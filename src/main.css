@@ -1,0 +1,55 @@
+:root {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    'Segoe UI Symbol', 'Noto Color Emoji';
+  font-size: 10px;
+  line-height: 1.2;
+  font-weight: normal;
+  font-synthesis: none;
+  color-scheme: light dark;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+#root {
+  isolation: isolate;
+  height: 100vh;
+  width: 100vw;
+}
+
+body {
+  font-size: 1.4rem;
+  line-height: 1.2;
+}
+
+button {
+  /* --hue: 240deg;
+  --saturation: 100%; */
+  --lightness: 50%;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1.6rem;
+  padding: 1rem 2.5rem;
+  color: #000;
+  background-color: hsl(45deg 100% var(--lightness));
+  transition: background-color 170ms linear;
+}
+
+button:hover {
+  --lightness: 70%;
+}
+
+@media (prefers-color-scheme: light) {
+  body {
+    background-color: hsl(120, 8%, 97%);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: hsl(0, 0%, 17%);
+  }
+}

@@ -1,0 +1,10 @@
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top: 1px solid #535353;
+  /* background-color: #3b3b3b; */
+
+  background: rgb(3, 88, 105);
+  background: radial-gradient(circle, rgba(3, 88, 105, 1) 0%, rgba(76, 79, 77, 1) 100%);
+}
