@@ -7,6 +7,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 import Logo from '@/components/Logo';
+import FastContext from '@/pages/FastContext';
 import MainPage from '@/pages/MainPage';
 import WizardPage from '@/pages/WizardPage';
 
@@ -24,6 +25,7 @@ export default function App() {
             <Routes>
               <Route element={<MainPage />} path="/" />
               <Route element={<WizardPage />} path="/wizard" />
+              <Route element={<FastContext />} path="/context" />
             </Routes>
           </Suspense>
         </section>

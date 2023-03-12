@@ -8,6 +8,7 @@ export default function Header() {
       <nav className={styles.navigation}>
         <NavLink to="/">Home</NavLink>
         <NavLink to="/wizard">Wizard</NavLink>
+        <NavLink to="/context">Fast context</NavLink>
       </nav>
     </header>
   );
