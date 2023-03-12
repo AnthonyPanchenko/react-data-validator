@@ -1,0 +1,11 @@
+.logo {
+  top: 6rem;
+  right: 3rem;
+  position: fixed;
+  width: 30rem;
+  color: hsl(var(--base-color-hue) var(--base-color-saturation) var(--base-color-lightness));
+
+  svg {
+    fill: currentColor;
+  }
+}

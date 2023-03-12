@@ -12,6 +12,13 @@
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+
+  --base-color-hue: 210deg;
+  --base-color-saturation: 100%;
+  --base-color-lightness: 50%;
+
+  --border-color: #5e5e5e;
+  --bg-gradient: radial-gradient(circle, #02424a 30%, #2f3c2e 100%);
 }
 
 #root {
@@ -26,20 +33,18 @@ body {
 }
 
 button {
-  /* --hue: 240deg;
-  --saturation: 100%; */
-  --lightness: 50%;
+  --button-lightness: var(--base-color-lightness);
+  background-color: hsl(var(--base-color-hue) var(--base-color-saturation) var(--button-lightness));
   border: none;
   border-radius: 0.5rem;
   font-size: 1.6rem;
   padding: 1rem 2.5rem;
   color: #000;
-  background-color: hsl(45deg 100% var(--lightness));
   transition: background-color 170ms linear;
 }
 
 button:hover {
-  --lightness: 70%;
+  --button-lightness: calc(var(--base-color-lightness) + 20%);
 }
 
 @media (prefers-color-scheme: light) {

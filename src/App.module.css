@@ -2,16 +2,16 @@
   width: inherit;
   height: inherit;
   display: grid;
-  grid-template-rows: 1fr 8rem;
-}
-
-.logo {
-  top: 6rem;
-  right: 6rem;
-  position: fixed;
+  grid-template-rows: min-content 1fr min-content;
 }
 
 .section {
   overflow-y: auto;
   padding: 2rem;
+}
+
+.loading {
+  text-align: center;
+  font-size: 2.2rem;
+  color: #ff0;
 }
