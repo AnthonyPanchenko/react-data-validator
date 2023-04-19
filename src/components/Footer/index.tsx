@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+import CustomButton from '@/components/CustomButton';
+
 import styles from './Footer.module.css';
 
 type PropsTypes = {
@@ -13,9 +15,9 @@ export default function Footer({ msg }: PropsTypes) {
 
   return (
     <footer className={styles.footer}>
-      <button type="button" onClick={increment}>
+      <CustomButton type="button" className="ripple" onClick={increment}>
         count is: {count}
-      </button>
+      </CustomButton>
     </footer>
   );
 }

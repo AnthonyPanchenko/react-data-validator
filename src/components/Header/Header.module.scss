@@ -5,6 +5,7 @@
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-gradient);
   padding: 2rem;
+  box-shadow: 0 1px 9px 0 var(--box-shadow-color);
 }
 
 .navigation {
@@ -12,6 +13,7 @@
     --link-lightness: var(--base-color-lightness);
     color: hsl(var(--base-color-hue) var(--base-color-saturation) var(--link-lightness));
     text-decoration: none;
+    font-size: 1.6rem;
 
     &:not(:last-of-type) {
       margin-right: 2rem;

@@ -6,7 +6,42 @@
     <meta name="color-scheme" content="light dark" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>React + Vite App</title>
+    <style type="text/css">
+      :root {
+        --font-size: 10px;
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+          'Segoe UI Symbol', 'Noto Color Emoji';
+        font-size: var(--font-size);
+        line-height: 1.2;
+        font-weight: normal;
+        font-synthesis: none;
+        color-scheme: light dark;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+      }
+    </style>
+    <link rel="stylesheet" href="/dark-theme.css" media="(prefers-color-scheme: dark)" />
+    <link rel="stylesheet" href="/light-theme.css" media="(prefers-color-scheme: light)" />
+    <script>
+      const darkTheme = document.head.querySelector('link[rel=stylesheet][href*=dark-theme]');
+      const lightTheme = document.head.querySelector('link[rel=stylesheet][href*=light-theme]');
+      const activeColorSchema = localStorage.getItem('theme-mode');
+      if (activeColorSchema === 'dark' && lightTheme && darkTheme) {
+        lightTheme.media = 'not all';
+        darkTheme.media = 'all';
+      }
+      if (activeColorSchema === 'light' && lightTheme && darkTheme) {
+        lightTheme.media = 'all';
+        darkTheme.media = 'not all';
+      }
+    </script>
   </head>
+
+  <!-- <body class="body-hidden">  body-hidden -> theme-dark/theme-light -->
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

@@ -4,6 +4,7 @@ import ButtonInput from '@/components/ButtonInput';
 import RangeInput from '@/components/RangeInput';
 import SelectInput from '@/components/SelectInput';
 import TextInput from '@/components/TextInput';
+// import useDataValidator from '@/validator/hooks/useDataValidator';
 
 const RADIO_OPTIONS = [
   { value: 'US', label: 'USD' },
@@ -28,9 +29,10 @@ const CHECKBOX_OPTIONS = [
 ];
 
 export default function MainPage() {
-  const [textValue, setTextValue] = useState<string | undefined>();
-  const [numberValue, setNumberValue] = useState<number | undefined>();
+  const [textValue, setTextValue] = useState<string | undefined>('some text');
   const [selectValue, setSelectValue] = useState<string | undefined>();
+
+  const [numberValue, setNumberValue] = useState<number | undefined>();
   const [rangeValue, setRangeValue] = useState<number | undefined>();
 
   const [radioValue, setRadioValue] = useState<string | undefined>();
@@ -38,6 +40,7 @@ export default function MainPage() {
 
   const onChangeText = (value: string, name?: string) => {
     console.log(value, name);
+    // setSingle('textValue', value);
     setTextValue(value);
   };
   const onChangeNumber = (value: number, name?: string) => {
@@ -50,6 +53,7 @@ export default function MainPage() {
   };
   const onChangeSelect = (value: string, name?: string) => {
     console.log(value, name);
+    // setSingle('selectValue', value);
     setSelectValue(value);
   };
   const onChangeCheckbox = (value: ReadonlyArray<string>, name?: string) => {
@@ -63,6 +67,7 @@ export default function MainPage() {
 
   return (
     <Fragment>
+      {/* <p>{state.textValue}</p> */}
       <TextInput<string>
         type="text"
         value={textValue}

@@ -41,6 +41,7 @@ export default function createFastContext<Store>(initialState: Store) {
     selector: (store: Store) => SelectorOutput
   ): [SelectorOutput, (value: Partial<Store>) => void] {
     const store = useContext(StoreContext);
+
     if (!store) {
       throw new Error('Store not found');
     }

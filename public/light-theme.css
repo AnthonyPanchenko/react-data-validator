@@ -1,0 +1,27 @@
+:root {
+  color: #1a1a1a;
+  background-color: hsl(120deg 6.45% 92.95%);
+
+  --nav-menu-color: #1d1d1d;
+
+  --base-color-hue: 34deg;
+  --base-color-saturation: 100%;
+  --base-color-lightness: 50%;
+
+  --box-shadow-color: #cdcccc;
+
+  --border-color: #b6b6b6;
+  --bg-gradient: radial-gradient(circle, #97f3ff 30%, #e1f0f7 100%);
+}
+
+.switcher__radio {
+  filter: invert(0);
+}
+
+.switcher__radio:checked {
+  filter: invert(1);
+}
+
+.switcher__legend {
+  filter: invert(0);
+}
