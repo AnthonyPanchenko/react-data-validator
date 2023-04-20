@@ -22,10 +22,7 @@ export type ValidationFieldStateManagerReturnType<TValue, TError = string> = {
   value: TValue | undefined;
   fieldState: ValidationFieldState<TValue, TError>;
   setInitialFieldState: (initialState: Partial<ValidationFieldState<TValue, TError>>) => void;
-  setCurrentFieldState: (
-    newState: Partial<Omit<ValidationFieldState<TValue, TError>, 'initialValue'>>
-  ) => void;
-  setCurrentFieldValue: React.Dispatch<React.SetStateAction<TValue | undefined>>;
+  setFieldValue: React.Dispatch<React.SetStateAction<TValue | undefined>>;
   setFieldState: React.Dispatch<React.SetStateAction<ValidationFieldState<TValue, TError>>>;
   resetFieldState: () => void;
 };

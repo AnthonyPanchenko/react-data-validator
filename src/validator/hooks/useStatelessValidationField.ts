@@ -12,7 +12,7 @@ type StatelessValidationFieldReturnType<TValue, TError = string> = {
   value: TValue | undefined;
   fieldState: ValidationFieldState<TValue, TError>;
   setInitialFieldState: (initialState: Partial<ValidationFieldState<TValue, TError>>) => void;
-  setFieldState: (newState: Partial<ValidationFieldState<TValue, TError>>) => void;
+  setFieldState: React.Dispatch<React.SetStateAction<ValidationFieldState<TValue, TError>>>;
   setFieldValue: (value: TValue) => {
     validate: <TAddValue = undefined>(value?: TAddValue) => void;
   };
@@ -26,11 +26,11 @@ export default function useStatelessValidationField<TValue, TError = string>(
   config: StatelessValidationFieldConfig<TValue, TError>
 ): StatelessValidationFieldReturnType<TValue, TError> {
   const validationFieldState = useStateManager({
-    initialValue: config.initialValue,
-    isValid: config.isValid,
-    isDirty: config.isDirty,
-    isValidating: config.isValidating,
-    isTouched: config.isTouched,
+    initialValue: config.initialValue as TValue,
+    isValid: config.isValid !== undefined ? config.isValid : true,
+    isDirty: !!config.isDirty,
+    isValidating: !!config.isValidating,
+    isTouched: !!config.isTouched,
     errors: config.errors
   });
 
@@ -73,7 +73,7 @@ export default function useStatelessValidationField<TValue, TError = string>(
   };
 
   const setFieldValue = (val: TValue) => {
-    validationFieldState.setCurrentFieldValue(val);
+    validationFieldState.setFieldValue(val);
 
     const isCurrentDirty = !isEqual(validationFieldState.fieldState.initialValue, val);
     if (
@@ -98,7 +98,7 @@ export default function useStatelessValidationField<TValue, TError = string>(
     value: validationFieldState.value,
     fieldState: validationFieldState.fieldState,
     setInitialFieldState: validationFieldState.setInitialFieldState,
-    setFieldState: validationFieldState.setCurrentFieldState,
+    setFieldState: validationFieldState.setFieldState,
     resetFieldState: validationFieldState.resetFieldState,
     setFieldValue
   };
