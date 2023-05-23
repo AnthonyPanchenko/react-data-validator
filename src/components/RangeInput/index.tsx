@@ -40,8 +40,9 @@ export default function RangeInput({
     debounce(val => {
       onChange(val, name);
     }, delay),
-    []
+    [onChange]
   );
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const val = event.target.value;
     const n = Number(val);

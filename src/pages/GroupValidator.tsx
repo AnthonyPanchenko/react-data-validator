@@ -1,76 +1,9 @@
-// import useDataValidator from '@/validator/hooks/useDataValidator';
 import '@/validator/utils';
 
-import { Fragment, useRef } from 'react';
+import { useRef } from 'react';
 
-import TextInput from '@/components/TextInput';
-import ValidationField from '@/validator/components/ValidationField';
-import ValidationFieldError from '@/validator/components/ValidationFieldError';
-import { useDataValidatorStateManager } from '@/validator/hooks/createDataValidatorContext';
-
-// type OwnersType = {
-//   id: number;
-//   firstName: string;
-//   lastName: string;
-//   pep: {
-//     isExposed: boolean;
-//   };
-// };
-
-// type CompanyDataType = {
-//   id: number;
-//   companyName: string;
-//   postCode: string;
-//   city: string;
-//   license: {
-//     number: number;
-//     isRegulation: boolean;
-//   };
-//   documents: Array<{ id: string; file: string }>;
-// };
-
-// type GroupDataToValidate = {
-//   companyData: CompanyDataType;
-//   ownersData: {
-//     securityNumber: string;
-//     owners: Array<OwnersType>;
-//   };
-// };
-type GroupDataToValidate = {
-  firstName: string;
-  lastName: string;
-};
-
-// const dataToValidate: GroupDataToValidate = {
-//   companyData: {
-//     id: 45,
-//     companyName: 'Cyberpunk Ltd',
-//     postCode: '23-234',
-//     city: 'New york',
-//     license: {
-//       number: 739,
-//       isRegulation: true
-//     },
-//     documents: [{ id: '1212', file: 'ewer' }]
-//   },
-//   ownersData: {
-//     securityNumber: 'ML73900753799',
-//     owners: [
-//       {
-//         id: 23,
-//         firstName: 'John',
-//         lastName: 'Connors',
-//         pep: {
-//           isExposed: false
-//         }
-//       }
-//     ]
-//   }
-// };
-// const dataToValidate: GroupDataToValidate = {
-//   firstName: 'John',
-//   lastName: 'Connors'
-// };
+import GroupDataValidator, { INITIAL_STATE_GROUP_DATA } from '@/pages/group-data-validator-context';
+import GroupValidatorFields from '@/pages/GroupValidatorFields';
 
 // const SELECT_OPTIONS = [
 //   { label: 'Monday', value: 'mon' },
@@ -128,28 +61,38 @@ function validateUserName(name: string | undefined) {
 
 export default function GroupValidator() {
   const renderCounter = useRef(0);
-  const dataValidatorStore = useDataValidatorStateManager<GroupDataToValidate>();
+  const dataValidatorStore = GroupDataValidator.useFormValidator(INITIAL_STATE_GROUP_DATA);
 
-  // const onChangeText = (value: string | undefined, name?: string) => {
-  //   console.log(value, name);
-  //   // setSingle('textValue', value);
+  renderCounter.current += 1;
+  console.log('GroupValidator renderer counter', renderCounter.current);
 
-  //   const d = userNameField.setFieldValue(value);
+  return (
+    <GroupDataValidator.ContextProvider value={dataValidatorStore}>
+      <GroupValidatorFields />
+    </GroupDataValidator.ContextProvider>
+  );
+}
 
-  //   if (value?.includes('q')) {
-  //     console.log(1);
-  //     d.validate<string>('bla');
-  //   }
-  // };
+// const onChangeText = (value: string | undefined, name?: string) => {
+//   console.log(value, name);
+//   // setSingle('textValue', value);
 
-  // const onChangeSelect = (value: string, name?: string) => {
-  //   console.log(value, name);
-  //   // setSingle('selectValue', value);
-  //   const d = dayField.setFieldValue(value);
-  //   d.validate();
-  // };
+//   const d = userNameField.setFieldValue(value);
 
-  /*
+//   if (value?.includes('q')) {
+//     console.log(1);
+//     d.validate<string>('bla');
+//   }
+// };
+
+// const onChangeSelect = (value: string, name?: string) => {
+//   console.log(value, name);
+//   // setSingle('selectValue', value);
+//   const d = dayField.setFieldValue(value);
+//   d.validate();
+// };
+
+/*
   meta: {
       fieldId: prev.fieldId,
       parentId: prev.parentId,
@@ -166,84 +109,29 @@ export default function GroupValidator() {
   }
   */
 
-  // fieldPath="companyData.documents[]"
+// fieldPath="companyData.documents[]"
 
-  // companyData: {
-  //   id: 45,
-  //   companyName: 'Cyberpunk Ltd',
-  //   postCode: '23-234',
-  //   city: 'New york',
-  //   license: {
-  //     number: 739,
-  //     isRegulation: true
-  //   },
-  //   documents: [{ id: '12212', file: 'ewer' }]
-  // },
-  // ownersData: {
-  //   securityNumber: 'ML73900753799',
-  //   owners: [
-  //     {
-  //       id: 23,
-  //       firstName: 'John',
-  //       lastName: 'Connors',
-  //       pep: {
-  //         isExposed: false
-  //       }
-  //     }
-  //   ]
-  // }
-  renderCounter.current += 1;
-  console.log('renderer counter', renderCounter.current);
-
-  return (
-    <Fragment>
-      <ValidationField<string | undefined, GroupDataToValidate>
-        validatorStore={dataValidatorStore}
-        fieldPath="firstName"
-        validator={validateUserName}
-      >
-        {(val, setValue) => (
-          <Fragment>
-            <TextInput<string | undefined>
-              type="text"
-              value={val}
-              name="firstName"
-              label="Name"
-              placeholder="Name"
-              onChange={value => {
-                console.log(value, val);
-                setValue({ firstName: value });
-              }}
-            />
-            <ValidationFieldError errors={undefined} />
-          </Fragment>
-        )}
-      </ValidationField>
-
-      <br />
-
-      <ValidationField<string | undefined, GroupDataToValidate>
-        validatorStore={dataValidatorStore}
-        fieldPath="lastName"
-        validator={validateUserName}
-      >
-        {(val, setValue) => (
-          <Fragment>
-            <TextInput<string | undefined>
-              type="text"
-              value={val}
-              name="lastName"
-              label="Name"
-              placeholder="Name"
-              onChange={value => {
-                console.log(value, val);
-                setValue({ lastName: value });
-              }}
-            />
-            <ValidationFieldError errors={undefined} />
-          </Fragment>
-        )}
-      </ValidationField>
-    </Fragment>
-  );
-}
+// companyData: {
+//   id: 45,
+//   companyName: 'Cyberpunk Ltd',
+//   postCode: '23-234',
+//   city: 'New york',
+//   license: {
+//     number: 739,
+//     isRegulation: true
+//   },
+//   documents: [{ id: '12212', file: 'ewer' }]
+// },
+// ownersData: {
+//   securityNumber: 'ML73900753799',
+//   owners: [
+//     {
+//       id: 23,
+//       firstName: 'John',
+//       lastName: 'Connors',
+//       pep: {
+//         isExposed: false
+//       }
+//     }
+//   ]
+// }

@@ -1,5 +1,4 @@
-export type ValidationFieldState<TValue, TError = string> = {
-  initialValue: TValue;
+export type ValidationFieldMetaState<TError = string> = {
   isValid: boolean;
   isDirty: boolean;
   isValidating: boolean;
@@ -9,6 +8,7 @@ export type ValidationFieldState<TValue, TError = string> = {
 
 export type StatelessValidationFieldConfig<TValue, TError = string> = {
   fieldPath: string | number;
+  initialValue: TValue;
   // shouldReinitialize?: boolean;
   validator: <TAddValue = undefined>(
     value: TValue | undefined,
@@ -16,13 +16,14 @@ export type StatelessValidationFieldConfig<TValue, TError = string> = {
   ) => ReadonlyArray<TError> | TError | Promise<ReadonlyArray<TError> | TError> | undefined;
   subscribeOnFieldError?: () => void;
   subscribeOnFieldStateChange?: () => void;
-} & ValidationFieldState<TValue, TError>;
+} & ValidationFieldMetaState<TError>;
 
 export type ValidationFieldStateManagerReturnType<TValue, TError = string> = {
   value: TValue | undefined;
-  fieldState: ValidationFieldState<TValue, TError>;
-  setInitialFieldState: (initialState: Partial<ValidationFieldState<TValue, TError>>) => void;
+  initialValue: TValue | undefined;
+  fieldState: ValidationFieldMetaState<TError>;
+  setInitialFieldState: (initialState: Partial<ValidationFieldMetaState<TError>>) => void;
   setFieldValue: React.Dispatch<React.SetStateAction<TValue | undefined>>;
-  setFieldState: React.Dispatch<React.SetStateAction<ValidationFieldState<TValue, TError>>>;
+  setFieldState: React.Dispatch<React.SetStateAction<ValidationFieldMetaState<TError>>>;
   resetFieldState: () => void;
 };

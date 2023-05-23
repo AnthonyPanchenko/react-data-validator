@@ -2,43 +2,48 @@ import lodash from 'lodash';
 import { useRef, useState } from 'react';
 
 import {
-  ValidationFieldState,
+  ValidationFieldMetaState,
   ValidationFieldStateManagerReturnType
 } from '@/validator/hooks/validation-field-types';
 
 export default function useValidationFieldState<TValue, TError = string>(
-  initialSate: ValidationFieldState<TValue, TError>
+  initialSate: ValidationFieldMetaState<TError> & { initialValue: TValue }
 ): ValidationFieldStateManagerReturnType<TValue, TError> {
-  const initialState = useRef<ValidationFieldState<TValue, TError>>(initialSate);
-  const [value, setFieldValue] = useState<TValue | undefined>(initialSate.initialValue);
-  const [fieldState, setFieldState] = useState<ValidationFieldState<TValue, TError>>(initialSate);
+  const initialState = useRef<ValidationFieldMetaState<TError>>(initialSate);
+  const initialValue = useRef<TValue | undefined>(initialSate.initialValue);
 
-  const setInitialFieldState = (state: Partial<ValidationFieldState<TValue, TError>>) => {
-    const prev = { ...initialState.current };
+  const [value, setFieldValue] = useState<TValue | undefined>(initialSate.initialValue);
+  const [fieldState, setFieldState] = useState<ValidationFieldMetaState<TError>>(initialSate);
+
+  const setInitialFieldState = (
+    state: Partial<ValidationFieldMetaState<TError> & { initialValue: TValue }>
+  ) => {
     const generatedState = {
-      initialValue: (lodash.has(state, 'initialValue')
-        ? state.initialValue
-        : prev.initialValue) as TValue,
-      isValid: state.isValid !== undefined ? state.isValid : !!prev.isValid,
-      isDirty: state.isDirty !== undefined ? state.isDirty : !!prev.isDirty,
-      isValidating: state.isValidating !== undefined ? state.isValidating : !!prev.isValidating,
-      isTouched: state.isTouched !== undefined ? state.isTouched : !!prev.isTouched,
-      errors: lodash.has(state, 'errors') ? state.errors : prev.errors
+      isValid: state.isValid !== undefined ? state.isValid : !!initialState.current.isValid,
+      isDirty: state.isDirty !== undefined ? state.isDirty : !!initialState.current.isDirty,
+      isValidating:
+        state.isValidating !== undefined ? state.isValidating : !!initialState.current.isValidating,
+      isTouched: state.isTouched !== undefined ? state.isTouched : !!initialState.current.isTouched,
+      errors: lodash.has(state, 'errors') ? state.errors : initialState.current.errors
     };
 
     initialState.current = generatedState;
-
     setFieldState(generatedState);
-    setFieldValue(state.initialValue);
+
+    if (lodash.has(state, 'initialValue')) {
+      initialValue.current = state.initialValue;
+      setFieldValue(state.initialValue);
+    }
   };
 
   const resetFieldState = () => {
     setFieldState({ ...initialState.current });
-    setFieldValue(initialState.current.initialValue);
+    setFieldValue(initialValue.current);
   };
 
   return {
     value,
+    initialValue: initialValue.current,
     fieldState,
     setFieldValue,
     setInitialFieldState,

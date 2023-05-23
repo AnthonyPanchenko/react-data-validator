@@ -81,30 +81,33 @@ export function isAsyncFunction(f: unknown) {
 
 //   return false;
 // }
+/*
 
-// const dataToValidate: GroupDataToValidate = {
-//   companyData: {
-//     companyName: 'Cyberpunk Ltd',
-//     postCode: '23-234',
-//     license: {
-//       number: 739,
-//       isRegulation: true
-//     },
-//     documents: [{ id: '1212', file: 'ewer' }]
-//   },
-//   ownersData: {
-//     securityNumber: 'ML73900753799',
-//     owners: [
-//       {
-//         firstName: 'John',
-//         lastName: 'Connors',
-//         pep: {
-//           isExposed: false
-//         }
-//       }
-//     ]
-//   }
-// };
+const dataToValidate: GroupDataToValidate = {
+  companyData: {
+    companyName: 'Cyberpunk Ltd',
+    postCode: '23-234',
+    license: {
+      number: 739,
+      isRegulation: true
+    },
+    documents: [{ id: '1212', file: 'ewer' }]
+  },
+  ownersData: {
+    securityNumber: 'ML73900753799',
+    owners: [
+      {
+        firstName: 'John',
+        lastName: 'Connors',
+        pep: {
+          isExposed: false
+        }
+      }
+    ]
+  }
+};
+
+*/
 
 // initialValue: '',
 // isValid: true,
@@ -163,6 +166,7 @@ for (const item of testDataArr) {
   });
 
   lodash.set(resultData, item.fieldPath, item.value);
+  lodash.get(resultData, item.fieldPath, item.value);
 }
 
 console.log(testData);

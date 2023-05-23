@@ -3,16 +3,16 @@ import isEqual from 'react-fast-compare';
 
 import {
   StatelessValidationFieldConfig,
-  ValidationFieldState,
+  ValidationFieldMetaState,
   ValidationFieldStateManagerReturnType
 } from '@/validator/hooks/validation-field-types';
 import { isAsyncFunction } from '@/validator/utils';
 
 type StatelessValidationFieldReturnType<TValue, TError = string> = {
   value: TValue | undefined;
-  fieldState: ValidationFieldState<TValue, TError>;
-  setInitialFieldState: (initialState: Partial<ValidationFieldState<TValue, TError>>) => void;
-  setFieldState: React.Dispatch<React.SetStateAction<ValidationFieldState<TValue, TError>>>;
+  fieldState: ValidationFieldMetaState<TError>;
+  setInitialFieldState: (initialState: Partial<ValidationFieldMetaState<TError>>) => void;
+  setFieldState: React.Dispatch<React.SetStateAction<ValidationFieldMetaState<TError>>>;
   setFieldValue: (value: TValue) => {
     validate: <TAddValue = undefined>(value?: TAddValue) => void;
   };
@@ -21,9 +21,9 @@ type StatelessValidationFieldReturnType<TValue, TError = string> = {
 
 export default function useStatelessValidationField<TValue, TError = string>(
   useStateManager: (
-    initialSate: ValidationFieldState<TValue, TError>
+    initialSate: ValidationFieldMetaState<TError> & { initialValue: TValue }
   ) => ValidationFieldStateManagerReturnType<TValue, TError>,
-  config: StatelessValidationFieldConfig<TValue, TError>
+  config: StatelessValidationFieldConfig<TValue, TError> & { initialValue: TValue }
 ): StatelessValidationFieldReturnType<TValue, TError> {
   const validationFieldState = useStateManager({
     initialValue: config.initialValue as TValue,
@@ -75,7 +75,7 @@ export default function useStatelessValidationField<TValue, TError = string>(
   const setFieldValue = (val: TValue) => {
     validationFieldState.setFieldValue(val);
 
-    const isCurrentDirty = !isEqual(validationFieldState.fieldState.initialValue, val);
+    const isCurrentDirty = !isEqual(validationFieldState.initialValue, val);
     if (
       !validationFieldState.fieldState.isTouched ||
       validationFieldState.fieldState.isDirty !== isCurrentDirty

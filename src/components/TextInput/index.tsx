@@ -44,7 +44,7 @@ export default function TextInput<TValue = string>({
     debounce(val => {
       onChange(val, name);
     }, delay),
-    []
+    [onChange]
   );
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
