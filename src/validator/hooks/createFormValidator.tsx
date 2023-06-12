@@ -8,7 +8,6 @@ import {
   useState,
   useSyncExternalStore
 } from 'react';
-import useDeepCompareEffect from 'use-deep-compare-effect';
 
 import {
   FormValidatorValidationNode,
@@ -18,7 +17,7 @@ import {
   ValidationFieldDataType,
   ValidationFieldMetaData
 } from '@/validator/hooks/validation-field-types';
-import { formFiledValueSelector, traverseValidationData } from '@/validator/utils';
+import { formFiledValueSelector, setValueWith, traverseValidationData } from '@/validator/utils';
 
 type FormValidatorState = {
   isValid: boolean;
@@ -29,10 +28,6 @@ type FormValidatorState = {
 type FormValidatorProps<TData extends { [key in keyof TData]: TData[key] }> = {
   initialData: TData;
   onSubmit: (data: TData) => void;
-};
-
-type FormFieldArrayConfig = {
-  fieldPath: ReadonlyArray<string>;
 };
 
 type FormFieldArrayReturnType<TArrayItem> = {
@@ -88,33 +83,39 @@ export default function createFormValidator<TData extends { [key in keyof TData]
     });
 
     const initialData = useRef<TData>(props.initialData);
-    const currentData = useRef<TData>(props.initialData);
-    const validationData = useRef<FormValidatorValidationNodes>({
-      // fff: [
-      //   node,
-      //   node,
-      // ],
-      // qwe: {
-      //   node,
-      //   rty: {
-      //     aaa: node,
-      //     asd: [node, node, node]
-      //   }
-      // }
+
+    const dataForm = useRef<{
+      validationData: FormValidatorValidationNodes;
+      currentData: TData;
+    }>({
+      currentData: { ...props.initialData },
+      validationData: {}
     });
 
     const subscribers = useRef(new Set<() => void>());
 
-    const getFormData = useCallback(() => {
-      return {
-        validationData: validationData.current,
-        currentData: currentData.current
-      };
-    }, []);
+    const getFormData = useCallback(() => dataForm.current, []);
 
     const setFieldData = useCallback(
       <TValue, TError = string>(field: ValidationFieldDataType<TValue, TError>) => {
-        console.log('setFieldData', field, validationData.current);
+        setValueWith({
+          data: dataForm.current.currentData,
+          path: field.fieldPath,
+          valueCustomizer: n => {
+            console.log('old value: ', n);
+            return field.value as TData[keyof TData];
+          }
+        });
+
+        dataForm.current = { ...dataForm.current };
+
+        console.log('subscribers.current: ', subscribers.current);
+
+        for (const onStoreChange of subscribers.current) {
+          onStoreChange();
+        }
+
+        console.log('setFieldData: ', field, dataForm.current.validationData);
       },
       []
     );
@@ -127,11 +128,11 @@ export default function createFormValidator<TData extends { [key in keyof TData]
 
     const validateForm = useCallback(() => {
       traverseValidationData(
-        validationData.current,
+        dataForm.current.validationData,
         (node: FormValidatorValidationNode<unknown, unknown>) => {
           node.validator(
-            formFiledValueSelector(currentData.current, node.fieldPath, undefined),
-            currentData.current
+            formFiledValueSelector(dataForm.current.currentData, node.fieldPath, undefined),
+            dataForm.current.currentData
           );
         }
       );
@@ -151,7 +152,7 @@ export default function createFormValidator<TData extends { [key in keyof TData]
     // add / update field with initial data -> in validationData
     const initializeValidationField = useCallback(
       <TValue, TError = string>(field: InitialValidationFieldDataType<TValue, TError>) => {
-        console.log('initializeValidationField', field, validationData.current);
+        console.log('initializeValidationField', field, dataForm.current.validationData);
       },
       []
     );
@@ -161,7 +162,11 @@ export default function createFormValidator<TData extends { [key in keyof TData]
       console.log('resetForm');
     }, []);
 
-    console.log('Form Validator render analyzer:', validationData.current, currentData.current);
+    console.log(
+      'Form Validator render analyzer:',
+      dataForm.current.validationData,
+      dataForm.current.currentData
+    );
 
     return {
       isValid: formState.isValid,
@@ -201,6 +206,10 @@ export default function createFormValidator<TData extends { [key in keyof TData]
 
   // ========================================= useFormFieldArray ===================================
 
+  type FormFieldArrayConfig = {
+    fieldPath: ReadonlyArray<string>;
+  };
+
   function useFormFieldArray<TArrayItem>(
     config: FormFieldArrayConfig
   ): FormFieldArrayReturnType<TArrayItem> {
@@ -208,8 +217,8 @@ export default function createFormValidator<TData extends { [key in keyof TData]
 
     const data = useSyncExternalStore(
       formValidator.subscribe,
-      formValidator.getFormData,
-      formValidator.getFormData
+      () => formValidator.getFormData(),
+      () => formValidator.getFormData()
     );
 
     // eslint-disable-next-line @typescript-eslint/ban-types
@@ -239,6 +248,18 @@ export default function createFormValidator<TData extends { [key in keyof TData]
     };
   }
 
+  type FormFieldArrayType<TValue> = {
+    children: (entries: ReadonlyArray<TValue>) => JSX.Element;
+  } & FormFieldArrayConfig;
+
+  function FormFieldArray<TValue>({ children, ...rest }: FormFieldArrayType<TValue>): JSX.Element {
+    const field = useFormFieldArray<TValue>(rest);
+
+    console.log('FormFieldArray: ', field);
+
+    return children(field.entries);
+  }
+
   // ========================================= useFormFieldError ===================================
 
   function useFormFieldError<TError>(config: FieldErrorConfig): TError | undefined {
@@ -246,8 +267,8 @@ export default function createFormValidator<TData extends { [key in keyof TData]
 
     const data = useSyncExternalStore(
       formValidator.subscribe,
-      formValidator.getFormData,
-      formValidator.getFormData
+      () => formValidator.getFormData(),
+      () => formValidator.getFormData()
     );
 
     // eslint-disable-next-line @typescript-eslint/ban-types
@@ -286,9 +307,11 @@ export default function createFormValidator<TData extends { [key in keyof TData]
 
     const data = useSyncExternalStore(
       formValidator.subscribe,
-      formValidator.getFormData,
-      formValidator.getFormData
+      () => formValidator.getFormData(),
+      () => formValidator.getFormData()
     );
+
+    console.log(data);
 
     const currentValidationNode = formFiledValueSelector<
       FormValidatorValidationNode<TValue, TError> | undefined,
@@ -322,12 +345,13 @@ export default function createFormValidator<TData extends { [key in keyof TData]
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    useDeepCompareEffect(() => {
+    useEffect(() => {
       if (currentValidationNode) {
         const isCurrentDirty = !dequal(currentValue, currentValidationNode.initialValue);
         console.log('isCurrentDirty', isCurrentDirty);
         console.log('currentValue', currentValue);
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentValue]);
 
     // const resetField = () => {
@@ -399,7 +423,8 @@ export default function createFormValidator<TData extends { [key in keyof TData]
     useFormFieldValidator,
     FormValidatorContext,
     FormValidatorProvider,
-    FormFieldValidator
+    FormFieldValidator,
+    FormFieldArray
   };
 }
 
@@ -421,7 +446,7 @@ export default function createFormValidator<TData extends { [key in keyof TData]
       metaData: PartialValidationFieldMetaData<TError> & { initialValue?: TValue }
     ) => {
       setValueWith({
-        data: currentData.current,
+        data: dataForm.current.currentData,
         path: fieldPath,
         valueCustomizer: node => {
           const mergedMetaData = mergeMetaData(node.metaData, metaData);
@@ -447,7 +472,7 @@ export default function createFormValidator<TData extends { [key in keyof TData]
       metaData: PartialValidationFieldMetaData<TError> & { initialValue?: TValue }
     ) => {
       setValueWith({
-        data: currentData.current,
+        data: dataForm.current.currentData,
         path: fieldPath,
         valueCustomizer: node => {
           const mergedMetaData = mergeMetaData(node.metaData, metaData);
@@ -470,7 +495,7 @@ export default function createFormValidator<TData extends { [key in keyof TData]
   
     const setStateOnError = <TError = string>(fieldPath: ReadonlyArray<string>, errors: TError) => {
       const isCurrentValid = Array.isArray(errors) ? !errors.length : !errors;
-      setValueWith({data: currentData.current, path: [...fieldPath, 'metaData'], valueCustomizer: (node) => {
+      setValueWith({data: dataForm.current.currentData, path: [...fieldPath, 'metaData'], valueCustomizer: (node) => {
         return mergeMetaData(node, {
           errors,
           isValidating: false,
@@ -510,15 +535,4 @@ export default function createFormValidator<TData extends { [key in keyof TData]
     return {
       validate: <TAdditionalData = undefined>(data?: TAdditionalData) => formValidator.validateField<TAdditionalData = undefined>(config.fieldPath, data)
     };
-  
-    const setData = useCallback(
-      (data: FormValidatorValidationNode<unknown, unknown>, fieldPath: ReadonlyArray<string>) => {
-        validationData.current[fieldPath] = data;
-        validationData.current = lodash.set(currentData.current, fieldPath, value);
-        for (const onStoreChange of subscribers.current) {
-          onStoreChange();
-        }
-      },
-      []
-    );
       */

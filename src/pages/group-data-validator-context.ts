@@ -1,5 +1,10 @@
 import createFormValidator from '@/validator/hooks/createFormValidator';
 
+export type Owner = {
+  name: string;
+  documents: Array<{ id: string; file: string }>;
+};
+
 export type GroupDataToValidate = {
   companyName: string;
   postCode: string;
@@ -10,10 +15,7 @@ export type GroupDataToValidate = {
   };
   ownersData: {
     securityNumber: string;
-    owners: Array<{
-      name: string;
-      documents: Array<{ id: string; file: string }>;
-    }>;
+    owners: Array<Owner>;
   };
 };
 

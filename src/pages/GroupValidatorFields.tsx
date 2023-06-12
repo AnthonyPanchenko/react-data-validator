@@ -1,7 +1,7 @@
 import { Fragment, useRef } from 'react';
 
 import TextInput from '@/components/TextInput';
-import GroupDataValidator from '@/pages/group-data-validator-context';
+import GroupDataValidator, { Owner } from '@/pages/group-data-validator-context';
 
 // const SELECT_OPTIONS = [
 //   { label: 'Monday', value: 'mon' },
@@ -66,7 +66,7 @@ export default function GroupValidatorFields() {
   return (
     <Fragment>
       <GroupDataValidator.FormFieldValidator<string | undefined, ReadonlyArray<string> | string>
-        fieldPath={['companyData', 'companyName']}
+        fieldPath={['companyName']}
         validator={validateUserName}
       >
         {(val, setValue) => (
@@ -110,6 +110,42 @@ export default function GroupValidatorFields() {
           </Fragment>
         )}
       </GroupDataValidator.FormFieldValidator>
+
+      <br />
+
+      <GroupDataValidator.FormFieldArray<Owner> fieldPath={['ownersData', 'owners']}>
+        {entries => (
+          <Fragment>
+            {entries.map((item, i) => (
+              <GroupDataValidator.FormFieldValidator<
+                string | undefined,
+                ReadonlyArray<string> | string
+              >
+                key={'owner' + i}
+                fieldPath={['ownersData', 'owners', i.toString(), 'name']}
+                validator={validateUserName}
+              >
+                {(val, setValue) => (
+                  <Fragment>
+                    <TextInput<string | undefined>
+                      type="text"
+                      value={val}
+                      name="owner"
+                      label="Owner"
+                      placeholder="Owner"
+                      onChange={value => {
+                        console.log('owner: ', i, value, val);
+                        setValue(value);
+                      }}
+                    />
+                    <p>{item.name}</p>
+                  </Fragment>
+                )}
+              </GroupDataValidator.FormFieldValidator>
+            ))}
+          </Fragment>
+        )}
+      </GroupDataValidator.FormFieldArray>
     </Fragment>
   );
 }
