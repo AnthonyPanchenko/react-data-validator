@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import isEqual from 'react-fast-compare';
 
 import {
   StatelessValidationFieldConfig,
@@ -75,15 +74,12 @@ export default function useStatelessValidationField<TValue, TError = string>(
   const setFieldValue = (val: TValue) => {
     validationFieldState.setFieldValue(val);
 
-    const isCurrentDirty = !isEqual(validationFieldState.initialValue, val);
-    if (
-      !validationFieldState.fieldState.isTouched ||
-      validationFieldState.fieldState.isDirty !== isCurrentDirty
-    ) {
+    // const isCurrentDirty = !isEqual(validationFieldState.initialValue, val);
+    if (!validationFieldState.fieldState.isTouched) {
       validationFieldState.setFieldState(prev => ({
         ...prev,
         isTouched: true,
-        isDirty: isCurrentDirty
+        isDirty: true
       }));
     }
 

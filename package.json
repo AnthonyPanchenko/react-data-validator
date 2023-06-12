@@ -30,12 +30,10 @@
     "package.json": "npx sort-package-json"
   },
   "dependencies": {
+    "dequal": "^2.0.2",
     "lodash": "^4.17.21",
     "react": "^18.2.0",
-    "react-dnd": "^16.0.1",
-    "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.2.0",
-    "react-fast-compare": "^3.2.1",
     "react-router-dom": "^6.9.0",
     "react-transition-group": "^4.4.5",
     "use-deep-compare-effect": "^1.8.1"

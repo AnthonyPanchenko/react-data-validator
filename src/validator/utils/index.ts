@@ -1,4 +1,20 @@
-import lodash from 'lodash';
+import {
+  FormValidatorValidationNode,
+  FormValidatorValidationNodes
+} from '@/validator/hooks/validation-field-types';
+
+function isObject<T>(obj: T | null | undefined) {
+  return (
+    obj && typeof obj === 'object' && Object.prototype.toString.call(obj) === '[object Object]'
+  );
+}
+
+function hasOwnProperty<T extends { [key in keyof T]: T[key] }>(
+  obj: T | null | undefined,
+  prop: number | string
+) {
+  return isObject(obj) ? false : Object.prototype.hasOwnProperty.call(obj, prop);
+}
 
 export function isPromise(p: Promise<unknown> | null) {
   if (
@@ -13,18 +29,6 @@ export function isPromise(p: Promise<unknown> | null) {
   return false;
 }
 
-/*
-
-    | ((...args: Parameters<<T>(arg: T) => T>) => Promise<TReturnType>)
-    | ((...args: Parameters<<T>(arg: T) => T>) => TReturnType)
-    | ((...args: Parameters<<T>(arg: T) => T>) => void)
-    | (() => void)
-    | (() => TReturnType)
-    | Promise<TReturnType>
-    | null
-
-*/
-
 // ✅ Check if a function's return value is a Promise
 export function isAsyncFunction(f: unknown) {
   if (
@@ -37,137 +41,132 @@ export function isAsyncFunction(f: unknown) {
   return false;
 }
 
-// 👇️ Examples
-// ⛔️
-// 👉️ true
-
-// function getStringType(value: unknown) {
-//   return Object.prototype.toString.call(value);
-// }
-
-// function isBoolean(value: boolean | null | undefined) {
-//   return typeof value === 'boolean' || getStringType(value) === '[object Boolean]';
-// }
-
-// function isObject<T>(obj: T | null | undefined) {
-//   return obj && (typeof obj === 'object' || getStringType(obj) === '[object Object]');
-// }
-
-// function hasOwnProperty<T extends { [key in keyof T]: T[key] }>(
-//   obj: T | null | undefined,
-//   prop: number | string
-// ) {
-//   return obj === null || obj === undefined
-//     ? false
-//     : Object.prototype.hasOwnProperty.call(obj, prop);
-// }
-
-// function isEmpty<T extends Array<T>>(arr: T | null | undefined) {
-//   if (!arr || arr === null || arr === undefined) {
-//     return true;
-//   }
-
-//   if (Array.isArray(arr) && arr.length === 0) {
-//     return true;
-//   } else if (typeof arr !== 'string') {
-//     for (const v in arr) {
-//       if (hasOwnProperty(arr, v)) {
-//         return false;
-//       }
-//     }
-
-//     return true;
-//   }
-
-//   return false;
-// }
-/*
-
-const dataToValidate: GroupDataToValidate = {
-  companyData: {
-    companyName: 'Cyberpunk Ltd',
-    postCode: '23-234',
-    license: {
-      number: 739,
-      isRegulation: true
-    },
-    documents: [{ id: '1212', file: 'ewer' }]
-  },
-  ownersData: {
-    securityNumber: 'ML73900753799',
-    owners: [
-      {
-        firstName: 'John',
-        lastName: 'Connors',
-        pep: {
-          isExposed: false
-        }
-      }
-    ]
-  }
+type SetValueWithType<TData extends { [key in keyof TData]: TData[key] }> = {
+  data: TData;
+  path: ReadonlyArray<string>;
+  valueCustomizer: (valueNode: TData[keyof TData]) => TData[keyof TData];
+  isIndexAsObjectKey?: boolean;
 };
 
-*/
+// 👇️ mutate data 👉️ that's why we need to use useRef hook
+export function setValueWith<TData extends { [key in keyof TData]: TData[key] }>(
+  cfg: SetValueWithType<TData>
+) {
+  let i = 0;
+  const len = cfg.path.length - 1;
 
-// initialValue: '',
-// isValid: true,
-// isDirty: true,
-// isValidating: false,
-// isTouched: true,
-// errors: ''
+  for (; i < len; i++) {
+    const pathPart: keyof TData = cfg.path[i] as keyof TData;
+    const currentObj: TData[keyof TData] = cfg.data[pathPart];
 
-const testDataArr = [
-  {
-    fieldPath: 'companyData.companyName',
-    value: 'Cyberpunk Ltd'
-  },
-  {
-    fieldPath: 'companyData.postCode',
-    value: '13-234'
-  },
-  {
-    fieldPath: 'companyData.license.number',
-    value: 34567
-  },
-  {
-    fieldPath: 'companyData.license.isRegulation',
-    value: true
-  },
-  {
-    fieldPath: 'companyData.documents[0]',
-    value: { id: '1212', file: 'ewer' }
-  },
-  {
-    fieldPath: 'ownersData.securityNumber',
-    value: 'ML73900753799'
-  },
-  {
-    fieldPath: 'ownersData.owners[0].firstName',
-    value: 'John'
-  },
-  {
-    fieldPath: 'ownersData.owners[0].lastName',
-    value: 'Connors'
-  },
-  {
-    fieldPath: 'ownersData.owners[0][pep].isExposed',
-    value: false
+    if (currentObj && (isObject(currentObj) || Array.isArray(currentObj))) {
+      cfg.data = cfg.data[pathPart];
+    } else {
+      const nextPathPart = Number(cfg.path[i + 1]);
+      cfg.data = cfg.data[pathPart] = (
+        !cfg.isIndexAsObjectKey && Number.isInteger(nextPathPart) && nextPathPart >= 0 ? [] : {}
+      ) as TData[keyof TData];
+    }
   }
-];
 
-const testData = new Map();
-const resultData = {};
-
-for (const item of testDataArr) {
-  testData.set(item.fieldPath, {
-    value: item.value,
-    fieldPath: item.fieldPath,
-    objPath: lodash.toPath(item.fieldPath)
-  });
-
-  lodash.set(resultData, item.fieldPath, item.value);
-  lodash.get(resultData, item.fieldPath, item.value);
+  cfg.data[cfg.path[i] as keyof TData] = cfg.valueCustomizer(cfg.data[cfg.path[i] as keyof TData]);
 }
 
-console.log(testData);
-console.log(resultData);
+export function formFiledValueSelector<TValue, TData extends { [key in keyof TData]: TData[key] }>(
+  obj: TData,
+  path: ReadonlyArray<string>,
+  defaultValue: TValue
+): TValue {
+  let i = 0;
+  const len = path.length;
+
+  while (obj && i < len) {
+    obj = obj[path[i++] as keyof TData];
+  }
+
+  return i && i === len ? obj : defaultValue;
+}
+
+function handleValidationNode(
+  node:
+    | {
+        [key: string | number]:
+          | FormValidatorValidationNode<unknown, unknown>
+          | Array<FormValidatorValidationNode<unknown, unknown>>;
+      }
+    | FormValidatorValidationNode<unknown, unknown>
+    | Array<FormValidatorValidationNode<unknown, unknown>>,
+  callback: (node: FormValidatorValidationNode<unknown, unknown>) => void
+) {
+  if (
+    hasOwnProperty(node, 'validator') &&
+    typeof (node as FormValidatorValidationNode<unknown, unknown>).validator === 'function'
+  ) {
+    callback(node as FormValidatorValidationNode<unknown, unknown>);
+  } else {
+    traverseValidationData(node as FormValidatorValidationNodes, callback);
+  }
+}
+
+export function traverseValidationData(
+  obj: FormValidatorValidationNodes,
+  callback: (node: FormValidatorValidationNode<unknown, unknown>) => void
+) {
+  if (isObject(obj)) {
+    for (const key of Object.keys(obj)) {
+      handleValidationNode(
+        obj[key] as
+          | {
+              [key: string | number]:
+                | FormValidatorValidationNode<unknown, unknown>
+                | Array<FormValidatorValidationNode<unknown, unknown>>;
+            }
+          | FormValidatorValidationNode<unknown, unknown>
+          | Array<FormValidatorValidationNode<unknown, unknown>>,
+        callback
+      );
+    }
+  } else if (Array.isArray(obj)) {
+    for (const item of obj) {
+      handleValidationNode(item, callback);
+    }
+  }
+}
+
+// ⛔️
+
+/*
+
+function isBoolean(value: boolean | null | undefined) {
+  return typeof value === 'boolean' || getStringType(value) === '[object Boolean]';
+}
+
+function isEmpty<T extends Array<T>>(arr: T | null | undefined) {
+  if (!arr || arr === null || arr === undefined) {
+    return true;
+  }
+
+  if (Array.isArray(arr) && arr.length === 0) {
+    return true;
+  } else if (typeof arr !== 'string') {
+    for (const v in arr) {
+      if (hasOwnProperty(arr, v)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  return false;
+}
+
+    | ((...args: Parameters<<T>(arg: T) => T>) => Promise<TReturnType>)
+    | ((...args: Parameters<<T>(arg: T) => T>) => TReturnType)
+    | ((...args: Parameters<<T>(arg: T) => T>) => void)
+    | (() => void)
+    | (() => TReturnType)
+    | Promise<TReturnType>
+    | null
+
+*/

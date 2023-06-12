@@ -1,5 +1,3 @@
-import '@/validator/utils';
-
 import { Fragment, useRef } from 'react';
 
 import TextInput from '@/components/TextInput';
@@ -67,9 +65,10 @@ export default function GroupValidatorFields() {
 
   return (
     <Fragment>
-      <GroupDataValidator.FormFieldValidator<
-        string | undefined
-      > fieldPath="companyData.companyName">
+      <GroupDataValidator.FormFieldValidator<string | undefined, ReadonlyArray<string> | string>
+        fieldPath={['companyData', 'companyName']}
+        validator={validateUserName}
+      >
         {(val, setValue) => (
           <Fragment>
             <TextInput<string | undefined>
@@ -84,16 +83,16 @@ export default function GroupValidatorFields() {
               }}
             />
             <p>{val}</p>
-            {/* <FormFieldValidatorError errors={undefined} /> */}
           </Fragment>
         )}
       </GroupDataValidator.FormFieldValidator>
 
       <br />
 
-      <GroupDataValidator.FormFieldValidator<
-        string | undefined
-      > fieldPath="ownersData.securityNumber">
+      <GroupDataValidator.FormFieldValidator<string | undefined, ReadonlyArray<string> | string>
+        fieldPath={['ownersData', 'securityNumber']}
+        validator={validateUserName}
+      >
         {(val, setValue) => (
           <Fragment>
             <TextInput<string | undefined>
@@ -108,7 +107,6 @@ export default function GroupValidatorFields() {
               }}
             />
             <p>{val}</p>
-            {/* <FormFieldValidatorError errors={undefined} /> */}
           </Fragment>
         )}
       </GroupDataValidator.FormFieldValidator>
