@@ -6,6 +6,7 @@ type PropsTypes<TValue = string> = {
   value: TValue | undefined;
   delay?: number;
   placeholder: string;
+  isDebounced?: boolean;
   label: string;
   name?: string;
   type?: 'text' | 'number';
@@ -17,6 +18,7 @@ export default function TextInput<TValue = string>({
   delay = 500,
   label,
   name,
+  isDebounced = false,
   placeholder,
   value,
   onChange
@@ -52,11 +54,19 @@ export default function TextInput<TValue = string>({
     if (type === 'number') {
       const n = Number(val);
       const parsedNumber = !isNaN(n) ? n : 0;
-      debouncedChangeHandler(parsedNumber);
-      setLocalValue(parsedNumber as unknown as TValue);
+      if (isDebounced) {
+        debouncedChangeHandler(parsedNumber);
+        setLocalValue(parsedNumber as unknown as TValue);
+      } else {
+        onChange(parsedNumber as TValue, name);
+      }
     } else {
-      debouncedChangeHandler(val);
-      setLocalValue(val as unknown as TValue);
+      if (isDebounced) {
+        debouncedChangeHandler(val);
+        setLocalValue(val as unknown as TValue);
+      } else {
+        onChange(val as TValue, name);
+      }
     }
   };
 
@@ -67,7 +77,7 @@ export default function TextInput<TValue = string>({
         <input
           type={type}
           name={name}
-          value={(localValue as string | number) || ''}
+          value={isDebounced ? (localValue as string | number) || '' : (value as string | number)}
           placeholder={placeholder}
           onChange={handleChange}
         />
