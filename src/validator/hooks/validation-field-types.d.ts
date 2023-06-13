@@ -43,7 +43,7 @@ export type PartialValidationFieldMetaData<TError = string> = {
 };
 
 type BaseValidationFieldDataType<TValue, TError = string> = {
-  fieldPath: ReadonlyArray<string>;
+  fieldPath: ReadonlyArray<string | number>;
   isSkipped: boolean;
   validator: (
     value: TValue,
@@ -69,7 +69,7 @@ export type FormValidatorValidationNode<TValue, TError = string> = {
 } & BaseValidationFieldDataType<TValue, TError>;
 
 export type ValidationFieldDataType<TValue, TError = string> = {
-  fieldPath: ReadonlyArray<string>;
+  fieldPath: ReadonlyArray<string | number>;
   value?: TValue;
   metaData?: PartialValidationFieldMetaData<TError>;
   isValidating?: boolean;

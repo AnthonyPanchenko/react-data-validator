@@ -10,7 +10,7 @@ import {
 import { formFiledValueSelector } from '@/validator/utils';
 
 type FieldErrorConfig = {
-  fieldPath: ReadonlyArray<string>;
+  fieldPath: ReadonlyArray<string | number>;
 };
 
 type FormValidatorReturnType<TData extends { [key in keyof TData]: TData[key] }> = {
@@ -19,8 +19,8 @@ type FormValidatorReturnType<TData extends { [key in keyof TData]: TData[key] }>
   isValidating: boolean;
   subscribe: (onStoreChange: () => void) => () => boolean;
   validateForm: (data: TData) => void;
-  validateField: (fieldPath: ReadonlyArray<string>) => void;
-  deleteValidationField: (fieldPath: ReadonlyArray<string>) => void;
+  validateField: (fieldPath: ReadonlyArray<string | number>) => void;
+  deleteValidationField: (fieldPath: ReadonlyArray<string | number>) => void;
   setFieldData: <TValue, TError = string>(field: ValidationFieldDataType<TValue, TError>) => void;
   initializeValidationField: <TValue, TError = string>(
     field: InitialValidationFieldDataType<TValue, TError>

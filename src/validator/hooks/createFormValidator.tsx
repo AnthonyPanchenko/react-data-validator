@@ -31,18 +31,18 @@ type FormValidatorProps<TData extends { [key in keyof TData]: TData[key] }> = {
 };
 
 type FormFieldArrayReturnType<TArrayItem> = {
-  fieldPath: ReadonlyArray<string>;
+  fieldPath: ReadonlyArray<string | number>;
   entries: ReadonlyArray<TArrayItem>;
   addField: (item: TArrayItem) => void;
   deleteField: (index: number) => void;
 };
 
 type FieldErrorConfig = {
-  fieldPath: ReadonlyArray<string>;
+  fieldPath: ReadonlyArray<string | number>;
 };
 
 type FormFieldValidatorReturnType<TValue, TError = string> = {
-  fieldPath: ReadonlyArray<string>;
+  fieldPath: ReadonlyArray<string | number>;
   value: TValue | undefined;
   errors: TError | undefined;
   isValid: boolean;
@@ -61,8 +61,8 @@ type FormValidatorReturnType<TData extends { [key in keyof TData]: TData[key] }>
   isValidating: boolean;
   subscribe: (onStoreChange: () => void) => () => boolean;
   validateForm: (data: TData) => void;
-  validateField: (fieldPath: ReadonlyArray<string>) => void;
-  deleteValidationField: (fieldPath: ReadonlyArray<string>) => void;
+  validateField: (fieldPath: ReadonlyArray<string | number>) => void;
+  deleteValidationField: (fieldPath: ReadonlyArray<string | number>) => void;
   setFieldData: <TValue, TError = string>(field: ValidationFieldDataType<TValue, TError>) => void;
   initializeValidationField: <TValue, TError = string>(
     field: InitialValidationFieldDataType<TValue, TError>
@@ -140,12 +140,12 @@ export default function createFormValidator<TData extends { [key in keyof TData]
     }, [formState]);
 
     // validate particular field
-    const validateField = useCallback((fieldPath: ReadonlyArray<string>) => {
+    const validateField = useCallback((fieldPath: ReadonlyArray<string | number>) => {
       console.log('validateField: ', fieldPath);
     }, []);
 
     // delete field from validation validationData only
-    const deleteValidationField = useCallback((fieldPath: ReadonlyArray<string>) => {
+    const deleteValidationField = useCallback((fieldPath: ReadonlyArray<string | number>) => {
       console.log('deleteValidationField: ', fieldPath);
     }, []);
 
@@ -207,7 +207,7 @@ export default function createFormValidator<TData extends { [key in keyof TData]
   // ========================================= useFormFieldArray ===================================
 
   type FormFieldArrayConfig = {
-    fieldPath: ReadonlyArray<string>;
+    fieldPath: ReadonlyArray<string | number>;
   };
 
   function useFormFieldArray<TArrayItem>(
@@ -287,7 +287,7 @@ export default function createFormValidator<TData extends { [key in keyof TData]
   // ========================================= useFormFieldValidator ===================================
 
   type FormFieldValidatorConfig<TValue, TError = string> = {
-    fieldPath: ReadonlyArray<string>;
+    fieldPath: ReadonlyArray<string | number>;
     initialValue?: TValue;
     isValid?: boolean;
     isDirty?: boolean;
@@ -399,7 +399,7 @@ export default function createFormValidator<TData extends { [key in keyof TData]
 
   type FormFieldValidatorType<TValue, TError = string> = {
     children: (value: TValue | undefined, setValue: (value: TValue) => void) => JSX.Element;
-    fieldPath: ReadonlyArray<string>;
+    fieldPath: ReadonlyArray<string | number>;
     initialValue?: TValue;
     isSkipped?: boolean;
     validator: (value: TValue | undefined, data: TData) => TError | Promise<TError> | undefined;
@@ -411,7 +411,7 @@ export default function createFormValidator<TData extends { [key in keyof TData]
   }: FormFieldValidatorType<TValue, TError>): JSX.Element {
     const field = useFormFieldValidator<TValue, TError>(rest);
 
-    console.log('FormFieldValidator: ', field);
+    console.log('>>>>>> FormFieldValidator: ', field);
 
     return children(field.value, field.setFieldValue);
   }
@@ -442,7 +442,7 @@ export default function createFormValidator<TData extends { [key in keyof TData]
   }
 
     const setInitialFieldData = <TValue, TError = string>(
-      fieldPath: ReadonlyArray<string>,
+      fieldPath: ReadonlyArray<string | number>,
       metaData: PartialValidationFieldMetaData<TError> & { initialValue?: TValue }
     ) => {
       setValueWith({
@@ -468,7 +468,7 @@ export default function createFormValidator<TData extends { [key in keyof TData]
     };
   
     const setFieldValue = <TValue, TError = string>(
-      fieldPath: ReadonlyArray<string>,
+      fieldPath: ReadonlyArray<string | number>,
       metaData: PartialValidationFieldMetaData<TError> & { initialValue?: TValue }
     ) => {
       setValueWith({
@@ -493,7 +493,7 @@ export default function createFormValidator<TData extends { [key in keyof TData]
       });
     };
   
-    const setStateOnError = <TError = string>(fieldPath: ReadonlyArray<string>, errors: TError) => {
+    const setStateOnError = <TError = string>(fieldPath: ReadonlyArray<string | number>, errors: TError) => {
       const isCurrentValid = Array.isArray(errors) ? !errors.length : !errors;
       setValueWith({data: dataForm.current.currentData, path: [...fieldPath, 'metaData'], valueCustomizer: (node) => {
         return mergeMetaData(node, {

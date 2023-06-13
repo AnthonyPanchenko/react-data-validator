@@ -27,8 +27,8 @@ type FormValidatorReturnType<TData extends { [key in keyof TData]: TData[key] }>
   isValidating: boolean;
   subscribe: (onStoreChange: () => void) => () => boolean;
   validateForm: (data: TData) => void;
-  validateField: (fieldPath: ReadonlyArray<string>) => void;
-  deleteValidationField: (fieldPath: ReadonlyArray<string>) => void;
+  validateField: (fieldPath: ReadonlyArray<string | number>) => void;
+  deleteValidationField: (fieldPath: ReadonlyArray<string | number>) => void;
   setFieldData: <TValue, TError = string>(field: ValidationFieldDataType<TValue, TError>) => void;
   initializeValidationField: <TValue, TError = string>(
     field: InitialValidationFieldDataType<TValue, TError>
@@ -101,12 +101,12 @@ export default function useFormValidator<TData extends { [key in keyof TData]: T
   }, [formState]);
 
   // validate particular field
-  const validateField = useCallback((fieldPath: ReadonlyArray<string>) => {
+  const validateField = useCallback((fieldPath: ReadonlyArray<string | number>) => {
     console.log('validateField: ', fieldPath);
   }, []);
 
   // delete field from validation validationData only
-  const deleteValidationField = useCallback((fieldPath: ReadonlyArray<string>) => {
+  const deleteValidationField = useCallback((fieldPath: ReadonlyArray<string | number>) => {
     console.log('deleteValidationField: ', fieldPath);
   }, []);
 
@@ -154,7 +154,7 @@ function mergeMetaData<TError = string>(
 
 /*
   const setInitialFieldData = <TValue, TError = string>(
-    fieldPath: ReadonlyArray<string>,
+    fieldPath: ReadonlyArray<string | number>,
     metaData: PartialValidationFieldMetaData<TError> & { initialValue?: TValue }
   ) => {
     setValueWith({
@@ -180,7 +180,7 @@ function mergeMetaData<TError = string>(
   };
 
   const setFieldValue = <TValue, TError = string>(
-    fieldPath: ReadonlyArray<string>,
+    fieldPath: ReadonlyArray<string | number>,
     metaData: PartialValidationFieldMetaData<TError> & { initialValue?: TValue }
   ) => {
     setValueWith({
@@ -205,7 +205,7 @@ function mergeMetaData<TError = string>(
     });
   };
 
-  const setStateOnError = <TError = string>(fieldPath: ReadonlyArray<string>, errors: TError) => {
+  const setStateOnError = <TError = string>(fieldPath: ReadonlyArray<string | number>, errors: TError) => {
     const isCurrentValid = Array.isArray(errors) ? !errors.length : !errors;
     setValueWith({data: currentData.current, path: [...fieldPath, 'metaData'], valueCustomizer: (node) => {
       return mergeMetaData(node, {
@@ -249,7 +249,7 @@ function mergeMetaData<TError = string>(
   };
 
   const setData = useCallback(
-    (data: FormValidatorValidationNode<unknown, unknown>, fieldPath: ReadonlyArray<string>) => {
+    (data: FormValidatorValidationNode<unknown, unknown>, fieldPath: ReadonlyArray<string | number>) => {
       validationData.current[fieldPath] = data;
       validationData.current = lodash.set(currentData.current, fieldPath, value);
       for (const onStoreChange of subscribers.current) {

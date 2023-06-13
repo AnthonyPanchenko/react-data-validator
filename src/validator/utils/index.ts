@@ -43,7 +43,7 @@ export function isAsyncFunction(f: unknown) {
 
 type SetValueWithType<TData extends { [key in keyof TData]: TData[key] }> = {
   data: TData;
-  path: ReadonlyArray<string>;
+  path: ReadonlyArray<string | number>;
   valueCustomizer: (valueNode: TData[keyof TData]) => TData[keyof TData];
   isIndexAsObjectKey?: boolean;
 };
@@ -74,7 +74,7 @@ export function setValueWith<TData extends { [key in keyof TData]: TData[key] }>
 
 export function formFiledValueSelector<TValue, TData extends { [key in keyof TData]: TData[key] }>(
   obj: TData,
-  path: ReadonlyArray<string>,
+  path: ReadonlyArray<string | number>,
   defaultValue: TValue
 ): TValue {
   let i = 0;

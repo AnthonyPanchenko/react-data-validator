@@ -61,7 +61,7 @@ export default function GroupValidatorFields() {
   const renderCounter = useRef(0);
 
   renderCounter.current += 1;
-  console.log('GroupValidatorFields renderer counter', renderCounter.current);
+  console.log('>====== GroupValidatorFields renderer counter', renderCounter.current);
 
   return (
     <Fragment>
@@ -122,7 +122,7 @@ export default function GroupValidatorFields() {
                 ReadonlyArray<string> | string
               >
                 key={'owner' + i}
-                fieldPath={['ownersData', 'owners', i.toString(), 'name']}
+                fieldPath={['ownersData', 'owners', i, 'name']}
                 validator={validateUserName}
               >
                 {(val, setValue) => (
