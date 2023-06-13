@@ -91,7 +91,7 @@ export default function createFormValidator<TData extends { [key in keyof TData]
 
     const setFieldData = useCallback(
       <TValue, TError = string>(field: ValidationFieldDataType<TValue, TError>) => {
-        setValueWith({
+        setValueWith<TData>({
           data: currentData.current,
           path: field.fieldPath,
           valueCustomizer: n => {
@@ -205,7 +205,7 @@ export default function createFormValidator<TData extends { [key in keyof TData]
   ): FormFieldArrayReturnType<TArrayItem> {
     const formValidator = useContext(FormValidatorContext);
 
-    const formFieldArrayValueGetter = useCallback(
+    const formFieldArraySelector = useCallback(
       () =>
         formFiledValueSelector<ReadonlyArray<TArrayItem>, TData>(
           formValidator.getCurrentData(),
@@ -218,8 +218,8 @@ export default function createFormValidator<TData extends { [key in keyof TData]
 
     const entries = useSyncExternalStore(
       formValidator.subscribe,
-      formFieldArrayValueGetter,
-      formFieldArrayValueGetter
+      formFieldArraySelector,
+      formFieldArraySelector
     );
 
     // const addField = (item: TItem, beforeIndex?: number) => void
@@ -299,7 +299,7 @@ export default function createFormValidator<TData extends { [key in keyof TData]
   ): FormFieldValidatorReturnType<TValue, TError> {
     const formValidator = useContext(FormValidatorContext);
 
-    const formFieldValueGetter = useCallback(
+    const formFieldValueSelector = useCallback(
       () =>
         formFiledValueSelector<TValue | undefined, TData>(
           formValidator.getCurrentData(),
@@ -312,8 +312,8 @@ export default function createFormValidator<TData extends { [key in keyof TData]
 
     const currentValue = useSyncExternalStore(
       formValidator.subscribe,
-      formFieldValueGetter,
-      formFieldValueGetter
+      formFieldValueSelector,
+      formFieldValueSelector
     );
 
     const currentValidationNode: FormValidatorValidationNode<TValue, TError> | undefined =

@@ -9,7 +9,6 @@ import Header from '@/components/Header';
 // import Logo from '@/components/Logo';
 import FastContext from '@/pages/FastContext';
 import GroupValidator from '@/pages/GroupValidator';
-import IndependentValidator from '@/pages/IndependentValidator';
 import MainPage from '@/pages/MainPage';
 import MediaQuery from '@/pages/MediaQuery';
 import WizardPage from '@/pages/WizardPage';
@@ -29,8 +28,7 @@ export default function App() {
               <Route element={<MainPage />} path="/" />
               <Route element={<WizardPage />} path="/wizard" />
               <Route element={<FastContext />} path="/context" />
-              <Route element={<IndependentValidator />} path="/independent-validator" />
-              <Route element={<GroupValidator />} path="/group-validator" />
+              <Route element={<GroupValidator />} path="/form-validator" />
               <Route element={<MediaQuery />} path="/media-query" />
             </Routes>
           </Suspense>

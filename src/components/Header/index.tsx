@@ -11,8 +11,7 @@ export default function Header() {
         <NavLink to="/">Home</NavLink>
         <NavLink to="/wizard">Wizard</NavLink>
         <NavLink to="/context">Fast context</NavLink>
-        <NavLink to="/independent-validator">Independent Validator</NavLink>
-        <NavLink to="/group-validator">Group Validator</NavLink>
+        <NavLink to="/form-validator">Form Validator</NavLink>
         <NavLink to="/media-query">Media query</NavLink>
       </nav>
       <ThemeSwitcher />
