@@ -30,17 +30,6 @@ type FormValidatorProps<TData extends { [key in keyof TData]: TData[key] }> = {
   onSubmit: (data: TData) => void;
 };
 
-type FormFieldArrayReturnType<TArrayItem> = {
-  fieldPath: ReadonlyArray<string | number>;
-  entries: ReadonlyArray<TArrayItem>;
-  addField: (item: TArrayItem) => void;
-  deleteField: (index: number) => void;
-};
-
-type FieldErrorConfig = {
-  fieldPath: ReadonlyArray<string | number>;
-};
-
 type FormFieldValidatorReturnType<TValue, TError = string> = {
   fieldPath: ReadonlyArray<string | number>;
   value: TValue | undefined;
@@ -94,11 +83,17 @@ export default function createFormValidator<TData extends { [key in keyof TData]
         setValueWith<TData>({
           data: currentData.current,
           path: field.fieldPath,
-          valueCustomizer: n => {
-            console.log('old value: ', n);
-            return field.value as TData[keyof TData];
-          }
+          value: field.value as TData[keyof TData]
         });
+
+        // setValueWith<TData>({
+        //   data: currentData.current,
+        //   path: field.fieldPath,
+        //   valueCustomizer: n => {
+        //     console.log('old value: ', n);
+        //     return field.value as TData[keyof TData];
+        //   }
+        // });
 
         currentData.current = Object.assign({}, currentData.current);
 
@@ -145,6 +140,13 @@ export default function createFormValidator<TData extends { [key in keyof TData]
     // add / update field with initial data -> in validationData
     const initializeValidationField = useCallback(
       <TValue, TError = string>(field: InitialValidationFieldDataType<TValue, TError>) => {
+        setValueWith<FormValidatorValidationNodes>({
+          data: validationData.current,
+          path: field.fieldPath,
+          valueCustomizer: () => {
+            return field as TData[keyof TData];
+          }
+        });
         console.log('initializeValidationField', field, validationData.current);
       },
       []
@@ -200,6 +202,13 @@ export default function createFormValidator<TData extends { [key in keyof TData]
     fieldPath: ReadonlyArray<string | number>;
   };
 
+  type FormFieldArrayReturnType<TArrayItem> = {
+    fieldPath: ReadonlyArray<string | number>;
+    entries: ReadonlyArray<TArrayItem>;
+    addField: (item: TArrayItem) => void;
+    deleteField: (index: number) => void;
+  };
+
   function useFormFieldArray<TArrayItem>(
     config: FormFieldArrayConfig
   ): FormFieldArrayReturnType<TArrayItem> {
@@ -242,6 +251,8 @@ export default function createFormValidator<TData extends { [key in keyof TData]
     };
   }
 
+  // ========================================= FormFieldArray ===================================
+
   type FormFieldArrayType<TValue> = {
     children: (entries: ReadonlyArray<TValue>) => JSX.Element;
   } & FormFieldArrayConfig;
@@ -255,6 +266,10 @@ export default function createFormValidator<TData extends { [key in keyof TData]
   }
 
   // ========================================= useFormFieldError ===================================
+
+  type FieldErrorConfig = {
+    fieldPath: ReadonlyArray<string | number>;
+  };
 
   function useFormFieldError<TError>(config: FieldErrorConfig): TError | undefined {
     const formValidator = useContext(FormValidatorContext);
@@ -276,6 +291,21 @@ export default function createFormValidator<TData extends { [key in keyof TData]
     console.log('FieldError render analyzer:', config.fieldPath);
 
     return currentValidationNode.metaData.errors;
+  }
+
+  // ========================================= FormFieldError ===================================
+
+  type FormFieldErrorType = {
+    children: JSX.Element;
+    fieldPath: ReadonlyArray<string | number>;
+  };
+
+  function FormFieldError<TError = string>({ children, ...rest }: FormFieldErrorType): JSX.Element {
+    const field = useFormFieldError<TError>(rest);
+
+    console.log('>>>>>> FormFieldError: ', field);
+
+    return children;
   }
 
   // ========================================= useFormFieldValidator ===================================
@@ -415,6 +445,8 @@ export default function createFormValidator<TData extends { [key in keyof TData]
     return children(field.value, field.setFieldValue);
   }
 
+  // =========================================
+
   return {
     useFormValidator,
     useFormFieldArray,
@@ -423,7 +455,8 @@ export default function createFormValidator<TData extends { [key in keyof TData]
     FormValidatorContext,
     FormValidatorProvider,
     FormFieldValidator,
-    FormFieldArray
+    FormFieldArray,
+    FormFieldError
   };
 }
 
@@ -531,7 +564,5 @@ export default function createFormValidator<TData extends { [key in keyof TData]
       }));
     }
   
-    return {
-      validate: <TAdditionalData = undefined>(data?: TAdditionalData) => formValidator.validateField<TAdditionalData = undefined>(config.fieldPath, data)
-    };
+
       */

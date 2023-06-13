@@ -44,7 +44,8 @@ export function isAsyncFunction(f: unknown) {
 type SetValueWithType<TData extends { [key in keyof TData]: TData[key] }> = {
   data: TData;
   path: ReadonlyArray<string | number>;
-  valueCustomizer: (valueNode: TData[keyof TData]) => TData[keyof TData];
+  value?: TData[keyof TData];
+  valueCustomizer?: (valueNode: TData[keyof TData]) => TData[keyof TData];
   isIndexAsObjectKey?: boolean;
 };
 
@@ -69,7 +70,13 @@ export function setValueWith<TData extends { [key in keyof TData]: TData[key] }>
     }
   }
 
-  cfg.data[cfg.path[i] as keyof TData] = cfg.valueCustomizer(cfg.data[cfg.path[i] as keyof TData]);
+  if (typeof cfg.valueCustomizer === 'function') {
+    cfg.data[cfg.path[i] as keyof TData] = cfg.valueCustomizer(
+      cfg.data[cfg.path[i] as keyof TData]
+    );
+  } else {
+    cfg.data[cfg.path[i] as keyof TData] = cfg.value as TData[keyof TData];
+  }
 }
 
 export function formFiledValueSelector<TValue, TData extends { [key in keyof TData]: TData[key] }>(
