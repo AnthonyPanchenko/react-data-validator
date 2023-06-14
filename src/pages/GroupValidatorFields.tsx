@@ -1,8 +1,7 @@
 import './group-validator-fields.scss';
 
-import { Fragment, useRef } from 'react';
-
 import CustomButton from '@/components/CustomButton';
+import RenderChecker from '@/components/RenderChecker';
 import TextInput from '@/components/TextInput';
 import GroupDataValidator, { Owner } from '@/pages/group-data-validator-context';
 
@@ -63,19 +62,14 @@ function validateUserName(name: string | undefined) {
 const DELAY = 0;
 
 export default function GroupValidatorFields() {
-  const renderCounter = useRef(0);
-
-  renderCounter.current += 1;
-  console.log('>====== GroupValidatorFields renderer counter', renderCounter.current);
-
   return (
-    <Fragment>
+    <RenderChecker label="GroupValidatorFields">
       <GroupDataValidator.FormFieldValidator<string | undefined, ReadonlyArray<string> | string>
         fieldPath={['companyName']}
         validator={validateUserName}
       >
         {(val, setValue) => (
-          <Fragment>
+          <RenderChecker>
             <TextInput<string | undefined>
               type="text"
               value={val}
@@ -89,7 +83,7 @@ export default function GroupValidatorFields() {
               }}
             />
             <p>{val}</p>
-          </Fragment>
+          </RenderChecker>
         )}
       </GroupDataValidator.FormFieldValidator>
 
@@ -100,7 +94,7 @@ export default function GroupValidatorFields() {
         validator={validateUserName}
       >
         {(val, setValue) => (
-          <Fragment>
+          <RenderChecker>
             <TextInput<string | undefined>
               type="text"
               value={val}
@@ -114,16 +108,15 @@ export default function GroupValidatorFields() {
               }}
             />
             <p>{val}</p>
-          </Fragment>
+          </RenderChecker>
         )}
       </GroupDataValidator.FormFieldValidator>
 
       <br />
 
-      <p>-----Array fields-----</p>
       <GroupDataValidator.FormFieldArray<Owner> fieldPath={['ownersData', 'owners']}>
         {(entries, addField, deleteField) => (
-          <Fragment>
+          <RenderChecker label="Array fields">
             {entries.map((item, i) => (
               <GroupDataValidator.FormFieldValidator<
                 string | undefined,
@@ -134,7 +127,7 @@ export default function GroupValidatorFields() {
                 validator={validateUserName}
               >
                 {(val, setValue) => (
-                  <div className="validator-array-field">
+                  <RenderChecker className="validator-array-field ">
                     <TextInput<string | undefined>
                       type="text"
                       value={val}
@@ -157,7 +150,7 @@ export default function GroupValidatorFields() {
                     >
                       {`Delete "${item.name}"`}
                     </CustomButton>
-                  </div>
+                  </RenderChecker>
                 )}
               </GroupDataValidator.FormFieldValidator>
             ))}
@@ -167,7 +160,7 @@ export default function GroupValidatorFields() {
                 className="ripple"
                 onClick={() => {
                   addField({
-                    name: 'Pitter',
+                    name: `John ${entries.length + 1}`,
                     documents: [
                       { id: '1212', file: 'qwerty-1' },
                       { id: '24234', file: 'qwerty-2' }
@@ -178,9 +171,9 @@ export default function GroupValidatorFields() {
                 Add field
               </CustomButton>
             </div>
-          </Fragment>
+          </RenderChecker>
         )}
       </GroupDataValidator.FormFieldArray>
-    </Fragment>
+    </RenderChecker>
   );
 }
