@@ -69,7 +69,7 @@ export default function GroupValidatorFields() {
         validator={validateUserName}
       >
         {(val, setValue) => (
-          <RenderChecker>
+          <RenderChecker className="validator-text-field">
             <TextInput<string | undefined>
               type="text"
               value={val}
@@ -82,19 +82,17 @@ export default function GroupValidatorFields() {
                 setValue(value);
               }}
             />
-            <p>{val}</p>
+            <span>{val}</span>
           </RenderChecker>
         )}
       </GroupDataValidator.FormFieldValidator>
-
-      <br />
 
       <GroupDataValidator.FormFieldValidator<string | undefined, ReadonlyArray<string> | string>
         fieldPath={['ownersData', 'securityNumber']}
         validator={validateUserName}
       >
         {(val, setValue) => (
-          <RenderChecker>
+          <RenderChecker className="validator-text-field">
             <TextInput<string | undefined>
               type="text"
               value={val}
@@ -107,12 +105,10 @@ export default function GroupValidatorFields() {
                 setValue(value);
               }}
             />
-            <p>{val}</p>
+            <span>{val}</span>
           </RenderChecker>
         )}
       </GroupDataValidator.FormFieldValidator>
-
-      <br />
 
       <GroupDataValidator.FormFieldArray<Owner> fieldPath={['ownersData', 'owners']}>
         {(entries, addField, deleteField) => (
@@ -127,7 +123,7 @@ export default function GroupValidatorFields() {
                 validator={validateUserName}
               >
                 {(val, setValue) => (
-                  <RenderChecker className="validator-array-field ">
+                  <RenderChecker className="validator-array-field">
                     <TextInput<string | undefined>
                       type="text"
                       value={val}

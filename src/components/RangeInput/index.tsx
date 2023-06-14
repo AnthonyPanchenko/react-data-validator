@@ -11,6 +11,7 @@ type PropsTypes = {
   delay?: number;
   min: number;
   max: number;
+  children?: React.ReactNode | React.ReactNode[] | null;
   onChange: (v: number, name?: string) => void;
 };
 
@@ -19,6 +20,7 @@ export default function RangeInput({
   name,
   value = 0,
   delay = 300,
+  children,
   min,
   max,
   onChange
@@ -66,6 +68,7 @@ export default function RangeInput({
           onChange={handleChange}
         />
       </label>
+      {children}
     </div>
   );
 }

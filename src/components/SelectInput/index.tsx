@@ -10,6 +10,7 @@ type PropsTypes<TValue = string> = {
   label: string;
   name?: string;
   type?: 'text' | 'number';
+  children?: React.ReactNode | React.ReactNode[] | null;
   options: ReadonlyArray<SelectOption<TValue>>;
   onChange: (v: TValue, name?: string) => void;
 };
@@ -21,6 +22,7 @@ export default function SelectInput<TValue = string>({
   name,
   type = 'text',
   value,
+  children,
   onChange
 }: PropsTypes<TValue>): JSX.Element {
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -49,6 +51,7 @@ export default function SelectInput<TValue = string>({
           ))}
         </select>
       </label>
+      {children}
     </div>
   );
 }

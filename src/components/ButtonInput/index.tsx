@@ -8,6 +8,7 @@ type PropsTypes<TValue = string, TResult = ReadonlyArray<TValue>> = {
   value: TResult | undefined;
   name?: string;
   type: 'checkbox' | 'radio';
+  children?: React.ReactNode | React.ReactNode[] | null;
   options: ReadonlyArray<SelectOption<TValue>>;
   onChange: (v: TResult, name?: string) => void;
 };
@@ -17,6 +18,7 @@ export default function ButtonInput<TValue = string, TResult = ReadonlyArray<TVa
   name,
   type,
   value,
+  children,
   onChange
 }: PropsTypes<TValue, TResult>): JSX.Element {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,6 +53,7 @@ export default function ButtonInput<TValue = string, TResult = ReadonlyArray<TVa
           {option.label}
         </label>
       ))}
+      {children}
     </div>
   );
 }

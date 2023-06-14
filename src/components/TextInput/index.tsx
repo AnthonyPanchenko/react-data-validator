@@ -11,6 +11,7 @@ type PropsTypes<TValue = string> = {
   label: string;
   name?: string;
   type?: 'text' | 'number';
+  children?: React.ReactNode | React.ReactNode[] | null;
   onChange: (v: TValue, name?: string) => void;
 };
 
@@ -19,6 +20,7 @@ export default function TextInput<TValue = string>({
   delay = 500,
   label,
   name,
+  children,
   placeholder,
   value,
   onChange
@@ -82,6 +84,7 @@ export default function TextInput<TValue = string>({
           onChange={handleChange}
         />
       </label>
+      {children}
     </div>
   );
 }
