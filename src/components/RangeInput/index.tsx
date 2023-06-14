@@ -2,7 +2,7 @@ import './range-input.scss';
 
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { throttle } from '@/components/utils';
+import { debounce } from '@/components/utils';
 
 type PropsTypes = {
   value: number | undefined;
@@ -18,7 +18,7 @@ export default function RangeInput({
   label,
   name,
   value = 0,
-  delay = 1000,
+  delay = 300,
   min,
   max,
   onChange
@@ -39,7 +39,7 @@ export default function RangeInput({
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedChangeHandler = useCallback(
-    throttle(val => {
+    debounce(val => {
       onChange(val, name);
     }, delay),
     [onChange]
