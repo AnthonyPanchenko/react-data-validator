@@ -1,4 +1,14 @@
 .input-btn-row {
   font-size: 14px;
   margin-bottom: 2rem;
+  display: flex;
+  row-gap: 0.5rem;
+  align-items: flex-start;
+  flex-direction: column;
+
+  label {
+    display: inline-flex;
+    column-gap: 0.5rem;
+    align-items: flex-start;
+  }
 }

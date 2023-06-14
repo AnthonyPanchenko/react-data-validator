@@ -36,22 +36,20 @@ export default function ButtonInput<TValue = string, TResult = ReadonlyArray<TVa
   return (
     <div className="input-btn-row">
       {options.map(option => (
-        <div key={option.value as string | number}>
-          <label>
-            <input
-              name={name}
-              value={option.value as string | number}
-              type={type}
-              checked={
-                type === 'checkbox' && Array.isArray(value)
-                  ? value.includes(option.value)
-                  : value === option.value
-              }
-              onChange={handleChange}
-            />
-            {option.label}
-          </label>
-        </div>
+        <label key={option.value as string | number}>
+          <input
+            name={name}
+            value={option.value as string | number}
+            type={type}
+            checked={
+              type === 'checkbox' && Array.isArray(value)
+                ? value.includes(option.value)
+                : value === option.value
+            }
+            onChange={handleChange}
+          />
+          {option.label}
+        </label>
       ))}
     </div>
   );
