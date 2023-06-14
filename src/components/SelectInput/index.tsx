@@ -1,3 +1,5 @@
+import './select-input.scss';
+
 import React from 'react';
 
 import { SelectOption } from '@/typings';
@@ -31,7 +33,7 @@ export default function SelectInput<TValue = string>({
   };
 
   return (
-    <div>
+    <div className="select-input-btn-row">
       <label>
         {label}
         <select

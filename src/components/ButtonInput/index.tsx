@@ -1,3 +1,5 @@
+import './button-input.scss';
+
 import React from 'react';
 
 import { SelectOption } from '@/typings';
@@ -32,7 +34,7 @@ export default function ButtonInput<TValue = string, TResult = ReadonlyArray<TVa
   };
 
   return (
-    <div>
+    <div className="input-btn-row">
       {options.map(option => (
         <div key={option.value as string | number}>
           <label>

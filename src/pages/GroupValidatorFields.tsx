@@ -60,6 +60,8 @@ function validateUserName(name: string | undefined) {
   return '';
 }
 
+const DELAY = 0;
+
 export default function GroupValidatorFields() {
   const renderCounter = useRef(0);
 
@@ -77,6 +79,7 @@ export default function GroupValidatorFields() {
             <TextInput<string | undefined>
               type="text"
               value={val}
+              delay={DELAY}
               name="companyName"
               label="Company Name"
               placeholder="Company Name"
@@ -101,6 +104,7 @@ export default function GroupValidatorFields() {
             <TextInput<string | undefined>
               type="text"
               value={val}
+              delay={DELAY}
               name="securityNumber"
               label="Security Number"
               placeholder="Security Number"
@@ -134,8 +138,9 @@ export default function GroupValidatorFields() {
                     <TextInput<string | undefined>
                       type="text"
                       value={val}
+                      delay={DELAY}
                       name="owner"
-                      label="Owner"
+                      label={`Owner (${i + 1})`}
                       placeholder="Owner"
                       onChange={value => {
                         console.log('owner: ', i, value, val);

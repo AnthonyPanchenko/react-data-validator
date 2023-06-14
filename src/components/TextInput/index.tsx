@@ -1,3 +1,5 @@
+import './text-input.scss';
+
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { debounce } from '@/components/utils';
@@ -6,7 +8,6 @@ type PropsTypes<TValue = string> = {
   value: TValue | undefined;
   delay?: number;
   placeholder: string;
-  isDebounced?: boolean;
   label: string;
   name?: string;
   type?: 'text' | 'number';
@@ -18,7 +19,6 @@ export default function TextInput<TValue = string>({
   delay = 500,
   label,
   name,
-  isDebounced = false,
   placeholder,
   value,
   onChange
@@ -54,14 +54,14 @@ export default function TextInput<TValue = string>({
     if (type === 'number') {
       const n = Number(val);
       const parsedNumber = !isNaN(n) ? n : 0;
-      if (isDebounced) {
+      if (delay) {
         debouncedChangeHandler(parsedNumber);
         setLocalValue(parsedNumber as unknown as TValue);
       } else {
         onChange(parsedNumber as TValue, name);
       }
     } else {
-      if (isDebounced) {
+      if (delay) {
         debouncedChangeHandler(val);
         setLocalValue(val as unknown as TValue);
       } else {
@@ -71,13 +71,13 @@ export default function TextInput<TValue = string>({
   };
 
   return (
-    <div>
+    <div className="text-input-row">
       <label>
         {label}
         <input
           type={type}
           name={name}
-          value={isDebounced ? (localValue as string | number) || '' : (value as string | number)}
+          value={(localValue === undefined ? '' : localValue) as string | number}
           placeholder={placeholder}
           onChange={handleChange}
         />

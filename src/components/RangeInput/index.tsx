@@ -1,6 +1,8 @@
+import './range-input.scss';
+
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { debounce } from '@/components/utils';
+import { throttle } from '@/components/utils';
 
 type PropsTypes = {
   value: number | undefined;
@@ -15,8 +17,8 @@ type PropsTypes = {
 export default function RangeInput({
   label,
   name,
-  value,
-  delay = 500,
+  value = 0,
+  delay = 1000,
   min,
   max,
   onChange
@@ -37,7 +39,7 @@ export default function RangeInput({
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedChangeHandler = useCallback(
-    debounce(val => {
+    throttle(val => {
       onChange(val, name);
     }, delay),
     [onChange]
@@ -52,17 +54,17 @@ export default function RangeInput({
   };
 
   return (
-    <div>
+    <div className="range-input-row">
       <label>
+        {`${label} (${localValue || 0})`}
         <input
           type="range"
-          value={localValue || ''}
+          value={localValue || 0}
           name={name}
           min={min}
           max={max}
           onChange={handleChange}
         />
-        {label}
       </label>
     </div>
   );
