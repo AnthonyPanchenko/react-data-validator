@@ -1,19 +1,26 @@
 import {
-  FormValidatorValidationNode,
-  FormValidatorValidationNodes
+  FormFieldValidationNode,
+  FormFieldValidationNodes
 } from '@/validator/hooks/validation-field-types';
 
-function isObject<T>(obj: T | null | undefined) {
+export function isObject<T>(obj: T | null | undefined) {
   return (
     obj && typeof obj === 'object' && Object.prototype.toString.call(obj) === '[object Object]'
   );
 }
 
-function hasOwnProperty<T extends { [key in keyof T]: T[key] }>(
+export function hasSomeOwnProperty<T extends { [key in keyof T]: T[key] }>(
+  obj: T | null | undefined,
+  props: Array<number | string>
+) {
+  return isObject(obj) ? props.some(p => Object.prototype.hasOwnProperty.call(obj, p)) : false;
+}
+
+export function hasOwnProperty<T extends { [key in keyof T]: T[key] }>(
   obj: T | null | undefined,
   prop: number | string
 ) {
-  return isObject(obj) ? false : Object.prototype.hasOwnProperty.call(obj, prop);
+  return isObject(obj) ? Object.prototype.hasOwnProperty.call(obj, prop) : false;
 }
 
 export function isPromise(p: Promise<unknown> | null) {
@@ -98,26 +105,26 @@ function handleValidationNode(
   node:
     | {
         [key: string | number]:
-          | FormValidatorValidationNode<unknown, unknown>
-          | Array<FormValidatorValidationNode<unknown, unknown>>;
+          | FormFieldValidationNode<unknown, unknown>
+          | Array<FormFieldValidationNode<unknown, unknown>>;
       }
-    | FormValidatorValidationNode<unknown, unknown>
-    | Array<FormValidatorValidationNode<unknown, unknown>>,
-  callback: (node: FormValidatorValidationNode<unknown, unknown>) => void
+    | FormFieldValidationNode<unknown, unknown>
+    | Array<FormFieldValidationNode<unknown, unknown>>,
+  callback: (node: FormFieldValidationNode<unknown, unknown>) => void
 ) {
   if (
     hasOwnProperty(node, 'validator') &&
-    typeof (node as FormValidatorValidationNode<unknown, unknown>).validator === 'function'
+    typeof (node as FormFieldValidationNode<unknown, unknown>).validator === 'function'
   ) {
-    callback(node as FormValidatorValidationNode<unknown, unknown>);
+    callback(node as FormFieldValidationNode<unknown, unknown>);
   } else {
-    traverseValidationData(node as FormValidatorValidationNodes, callback);
+    traverseValidationData(node as FormFieldValidationNodes<unknown, unknown>, callback);
   }
 }
 
 export function traverseValidationData(
-  obj: FormValidatorValidationNodes,
-  callback: (node: FormValidatorValidationNode<unknown, unknown>) => void
+  obj: FormFieldValidationNodes<unknown, unknown>,
+  callback: (node: FormFieldValidationNode<unknown, unknown>) => void
 ) {
   if (isObject(obj)) {
     for (const key of Object.keys(obj)) {
@@ -125,11 +132,11 @@ export function traverseValidationData(
         obj[key] as
           | {
               [key: string | number]:
-                | FormValidatorValidationNode<unknown, unknown>
-                | Array<FormValidatorValidationNode<unknown, unknown>>;
+                | FormFieldValidationNode<unknown, unknown>
+                | Array<FormFieldValidationNode<unknown, unknown>>;
             }
-          | FormValidatorValidationNode<unknown, unknown>
-          | Array<FormValidatorValidationNode<unknown, unknown>>,
+          | FormFieldValidationNode<unknown, unknown>
+          | Array<FormFieldValidationNode<unknown, unknown>>,
         callback
       );
     }

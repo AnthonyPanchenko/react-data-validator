@@ -1,5 +1,8 @@
+import './group-validator-fields.scss';
+
 import { Fragment, useRef } from 'react';
 
+import CustomButton from '@/components/CustomButton';
 import TextInput from '@/components/TextInput';
 import GroupDataValidator, { Owner } from '@/pages/group-data-validator-context';
 
@@ -113,8 +116,9 @@ export default function GroupValidatorFields() {
 
       <br />
 
+      <p>-----Array fields-----</p>
       <GroupDataValidator.FormFieldArray<Owner> fieldPath={['ownersData', 'owners']}>
-        {entries => (
+        {(entries, addField, deleteField) => (
           <Fragment>
             {entries.map((item, i) => (
               <GroupDataValidator.FormFieldValidator<
@@ -126,7 +130,7 @@ export default function GroupValidatorFields() {
                 validator={validateUserName}
               >
                 {(val, setValue) => (
-                  <Fragment>
+                  <div className="validator-array-field">
                     <TextInput<string | undefined>
                       type="text"
                       value={val}
@@ -138,11 +142,37 @@ export default function GroupValidatorFields() {
                         setValue(value);
                       }}
                     />
-                    <p>{item.name}</p>
-                  </Fragment>
+                    <CustomButton
+                      type="button"
+                      className="ripple"
+                      fontSize="11px"
+                      onClick={() => {
+                        deleteField(i);
+                      }}
+                    >
+                      {`Delete "${item.name}"`}
+                    </CustomButton>
+                  </div>
                 )}
               </GroupDataValidator.FormFieldValidator>
             ))}
+            <div>
+              <CustomButton
+                type="button"
+                className="ripple"
+                onClick={() => {
+                  addField({
+                    name: 'Pitter',
+                    documents: [
+                      { id: '1212', file: 'qwerty-1' },
+                      { id: '24234', file: 'qwerty-2' }
+                    ]
+                  });
+                }}
+              >
+                Add field
+              </CustomButton>
+            </div>
           </Fragment>
         )}
       </GroupDataValidator.FormFieldArray>
