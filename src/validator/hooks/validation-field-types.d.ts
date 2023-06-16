@@ -7,7 +7,6 @@ export type ValidationFieldMetaData<TError = string> = {
 };
 
 export type FormFieldValidationNode<TValue, TError = string> = {
-  value: TValue | undefined;
   initialValue: TValue | undefined;
   initialMetaData: ValidationFieldMetaData<TError>;
   fieldPath: ReadonlyArray<string | number>;

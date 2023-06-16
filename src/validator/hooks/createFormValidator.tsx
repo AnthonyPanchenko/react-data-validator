@@ -41,10 +41,14 @@ type FormValidatorReturnType<TData extends { [key in keyof TData]: TData[key] }>
   isValidating: boolean;
   subscribe: (onStoreChange: () => void) => () => boolean;
   validateForm: (data: TData) => void;
-  validateField: (fieldPath: ReadonlyArray<string | number>) => void;
+  validateField: <TValue>(fieldPath: ReadonlyArray<string | number>, value: TValue) => void;
   deleteValidationField: (fieldPath: ReadonlyArray<string | number>) => void;
   setFieldData: <TValue, TError = string>(
     field: PartialFormFieldValidationNode<TValue, TError>
+  ) => void;
+  setFieldValue: <TValue, TPath extends string | number>(
+    fieldPath: ReadonlyArray<TPath>,
+    value: TValue
   ) => void;
   setFieldInitialData: <TValue, TError = string>(
     field: InitialValidationFieldData<TValue, TError>
@@ -57,7 +61,7 @@ type FormValidatorReturnType<TData extends { [key in keyof TData]: TData[key] }>
 };
 
 export default function createFormValidator<TData extends { [key in keyof TData]: TData[key] }>() {
-  function useFormValidator(props: FormValidatorProps<TData>) {
+  function useFormValidator(props: FormValidatorProps<TData>): FormValidatorReturnType<TData> {
     const [formState, setFormState] = useState<FormValidatorState>({
       isValid: true,
       isDirty: false,
@@ -73,7 +77,22 @@ export default function createFormValidator<TData extends { [key in keyof TData]
     const getCurrentData = useCallback(() => currentData.current, []);
     const getValidationData = useCallback(() => validationData.current, []);
 
-    // divide
+    const setFieldValue = useCallback(
+      <TValue, TPath extends string | number>(fieldPath: ReadonlyArray<TPath>, value: TValue) => {
+        setValueWith<TData>({
+          data: currentData.current,
+          path: fieldPath,
+          value: value as TData[keyof TData]
+        });
+        currentData.current = Object.assign({}, currentData.current);
+
+        for (const onStoreChange of subscribers.current) {
+          onStoreChange();
+        }
+      },
+      []
+    );
+
     const setFieldData = useCallback(
       <TValue, TError = string>(field: PartialFormFieldValidationNode<TValue, TError>) => {
         if (Object.hasOwn(field, 'value')) {
@@ -91,10 +110,6 @@ export default function createFormValidator<TData extends { [key in keyof TData]
           valueCustomizer: node => Object.assign({}, node, field) as TData[keyof TData]
         });
         validationData.current = Object.assign({}, validationData.current);
-
-        console.log('validationData.current: ', validationData.current);
-
-        console.log('subscribers.current: ', subscribers.current);
 
         for (const onStoreChange of subscribers.current) {
           onStoreChange();
@@ -170,7 +185,7 @@ export default function createFormValidator<TData extends { [key in keyof TData]
 
     // validate particular field
     const validateField = useCallback(
-      <TValue, TError = string>(fieldPath: ReadonlyArray<string | number>) => {
+      <TValue, TError = string>(fieldPath: ReadonlyArray<string | number>, value: TValue) => {
         setValueWith<FormFieldValidationNodes<TValue, TError>>({
           data: validationData.current,
           path: fieldPath,
@@ -181,7 +196,7 @@ export default function createFormValidator<TData extends { [key in keyof TData]
             // (value, data) => async func(...args)
             // (value, data) => func(...args)
             // (value, data) => new Promise();
-            Promise.resolve(node.validator(node.value, currentData.current))
+            Promise.resolve(node.validator(value, currentData.current))
               .then(errors => handleValidationResult<TValue, TError>(node, errors)) // if resolve
               .catch(errors => handleValidationResult<TValue, TError>(node, errors)); // if reject
           }
@@ -207,7 +222,7 @@ export default function createFormValidator<TData extends { [key in keyof TData]
           // set errors to the particular field
           if (typeof node.validator === 'function') {
             validationPromises.push(
-              Promise.resolve(node.validator(node.value, validationData.current))
+              Promise.resolve(node.validator('node.value', validationData.current))
             );
           }
         }
@@ -258,11 +273,11 @@ export default function createFormValidator<TData extends { [key in keyof TData]
             }
 
             const initialNode: FormFieldValidationNode<TValue | undefined, TError> = {
-              value: (Array.isArray(initialValue)
-                ? [...initialValue]
-                : isObject(initialValue)
-                ? Object.assign({}, initialValue)
-                : initialValue) as TValue | undefined,
+              // value: (Array.isArray(initialValue)
+              //   ? [...initialValue]
+              //   : isObject(initialValue)
+              //   ? Object.assign({}, initialValue)
+              //   : initialValue) as TValue | undefined,
               initialValue,
               initialMetaData: {
                 isValid,
@@ -319,6 +334,7 @@ export default function createFormValidator<TData extends { [key in keyof TData]
       getCurrentData,
       getValidationData,
       setFieldData,
+      setFieldValue,
       addArrayFieldItem,
       deleteArrayFieldItem,
       deleteValidationField,
@@ -502,7 +518,7 @@ export default function createFormValidator<TData extends { [key in keyof TData]
     const formValidator = useContext(FormValidatorContext);
     const shouldValidateField = useRef<boolean>(true);
 
-    const formFieldValueSelector = useCallback(
+    const formFieldStateSelector = useCallback(
       () =>
         formFiledValueSelector<
           FormFieldValidationNode<TValue, TError> | undefined,
@@ -512,7 +528,24 @@ export default function createFormValidator<TData extends { [key in keyof TData]
       []
     );
 
-    const currentValidationNode = useSyncExternalStore(
+    const formFieldValueSelector = useCallback(
+      () =>
+        formFiledValueSelector<TValue | undefined, TData>(
+          formValidator.getCurrentData(),
+          config.fieldPath,
+          undefined
+        ),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      []
+    );
+
+    const fieldState = useSyncExternalStore(
+      formValidator.subscribe,
+      formFieldStateSelector,
+      formFieldStateSelector
+    );
+
+    const currentValue = useSyncExternalStore(
       formValidator.subscribe,
       formFieldValueSelector,
       formFieldValueSelector
@@ -543,13 +576,10 @@ export default function createFormValidator<TData extends { [key in keyof TData]
     }, []);
 
     useEffect(() => {
-      if (currentValidationNode && currentValidationNode.isTouched) {
-        const isCurrentDirty = !dequal(
-          currentValidationNode.value,
-          currentValidationNode.initialValue
-        );
+      if (fieldState && fieldState.isTouched) {
+        const isCurrentDirty = !dequal(currentValue, fieldState.initialValue);
 
-        if (isCurrentDirty !== currentValidationNode.isDirty) {
+        if (isCurrentDirty !== fieldState.isDirty) {
           formValidator.setFieldData<TValue>({
             fieldPath: config.fieldPath,
             isDirty: isCurrentDirty
@@ -557,12 +587,12 @@ export default function createFormValidator<TData extends { [key in keyof TData]
         }
 
         if (shouldValidateField.current) {
-          formValidator.validateField(config.fieldPath);
+          formValidator.validateField(config.fieldPath, currentValue);
           console.log('isCurrentDirty', isCurrentDirty);
         }
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentValidationNode?.value]);
+    }, [currentValue]);
 
     // const resetField = () => {
     //   console.log('resetField: ', config.fieldPath);
@@ -571,24 +601,29 @@ export default function createFormValidator<TData extends { [key in keyof TData]
     const setFieldValue = (value: TValue, shouldValidate = true) => {
       shouldValidateField.current = shouldValidate;
       //  use mutation
-      formValidator.setFieldData<TValue>({
-        fieldPath: config.fieldPath,
-        isTouched: true,
-        value
-      });
+      if (!fieldState?.isTouched) {
+        formValidator.setFieldData<TValue>({
+          fieldPath: config.fieldPath,
+          isTouched: true,
+          value
+        });
+      } else {
+        formValidator.setFieldValue(config.fieldPath, value);
+      }
+
       console.log('setFieldValue: ', config.fieldPath, value);
     };
 
     const validateField = () => {
-      formValidator.validateField(config.fieldPath);
+      formValidator.validateField(config.fieldPath, currentValue);
     };
 
     console.log('FieldValidator render analyzer:', config.fieldPath);
 
-    const vNode = currentValidationNode ?? ({} as FormFieldValidationNode<TValue, TError>);
+    const vNode = fieldState ?? ({} as FormFieldValidationNode<TValue, TError>);
 
     return {
-      value: vNode.value,
+      value: currentValue,
       fieldPath: config.fieldPath,
       isValid: !!vNode.isValid,
       isDirty: !!vNode.isDirty,

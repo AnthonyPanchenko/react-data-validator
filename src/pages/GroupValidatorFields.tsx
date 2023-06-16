@@ -69,7 +69,7 @@ export default function GroupValidatorFields() {
         validator={validateUserName}
       >
         {(val, setValue) => (
-          <RenderChecker className="validator-text-field">
+          <RenderChecker label="companyName" className="validator-text-field">
             <TextInput<string | undefined>
               type="text"
               value={val}
