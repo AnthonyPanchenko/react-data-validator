@@ -23,6 +23,7 @@ export function hasOwnProperty<T extends { [key in keyof T]: T[key] }>(
   return isObject(obj) ? Object.prototype.hasOwnProperty.call(obj, prop) : false;
 }
 
+// ✅ Check if a function's return value is a Promise
 export function isPromise(p: Promise<unknown> | null) {
   if (
     p !== null &&
@@ -33,26 +34,22 @@ export function isPromise(p: Promise<unknown> | null) {
     return true;
   }
 
+  // p instanceof Promise
+  // p && Object.prototype.toString.call(p) === "[object Promise]";
+
   return false;
 }
 
-// ✅ Check if a function's return value is a Promise
 export function isAsyncFunction(f: unknown) {
-  if (
-    (typeof f === 'function' && f.constructor.name === 'AsyncFunction') ||
-    (typeof f === 'object' && isPromise(f as Promise<unknown> | null))
-  ) {
-    return true;
-  }
-
-  return false;
+  // f.constructor.name === 'Function'
+  return typeof f === 'function' && f.constructor.name === 'AsyncFunction';
 }
 
 type SetValueWithType<TData extends { [key in keyof TData]: TData[key] }> = {
   data: TData;
   path: ReadonlyArray<string | number>;
   value?: TData[keyof TData];
-  valueCustomizer?: (valueNode: TData[keyof TData]) => TData[keyof TData];
+  valueCustomizer?: (valueNode: TData[keyof TData]) => TData[keyof TData] | undefined;
   isIndexAsObjectKey?: boolean;
 };
 
@@ -78,9 +75,10 @@ export function setValueWith<TData extends { [key in keyof TData]: TData[key] }>
   }
 
   if (typeof cfg.valueCustomizer === 'function') {
-    cfg.data[cfg.path[i] as keyof TData] = cfg.valueCustomizer(
-      cfg.data[cfg.path[i] as keyof TData]
-    );
+    const newNode = cfg.valueCustomizer(cfg.data[cfg.path[i] as keyof TData]);
+    if (newNode !== undefined) {
+      cfg.data[cfg.path[i] as keyof TData] = newNode;
+    }
   } else {
     cfg.data[cfg.path[i] as keyof TData] = cfg.value as TData[keyof TData];
   }
