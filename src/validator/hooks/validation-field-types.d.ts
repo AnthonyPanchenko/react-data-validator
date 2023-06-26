@@ -7,10 +7,12 @@ export type ValidationFieldMetaData<TError = string> = {
 };
 
 export type FormFieldValidationNode<TValue, TError = string> = {
-  initialValue: TValue | undefined;
   initialMetaData: ValidationFieldMetaData<TError>;
-  fieldPath: ReadonlyArray<string | number>;
+  arrayPath: ReadonlyArray<string | number>;
+  fieldPath: string;
+  hashKey: string;
   isValidating: boolean;
+  subscribers: Set<() => void>;
   validator: (
     value: TValue | undefined,
     data: { [key in keyof TData]: TData[key] }
@@ -27,7 +29,8 @@ export type PartialValidationFieldMetaData<TError = string> = {
 
 export type PartialFormFieldValidationNode<TValue, TError = string> = {
   value?: TValue | undefined;
-  fieldPath: ReadonlyArray<string | number>;
+  arrayPath: ReadonlyArray<string | number>;
+  fieldPath: string;
   isValidating?: boolean;
   validator?: (
     value: TValue | undefined,
@@ -36,20 +39,16 @@ export type PartialFormFieldValidationNode<TValue, TError = string> = {
 } & PartialValidationFieldMetaData<TError>;
 
 export type InitialValidationFieldData<TValue, TError = string> = {
-  fieldPath: ReadonlyArray<string | number>;
+  arrayPath: ReadonlyArray<string | number>;
+  fieldPath: string;
+  hashKey: string;
   initialValue?: TValue | undefined;
+  subscribers: Set<() => void>;
   validator: (
     value: TValue | undefined,
     data: { [key in keyof TData]: TData[key] }
   ) => TError | Promise<TError>;
 } & PartialValidationFieldMetaData<TError>;
-
-export type FormFieldValidationNodes<TValue, TError = string> = {
-  [key: string | number]:
-    | FormFieldValidationNode<TValue, TError>
-    | Array<FormFieldValidationNode<TValue, TError>>
-    | FormFieldValidationNodes;
-};
 
 // parentFieldPath: ReadonlyArray<string> | null;
 // childrenFieldPath: ReadonlyArray<string> | null;

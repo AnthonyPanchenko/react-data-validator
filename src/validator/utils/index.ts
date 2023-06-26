@@ -1,7 +1,6 @@
-import {
-  FormFieldValidationNode,
-  FormFieldValidationNodes
-} from '@/validator/hooks/validation-field-types';
+export function miniUID() {
+  return Math.random().toString(36).substring(2, 12) + Math.random().toString(36).substring(2, 10);
+}
 
 export function isObject<T>(obj: T | null | undefined) {
   return (
@@ -25,23 +24,15 @@ export function hasOwnProperty<T extends { [key in keyof T]: T[key] }>(
 
 // ✅ Check if a function's return value is a Promise
 export function isPromise(p: Promise<unknown> | null) {
-  if (
-    p !== null &&
-    typeof p === 'object' &&
-    typeof p.then === 'function' &&
-    typeof p.catch === 'function'
-  ) {
-    return true;
-  }
-
-  // p instanceof Promise
-  // p && Object.prototype.toString.call(p) === "[object Promise]";
-
-  return false;
+  return (
+    p instanceof Promise ||
+    (p !== null &&
+      typeof p === 'object' &&
+      Object.prototype.toString.call(p) === '[object Promise]')
+  );
 }
 
 export function isAsyncFunction(f: unknown) {
-  // f.constructor.name === 'Function'
   return typeof f === 'function' && f.constructor.name === 'AsyncFunction';
 }
 
@@ -99,50 +90,25 @@ export function formFiledValueSelector<TValue, TData extends { [key in keyof TDa
   return i && i === len ? obj : defaultValue;
 }
 
-function handleValidationNode(
-  node:
-    | {
-        [key: string | number]:
-          | FormFieldValidationNode<unknown, unknown>
-          | Array<FormFieldValidationNode<unknown, unknown>>;
-      }
-    | FormFieldValidationNode<unknown, unknown>
-    | Array<FormFieldValidationNode<unknown, unknown>>,
-  callback: (node: FormFieldValidationNode<unknown, unknown>) => void
-) {
-  if (
-    hasOwnProperty(node, 'validator') &&
-    typeof (node as FormFieldValidationNode<unknown, unknown>).validator === 'function'
-  ) {
-    callback(node as FormFieldValidationNode<unknown, unknown>);
-  } else {
-    traverseValidationData(node as FormFieldValidationNodes<unknown, unknown>, callback);
-  }
-}
+const propertyName =
+  /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|$))/g;
 
-export function traverseValidationData(
-  obj: FormFieldValidationNodes<unknown, unknown>,
-  callback: (node: FormFieldValidationNode<unknown, unknown>) => void
-) {
-  if (isObject(obj)) {
-    for (const key of Object.keys(obj)) {
-      handleValidationNode(
-        obj[key] as
-          | {
-              [key: string | number]:
-                | FormFieldValidationNode<unknown, unknown>
-                | Array<FormFieldValidationNode<unknown, unknown>>;
-            }
-          | FormFieldValidationNode<unknown, unknown>
-          | Array<FormFieldValidationNode<unknown, unknown>>,
-        callback
-      );
-    }
-  } else if (Array.isArray(obj)) {
-    for (const item of obj) {
-      handleValidationNode(item, callback);
-    }
+// Used to match backslashes in property paths.
+const reEscapeChar = /\\(\\)?/g;
+
+export function stringToPath(path: string) {
+  const result = [];
+  // define dot .
+  if (path.charCodeAt(0) === 46) {
+    result.push('');
   }
+
+  path.replace(propertyName, ((match: string, num: number, quote: string, subString: string) => {
+    result.push(quote ? subString.replace(reEscapeChar, '$1') : num || match);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  }) as (substring: string, ...args: any[]) => string);
+
+  return result as ReadonlyArray<string | number>;
 }
 
 // ⛔️
