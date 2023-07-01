@@ -6,6 +6,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 // import logoSrc from '@/assets/logo.png';
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
+import DragAndDrop from '@/pages/DragAndDrop';
 // import Logo from '@/components/Logo';
 import FastContext from '@/pages/FastContext';
 import GroupValidator from '@/pages/GroupValidator';
@@ -30,6 +31,7 @@ export default function App() {
               <Route element={<FastContext />} path="/context" />
               <Route element={<GroupValidator />} path="/form-validator" />
               <Route element={<MediaQuery />} path="/media-query" />
+              <Route element={<DragAndDrop />} path="/d-n-d" />
             </Routes>
           </Suspense>
         </section>
