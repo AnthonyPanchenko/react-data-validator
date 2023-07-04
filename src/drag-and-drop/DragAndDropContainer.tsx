@@ -6,35 +6,51 @@ type PropsTypes = {
   children: React.ReactNode[] | React.ReactNode;
 };
 
+type DnDHandlers = {
+  onMove: (x: number, y: number) => void;
+  onSetActive: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
 export default function DragAndDropContainer({ children }: PropsTypes) {
-  const dragHandler = useRef<undefined | ((x: number, y: number) => void)>(undefined);
+  const dndHandlers = useRef<DnDHandlers | null>(null);
 
   const handleTouchEnd = (e: TouchEvent) => {
     e.preventDefault();
-    if (typeof dragHandler.current === 'function') {
-      dragHandler.current = undefined;
+    if (dndHandlers.current) {
+      dndHandlers.current.onSetActive(false);
+      dndHandlers.current = null;
+      // console.clear();
       console.log('handleTouchEnd', e);
     }
   };
 
   const handleTouchMove = (e: TouchEvent) => {
     e.preventDefault();
-    if (typeof dragHandler.current === 'function') {
+    // transform: translateY(4px);
+    if (dndHandlers.current) {
+      dndHandlers.current.onSetActive(true);
+      dndHandlers.current.onMove(e.touches[0].pageX, e.touches[0].pageY);
+      // console.clear();
       console.log('handleTouchMove', e);
     }
   };
 
   const handleMouseUp = (e: MouseEvent) => {
     e.preventDefault();
-    if (typeof dragHandler.current === 'function') {
-      dragHandler.current = undefined;
+    if (dndHandlers.current) {
+      dndHandlers.current.onSetActive(false);
+      dndHandlers.current = null;
+      // console.clear();
       console.log('handleMouseUp', e);
     }
   };
 
   const handleMouseMove = (e: MouseEvent) => {
     e.preventDefault();
-    if (typeof dragHandler.current === 'function') {
+    if (dndHandlers.current) {
+      dndHandlers.current.onSetActive(true);
+      dndHandlers.current.onMove(e.pageX, e.pageY);
+      // console.clear();
       console.log('handleMouseMove', e);
     }
   };
@@ -58,12 +74,17 @@ export default function DragAndDropContainer({ children }: PropsTypes) {
 
   const registerDragItem = useCallback(
     <TRef extends Element, TItem = unknown>(
-      handler: (x: number, y: number) => void,
+      moveHandler: (x: number, y: number) => void,
+      setActiveState: React.Dispatch<React.SetStateAction<boolean>>,
       event: React.MouseEvent<TRef, MouseEvent> | React.TouchEvent<TRef>,
-      item: TItem
+      item: TItem,
+      index: number
     ) => {
-      dragHandler.current = handler;
-      console.log(item, dragHandler, event);
+      dndHandlers.current = {
+        onMove: moveHandler,
+        onSetActive: setActiveState
+      };
+      console.log(item, moveHandler, setActiveState, event, index);
     },
     []
   );

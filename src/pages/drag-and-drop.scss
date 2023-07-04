@@ -1,13 +1,19 @@
+.text {
+  max-width: 400px;
+  min-height: 400px;
+}
+
 .dnd {
   font-size: 1.5rem;
   display: flex;
-  column-gap: 2rem;
+  gap: 2rem;
 }
 
 .dnd-area {
+  position: relative;
   display: flex;
   flex-direction: column;
-  row-gap: 1rem;
+  gap: 1rem;
   padding: 1rem;
   border-radius: 1rem;
   background-color: #1e1e1e;
@@ -24,6 +30,26 @@
   &.box-2 {
     color: rgb(36, 255, 29);
   }
+
+  &.box-3 {
+    color: #fff;
+    display: grid;
+    margin-top: 3rem;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-auto-rows: 200px;
+
+    .dnd-source {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+}
+
+@mixin active-dnd-source {
+  position: absolute;
+  border-style: dashed;
+  border-color: #4464ee;
 }
 
 .dnd-source {
@@ -31,6 +57,21 @@
   border-radius: inherit;
   background-color: #033639;
   border: 2px solid #8e8e8e;
+
+  &.active {
+    @include active-dnd-source;
+    transform: translate(var(--cord-x), var(--cord-y));
+
+    &-x {
+      @include active-dnd-source;
+      transform: translateX(var(--cord-x));
+    }
+
+    &-y {
+      @include active-dnd-source;
+      transform: translateY(var(--cord-y));
+    }
+  }
 }
 
 details {
