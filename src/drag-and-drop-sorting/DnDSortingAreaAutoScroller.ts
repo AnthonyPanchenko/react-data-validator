@@ -1,4 +1,4 @@
-export default class DnDAreaAutoScroller {
+export default class DnDSortingAreaAutoScroller {
   interval: NodeJS.Timer | null = null;
 
   clear() {

@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type DragAndDropContextType = {
+export type DragAndDropSortingContextType = {
   registerDragItem: <TRef extends Element, TItem = unknown>(
     dragHandler: (x: number, y: number) => void,
     setActiveState: React.Dispatch<React.SetStateAction<boolean>>,
@@ -11,7 +11,7 @@ export type DragAndDropContextType = {
   unRegisterDragItem: () => void;
 };
 
-export const DragAndDropContext = React.createContext<DragAndDropContextType>({
+export const DragAndDropSortingContext = React.createContext<DragAndDropSortingContextType>({
   registerDragItem: () => undefined,
   unRegisterDragItem: () => undefined
 });

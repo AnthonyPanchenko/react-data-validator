@@ -13,7 +13,7 @@ export default function Header() {
         <NavLink to="/context">Fast context</NavLink>
         <NavLink to="/form-validator">Form Validator</NavLink>
         <NavLink to="/media-query">Media query</NavLink>
-        <NavLink to="/d-n-d">Drag&Drop</NavLink>
+        <NavLink to="/d-n-d-sort">Drag&Drop Sorting</NavLink>
       </nav>
       <ThemeSwitcher />
     </header>
