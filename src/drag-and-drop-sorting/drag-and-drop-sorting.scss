@@ -66,5 +66,10 @@
     border-color: #4464ee;
     width: var(--width);
     transform: translateY(var(--cord-y));
+    z-index: 1;
+  }
+
+  &.inactive {
+    opacity: 0.3;
   }
 }
