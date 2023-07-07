@@ -11,7 +11,8 @@ type PropsTypes = {
         setPosition: (posY: number) => void,
         setActiveState: (isActive: boolean) => void,
         event: MouseEvent | Touch,
-        index: number
+        index: number,
+        elementClientRect: DOMRect
       ) => void)
     | undefined;
 };
@@ -27,18 +28,20 @@ export default function DragAndDropSortingSource({
   const elementRef = useRef<HTMLDivElement | null>(null);
   const elementWidth = useRef<number>(100);
 
+  // return pointerY + parentElement.scrollTop - offsetParentRect.top;
+
   const onMouseDown = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
     if (typeof onRegisterDragItem === 'function' && elementRef.current) {
-      elementWidth.current = elementRef.current.clientWidth;
-      onRegisterDragItem(setPosition, setActiveState, event as unknown as MouseEvent, index);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const onTouchStart = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
-    if (typeof onRegisterDragItem === 'function' && elementRef.current) {
-      elementWidth.current = elementRef.current.clientWidth;
-      onRegisterDragItem(setPosition, setActiveState, event.touches[0] as Touch, index);
+      const elementClientRect = elementRef.current.getBoundingClientRect();
+      elementWidth.current = elementClientRect.width;
+      console.log(elementClientRect);
+      onRegisterDragItem(
+        setPosition,
+        setActiveState,
+        event as unknown as MouseEvent,
+        index,
+        elementClientRect
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -65,9 +68,25 @@ export default function DragAndDropSortingSource({
       }
       className={currentClassName}
       onMouseDown={onMouseDown}
-      onTouchStart={onTouchStart}
     >
       {children}
     </div>
   );
 }
+
+/*
+  const onTouchStart = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
+    if (typeof onRegisterDragItem === 'function' && elementRef.current) {
+      const elementClientRect = elementRef.current.getBoundingClientRect();
+      elementWidth.current = elementClientRect.width;
+      onRegisterDragItem(
+        setPosition,
+        setActiveState,
+        event.touches[0] as Touch,
+        index,
+        elementClientRect
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+*/

@@ -1,6 +1,5 @@
 export function offsetXYFromParent<T extends HTMLElement>(pointerY: number, parentElement: T) {
-  const isBody = parentElement === parentElement.ownerDocument.body;
-  const offsetParentRect = isBody ? { top: 0 } : parentElement.getBoundingClientRect();
+  const offsetParentRect = parentElement.getBoundingClientRect();
 
   return pointerY + parentElement.scrollTop - offsetParentRect.top;
 }

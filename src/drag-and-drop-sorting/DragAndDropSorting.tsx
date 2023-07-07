@@ -14,7 +14,8 @@ type PropsTypes<TSortItem> = {
           setPosition: (posY: number) => void,
           setActiveState: (isActive: boolean) => void,
           event: MouseEvent | Touch,
-          index: number
+          index: number,
+          elementClientRect: DOMRect
         ) => void)
       | undefined
   ) => React.ReactNode;
@@ -33,20 +34,6 @@ export default function DragAndDropSorting<TSortItem>({
     console.log('DragAndDropSorting created');
     dndSortManager.current = new DnDropSortingManager(dndSortingArea);
 
-    const handleTouchEnd = (e: TouchEvent) => {
-      e.preventDefault();
-      if (dndSortManager.current) {
-        dndSortManager.current.onEndMove(e.touches[0]);
-      }
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      e.preventDefault();
-      if (dndSortManager.current) {
-        dndSortManager.current.onMove(e.touches[0]);
-      }
-    };
-
     const handleMouseUp = (e: MouseEvent) => {
       e.preventDefault();
       if (dndSortManager.current) {
@@ -61,15 +48,15 @@ export default function DragAndDropSorting<TSortItem>({
       }
     };
 
-    window.addEventListener('touchmove', handleTouchMove);
+    // window.addEventListener('touchmove', handleTouchMove);
+    // window.addEventListener('touchend', handleTouchEnd);
     window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('touchend', handleTouchEnd);
     window.addEventListener('mouseup', handleMouseUp);
 
     return () => {
-      window.addEventListener('touchmove', handleTouchMove);
+      // window.addEventListener('touchmove', handleTouchMove);
+      // window.addEventListener('touchend', handleTouchEnd);
       window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('touchend', handleTouchEnd);
       window.addEventListener('mouseup', handleMouseUp);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -80,10 +67,17 @@ export default function DragAndDropSorting<TSortItem>({
       setPosition: (posY: number) => void,
       setActiveState: (isActive: boolean) => void,
       event: MouseEvent | Touch,
-      index: number
+      index: number,
+      elementClientRect: DOMRect
     ) => {
       if (dndSortManager.current) {
-        dndSortManager.current.onRegisterDragItem(setPosition, setActiveState, event, index);
+        dndSortManager.current.onRegisterDragItem(
+          setPosition,
+          setActiveState,
+          event,
+          index,
+          elementClientRect
+        );
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     },
