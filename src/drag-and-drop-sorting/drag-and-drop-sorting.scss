@@ -37,9 +37,28 @@
 
 .dnd-source {
   padding: 3rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   border-radius: inherit;
   background-color: #033639;
   border: 2px solid #8e8e8e;
+
+  .drag-handler {
+    color: #000;
+    display: inline-block;
+    width: 20px;
+    cursor: grab;
+
+    svg {
+      stroke: currentColor;
+      fill: currentColor;
+    }
+
+    &:hover {
+      color: #4464ee;
+    }
+  }
 
   &.active {
     position: fixed;

@@ -14,9 +14,9 @@ export default class DnDropSortingEventManager {
 
   acceleration = {
     min: 2, // px
-    max: 10, // px
-    interval: 5, //ms
-    thresholdActivator: 0.35 // unit range from 0 to 1
+    max: 8, // px
+    interval: 10, // ms
+    thresholdActivator: 0.5 // unit range from 0 to 1
   };
 
   constructor(container: MutableRefObject<HTMLDivElement | null>) {
@@ -72,6 +72,8 @@ export default class DnDropSortingEventManager {
         );
 
         this.scrollView(acceleration, delta, this.container.current);
+      } else {
+        this.clearScrollView();
       }
     }
   }
