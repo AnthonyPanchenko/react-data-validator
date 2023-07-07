@@ -16,7 +16,7 @@ export default class DnDropSortingEventManager {
     min: 2, // px
     max: 8, // px
     interval: 10, // ms
-    thresholdActivator: 0.5 // unit range from 0 to 1
+    thresholdActivator: 0.4 // unit range from 0 to 1
   };
 
   constructor(container: MutableRefObject<HTMLDivElement | null>) {
@@ -52,7 +52,7 @@ export default class DnDropSortingEventManager {
     }
 
     if (this.container.current && this.elementRect && this.containerRect) {
-      const gap = 10; // ?border
+      const gap = 10; // border???
 
       const delta = e.pageY - this.startPosY;
       const y = delta + this.elementOffsetTop - gap;
@@ -79,14 +79,14 @@ export default class DnDropSortingEventManager {
   }
 
   onEndMove() {
-    if (this.isMoveActive && this.setActiveState) {
-      this.clearScrollView();
-      this.isMoveActive = false;
-      this.elementRect = null;
-      this.containerRect = null;
+    this.clearScrollView();
+    this.isMoveActive = false;
+    this.elementRect = null;
+    this.containerRect = null;
+    this.setPosition = undefined;
+    if (this.setActiveState) {
       this.setActiveState(false);
       this.setActiveState = undefined;
-      this.setPosition = undefined;
     }
   }
 
