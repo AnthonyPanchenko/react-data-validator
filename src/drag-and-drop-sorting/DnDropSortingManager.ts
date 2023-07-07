@@ -1,7 +1,13 @@
 import { MutableRefObject } from 'react';
 
+type AccelerationType = {
+  min: number;
+  max: number;
+  timer: NodeJS.Timer | null;
+  thresholdActivator: number;
+};
+
 export default class DnDropSortingEventManager {
-  interval: NodeJS.Timer | null = null;
   container: MutableRefObject<HTMLDivElement | null>;
   setPosition: ((posY: number) => void) | undefined;
   setActiveState: ((isActive: boolean) => void) | undefined;
@@ -11,11 +17,12 @@ export default class DnDropSortingEventManager {
   elementOffsetTop = 0;
   elementRect: DOMRect | null = null;
   containerRect: DOMRect | null = null;
+  mouseMoveTimer: NodeJS.Timer | null = null;
 
-  acceleration = {
+  acceleration: AccelerationType = {
     min: 2, // px
     max: 8, // px
-    interval: 10, // ms
+    timer: null, // NodeJS.Timer
     thresholdActivator: 0.4 // unit range from 0 to 1
   };
 
@@ -64,6 +71,7 @@ export default class DnDropSortingEventManager {
       );
 
       this.setPosition(y);
+      this.onStopMove();
 
       if (normalizedAcceleration > this.acceleration.thresholdActivator) {
         const acceleration = Math.min(
@@ -83,6 +91,7 @@ export default class DnDropSortingEventManager {
     this.isMoveActive = false;
     this.elementRect = null;
     this.containerRect = null;
+    this.mouseMoveTimer = null;
     this.setPosition = undefined;
     if (this.setActiveState) {
       this.setActiveState(false);
@@ -90,13 +99,22 @@ export default class DnDropSortingEventManager {
     }
   }
 
+  onStopMove() {
+    if (this.mouseMoveTimer) {
+      clearTimeout(this.mouseMoveTimer);
+    }
+    this.mouseMoveTimer = setTimeout(() => {
+      console.log('S T O P');
+    }, 150);
+  }
+
   clearScrollView() {
-    if (this.interval == null) {
+    if (this.acceleration.timer == null) {
       return;
     }
 
-    clearInterval(this.interval);
-    this.interval = null;
+    clearInterval(this.acceleration.timer);
+    this.acceleration.timer = null;
   }
 
   scrollView(acceleration: number, delta: number, container: HTMLDivElement) {
@@ -108,13 +126,14 @@ export default class DnDropSortingEventManager {
       direction = delta > 0 ? 1 : -1;
     }
 
-    if (this.interval) {
+    if (this.acceleration.timer) {
       this.clearScrollView();
     }
 
     if (direction !== 0) {
-      this.interval = setInterval(() => {
+      this.acceleration.timer = setInterval(() => {
         container.scrollTop += acceleration * direction;
+        this.onStopMove();
       }, 5);
     }
   }

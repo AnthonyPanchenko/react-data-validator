@@ -32,6 +32,7 @@ type ItemType = { label: string; value: string };
 
 export default function DragAndDropSortingPage() {
   const [sortingItems, setSortingItemsState] = useState<ReadonlyArray<ItemType>>(SORTING_ITEMS);
+  const [checkedItems, setChecked] = useState<Record<string, boolean>>({});
 
   return (
     <Fragment>
@@ -57,7 +58,17 @@ export default function DragAndDropSortingPage() {
             index={i}
             onRegisterDragItem={onRegisterDragItem}
           >
-            <input type="checkbox" name={item.label} id={item.value} />
+            <input
+              type="checkbox"
+              name={item.label}
+              id={item.value}
+              checked={!!checkedItems[item.value]}
+              onChange={() =>
+                setChecked(prev => {
+                  return { ...prev, [item.value]: !prev[item.value] };
+                })
+              }
+            />
             <label>{item.label}</label>
           </DragAndDropSortingSource>
         )}

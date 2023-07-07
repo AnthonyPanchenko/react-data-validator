@@ -1,6 +1,6 @@
 import './drag-and-drop-sorting.scss';
 
-import { forwardRef, Fragment, Ref, useCallback, useRef, useState } from 'react';
+import React, { forwardRef, Fragment, Ref, useCallback, useRef, useState } from 'react';
 
 type PropsTypes = {
   index: number;
@@ -32,7 +32,6 @@ export default function DragAndDropSortingSource({
     if (typeof onRegisterDragItem === 'function' && elementRef.current) {
       const elementClientRect = elementRef.current.getBoundingClientRect();
       elementWidth.current = elementClientRect.width;
-      // console.log(elementClientRect);
       onRegisterDragItem(
         setPosition,
         setActiveState,
