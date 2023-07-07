@@ -48,14 +48,10 @@ export default function DragAndDropSorting<TSortItem>({
       }
     };
 
-    // window.addEventListener('touchmove', handleTouchMove);
-    // window.addEventListener('touchend', handleTouchEnd);
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
 
     return () => {
-      // window.addEventListener('touchmove', handleTouchMove);
-      // window.addEventListener('touchend', handleTouchEnd);
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
     };

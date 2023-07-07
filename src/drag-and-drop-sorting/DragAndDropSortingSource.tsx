@@ -28,8 +28,6 @@ export default function DragAndDropSortingSource({
   const elementRef = useRef<HTMLDivElement | null>(null);
   const elementWidth = useRef<number>(100);
 
-  // return pointerY + parentElement.scrollTop - offsetParentRect.top;
-
   const onMouseDown = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
     if (typeof onRegisterDragItem === 'function' && elementRef.current) {
       const elementClientRect = elementRef.current.getBoundingClientRect();
@@ -76,20 +74,3 @@ export default function DragAndDropSortingSource({
     </div>
   );
 }
-
-/*
-  const onTouchStart = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
-    if (typeof onRegisterDragItem === 'function' && elementRef.current) {
-      const elementClientRect = elementRef.current.getBoundingClientRect();
-      elementWidth.current = elementClientRect.width;
-      onRegisterDragItem(
-        setPosition,
-        setActiveState,
-        event.touches[0] as Touch,
-        index,
-        elementClientRect
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-*/
