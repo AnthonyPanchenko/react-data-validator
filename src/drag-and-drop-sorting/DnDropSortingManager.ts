@@ -62,6 +62,7 @@ export default class DnDropSortingEventManager {
       const delta = e.clientY - this.startPosY;
       // based on position: fixed;
       const y = delta + this.elementRect.top;
+      const direction = !delta ? 0 : delta > 0 ? 1 : -1;
 
       const normalizedAcceleration = Math.abs(
         delta < 0
@@ -70,15 +71,6 @@ export default class DnDropSortingEventManager {
       );
 
       this.setPosition(y);
-
-      let direction = 0;
-
-      if (delta === 0) {
-        direction = 0;
-      } else {
-        direction = delta > 0 ? 1 : -1;
-      }
-
       this.clearMouseMoveTimer();
 
       this.onStopMove(
@@ -157,25 +149,22 @@ export default class DnDropSortingEventManager {
   }
 
   scrollView(acceleration: number, direction: number, delta: number, container: HTMLDivElement) {
-    if (direction !== 0) {
-      this.clearScrollView();
-      this.acceleration.timer = setInterval(() => {
-        const top = container.scrollTop + acceleration * direction;
-        container.scrollTo({ top });
+    this.clearScrollView();
+    const maxScroll = container.scrollHeight - container.clientHeight;
 
-        // if (top >= container.scrollTop && top <= container.scrollHeight - container.clientHeight) {
-        //   console.log('container');
-        //   this.clearMouseMoveTimer();
-        //   this.onStopMove(delta + this.elementRelativeOffsetTop + top, direction);
-        // }
+    this.acceleration.timer = setInterval(() => {
+      const scrollTopValue = Math.min(
+        Math.max(container.scrollTop + acceleration * direction, 0),
+        maxScroll
+      );
 
-        if (top <= container.scrollTop || top >= container.scrollHeight - container.clientHeight) {
-          // this.clearScrollView();
-          // this.clearMouseMoveTimer();
-          // this.onStopMove(delta + this.elementRelativeOffsetTop + top, direction);
-        }
-        // console.log('container');
-      }, 5);
-    }
+      container.scrollTo({ top: scrollTopValue });
+
+      if (scrollTopValue === maxScroll || scrollTopValue === 0) {
+        this.clearMouseMoveTimer();
+        this.onStopMove(delta + this.elementRelativeOffsetTop + scrollTopValue, direction);
+        this.clearScrollView();
+      }
+    }, 5);
   }
 }
