@@ -66,6 +66,7 @@ export default function DragAndDropSortingSource({
       )}
       <DragAndDropBaseSource
         ref={elementRef}
+        index={index}
         className={isActive ? currentClassName + ' inactive' : currentClassName}
         onMouseDown={onMouseDown}
       >
@@ -77,16 +78,17 @@ export default function DragAndDropSortingSource({
 
 type DnDBaseSourcePropsTypes = {
   className?: string;
+  index?: number;
   children?: React.ReactNode | React.ReactNode[] | null;
   styles?: React.CSSProperties;
   onMouseDown?: (event: React.MouseEvent<HTMLDivElement>) => void;
 };
 
 const DragAndDropBaseSourceContainer = (
-  { children, className, styles, onMouseDown }: DnDBaseSourcePropsTypes,
+  { children, className, styles, index, onMouseDown }: DnDBaseSourcePropsTypes,
   ref?: Ref<HTMLDivElement>
 ) => (
-  <div ref={ref} style={styles} className={className}>
+  <div ref={ref} style={styles} className={className} data-source-index={index}>
     <span role="button" className="drag-handler" tabIndex={0} onMouseDown={onMouseDown}>
       <svg viewBox="0 0 11 17" xmlns="http://www.w3.org/2000/svg">
         <path d="M8.5 12.484c.532 0 1 .203 1.406.609.406.406.609.875.609 1.406 0 .532-.203 1-.609 1.406-.406.406-.874.609-1.406.609-.531 0-1-.203-1.406-.609-.406-.406-.609-.874-.609-1.406 0-.531.203-1 .609-1.406.406-.406.875-.609 1.406-.609Zm0-6c.532 0 1 .203 1.406.609.406.406.609.875.609 1.406 0 .532-.203 1-.609 1.406-.406.406-.874.609-1.406.609-.531 0-1-.203-1.406-.609-.406-.406-.609-.874-.609-1.406 0-.531.203-1 .609-1.406.406-.406.875-.609 1.406-.609Zm0-1.968c-.531 0-1-.203-1.406-.609-.406-.406-.609-.874-.609-1.406 0-.531.203-1 .609-1.406C7.5.689 7.969.486 8.5.486c.532 0 1 .203 1.406.609.406.406.609.875.609 1.406 0 .532-.203 1-.609 1.406-.406.406-.874.609-1.406.609ZM2.5.484c.532 0 1 .203 1.406.609.406.406.609.875.609 1.406 0 .532-.203 1-.609 1.406-.406.406-.874.609-1.406.609-.531 0-1-.203-1.406-.609-.406-.406-.609-.874-.609-1.406 0-.531.203-1 .609-1.406C1.5.687 1.969.484 2.5.484Zm0 6c.532 0 1 .203 1.406.609.406.406.609.875.609 1.406 0 .532-.203 1-.609 1.406-.406.406-.874.609-1.406.609-.531 0-1-.203-1.406-.609-.406-.406-.609-.874-.609-1.406 0-.531.203-1 .609-1.406.406-.406.875-.609 1.406-.609ZM4.516 14.5c0 .532-.203 1-.609 1.406-.406.406-.874.609-1.406.609-.531 0-1-.203-1.406-.609C.689 15.5.486 15.032.486 14.5c0-.531.203-1 .609-1.406.406-.406.875-.609 1.406-.609.532 0 1 .203 1.406.609.406.406.609.875.609 1.406Z" />

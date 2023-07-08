@@ -6,26 +6,26 @@ import DragAndDropSorting from '@/drag-and-drop-sorting/DragAndDropSorting';
 import DragAndDropSortingSource from '@/drag-and-drop-sorting/DragAndDropSortingSource';
 
 const SORTING_ITEMS = [
-  { label: '11111', value: '11111' },
-  { label: '22222', value: '22222' },
-  { label: '33333', value: '33333' },
-  { label: '44444', value: '44444' },
-  { label: '55555', value: '55555' },
-  { label: '66666', value: '66666' },
-  { label: '77777', value: '77777' },
-  { label: '88888', value: '88888' },
-  { label: '99999', value: '99999' },
-  { label: '10101', value: '10101' },
-  { label: '121212', value: '121212' },
-  { label: '131313', value: '131313' },
-  { label: '141414', value: '141414' },
-  { label: '151515', value: '151515' },
-  { label: '161616', value: '161616' },
-  { label: '171717', value: '171717' },
-  { label: '181818', value: '181818' },
-  { label: '191919', value: '191919' },
-  { label: '202020', value: '202020' },
-  { label: '212121', value: '212121' }
+  { label: '0', value: '0' },
+  { label: '1', value: '1' },
+  { label: '2', value: '2' },
+  { label: '3', value: '3' },
+  { label: '4', value: '4' },
+  { label: '5', value: '5' },
+  { label: '6', value: '6' },
+  { label: '7', value: '7' },
+  { label: '8', value: '8' },
+  { label: '9', value: '9' },
+  { label: '10', value: '10' },
+  { label: '11', value: '11' },
+  { label: '12', value: '12' },
+  { label: '13', value: '13' },
+  { label: '14', value: '14' },
+  { label: '15', value: '15' },
+  { label: '16', value: '16' },
+  { label: '17', value: '17' },
+  { label: '18', value: '18' },
+  { label: '19', value: '19' }
 ];
 
 type ItemType = { label: string; value: string };

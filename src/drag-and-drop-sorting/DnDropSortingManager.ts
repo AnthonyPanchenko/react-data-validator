@@ -70,7 +70,21 @@ export default class DnDropSortingEventManager {
       );
 
       this.setPosition(y);
-      this.onStopMove();
+
+      let direction = 0;
+
+      if (delta === 0) {
+        direction = 0;
+      } else {
+        direction = delta > 0 ? 1 : -1;
+      }
+
+      this.clearMouseMoveTimer();
+
+      this.onStopMove(
+        delta + this.elementRelativeOffsetTop + this.container.current.scrollTop,
+        direction
+      );
 
       if (normalizedAcceleration > this.acceleration.thresholdActivator) {
         const acceleration = Math.min(
@@ -78,7 +92,7 @@ export default class DnDropSortingEventManager {
           this.acceleration.max
         );
 
-        this.scrollView(acceleration, delta, this.container.current);
+        this.scrollView(acceleration, direction, delta, this.container.current);
       } else {
         this.clearScrollView();
       }
@@ -87,10 +101,10 @@ export default class DnDropSortingEventManager {
 
   onEndMove() {
     this.clearScrollView();
+    this.clearMouseMoveTimer();
     this.isMoveActive = false;
     this.elementRect = null;
     this.containerRect = null;
-    this.mouseMoveTimer = null;
     this.setPosition = undefined;
     if (this.setActiveState) {
       this.setActiveState(false);
@@ -98,41 +112,69 @@ export default class DnDropSortingEventManager {
     }
   }
 
-  onStopMove() {
-    if (this.mouseMoveTimer) {
+  clearMouseMoveTimer() {
+    if (this.mouseMoveTimer !== null) {
       clearTimeout(this.mouseMoveTimer);
+      this.mouseMoveTimer = null;
     }
+  }
+
+  onStopMove(currentElementY: number, direction: number) {
     this.mouseMoveTimer = setTimeout(() => {
-      console.log('S T O P');
+      if (this.container.current) {
+        const arr: Array<{ offsetTop: number; index: number }> = [];
+
+        this.container.current.childNodes.forEach(node => {
+          if ((node as HTMLElement).dataset.sourceIndex !== undefined) {
+            arr.push({
+              offsetTop: (node as HTMLElement).offsetTop,
+              index: Number((node as HTMLElement).dataset.sourceIndex)
+            });
+          }
+        });
+
+        const closest = arr.reduce((prev, curr) =>
+          Math.abs(curr.offsetTop - currentElementY) < Math.abs(prev.offsetTop - currentElementY)
+            ? curr
+            : prev
+        );
+
+        console.log('direction: ', direction);
+        console.log('swap: ', this.startIndex, 'to: ', closest);
+      }
     }, 200);
   }
 
-  clearScrollView() {
-    if (this.acceleration.timer == null) {
-      return;
-    }
+  // onRearrangeElements() {
 
-    clearInterval(this.acceleration.timer);
-    this.acceleration.timer = null;
+  // }
+
+  clearScrollView() {
+    if (this.acceleration.timer !== null) {
+      clearInterval(this.acceleration.timer);
+      this.acceleration.timer = null;
+    }
   }
 
-  scrollView(acceleration: number, delta: number, container: HTMLDivElement) {
-    let direction = 0;
-
-    if (delta === 0) {
-      direction = 0;
-    } else {
-      direction = delta > 0 ? 1 : -1;
-    }
-
-    if (this.acceleration.timer) {
-      this.clearScrollView();
-    }
-
+  scrollView(acceleration: number, direction: number, delta: number, container: HTMLDivElement) {
     if (direction !== 0) {
+      this.clearScrollView();
       this.acceleration.timer = setInterval(() => {
-        container.scrollTop += acceleration * direction;
-        this.onStopMove();
+        const top = container.scrollTop + acceleration * direction;
+        container.scrollTo({ top });
+
+        // if (top >= container.scrollTop && top <= container.scrollHeight - container.clientHeight) {
+        //   console.log('container');
+        //   this.clearMouseMoveTimer();
+        //   this.onStopMove(delta + this.elementRelativeOffsetTop + top, direction);
+        // }
+
+        if (top <= container.scrollTop || top >= container.scrollHeight - container.clientHeight) {
+          // this.clearScrollView();
+          // this.clearMouseMoveTimer();
+          // this.onStopMove(delta + this.elementRelativeOffsetTop + top, direction);
+        }
+        // console.log('container');
       }, 5);
     }
   }
