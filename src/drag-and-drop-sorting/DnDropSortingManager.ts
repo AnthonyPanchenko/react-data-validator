@@ -14,7 +14,7 @@ export default class DnDropSortingEventManager {
   startIndex = 0;
   startPosY = 0;
   isMoveActive = false;
-  elementOffsetTop = 0;
+  elementRelativeOffsetTop = 0;
   elementRect: DOMRect | null = null;
   containerRect: DOMRect | null = null;
   mouseMoveTimer: NodeJS.Timer | null = null;
@@ -41,10 +41,10 @@ export default class DnDropSortingEventManager {
       this.startIndex = index;
       this.setPosition = setPosition;
       this.setActiveState = setActiveState;
-      this.startPosY = event.pageY;
+      this.startPosY = event.clientY;
       this.elementRect = elementRect;
       this.containerRect = this.container.current.getBoundingClientRect();
-      this.elementOffsetTop = this.elementRect.top - this.containerRect.top;
+      this.elementRelativeOffsetTop = this.elementRect.top - this.containerRect.top;
     }
   }
 
@@ -59,15 +59,14 @@ export default class DnDropSortingEventManager {
     }
 
     if (this.container.current && this.elementRect && this.containerRect) {
-      const gap = 10; // border???
-
-      const delta = e.pageY - this.startPosY;
-      const y = delta + this.elementOffsetTop - gap;
+      const delta = e.clientY - this.startPosY;
+      // based on position: fixed;
+      const y = delta + this.elementRect.top;
 
       const normalizedAcceleration = Math.abs(
         delta < 0
-          ? delta / this.elementOffsetTop
-          : delta / (this.containerRect.height - this.elementOffsetTop - gap)
+          ? delta / this.elementRelativeOffsetTop
+          : delta / (this.containerRect.height - this.elementRelativeOffsetTop)
       );
 
       this.setPosition(y);
@@ -105,7 +104,7 @@ export default class DnDropSortingEventManager {
     }
     this.mouseMoveTimer = setTimeout(() => {
       console.log('S T O P');
-    }, 150);
+    }, 200);
   }
 
   clearScrollView() {
