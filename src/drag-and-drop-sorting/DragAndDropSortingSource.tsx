@@ -1,44 +1,42 @@
 import './drag-and-drop-sorting.scss';
 
-import React, { forwardRef, Fragment, Ref, useCallback, useRef, useState } from 'react';
+import React, { forwardRef, Fragment, Ref, useCallback, useEffect, useRef, useState } from 'react';
+
+import { onRegisterEventInfo, onRegisterStateSetters } from '@/drag-and-drop-sorting/types';
 
 type PropsTypes = {
   index: number;
   className?: string;
   children?: React.ReactNode | React.ReactNode[] | null;
-  onRegisterDragItem:
-    | ((
-        setPosition: (posY: number) => void,
-        setActiveState: (isActive: boolean) => void,
-        event: MouseEvent | Touch,
-        index: number,
-        elementClientRect: DOMRect
-      ) => void)
-    | undefined;
+  onRegisterEventInfo: onRegisterEventInfo;
+  onRegisterStateSetters: onRegisterStateSetters;
 };
 
 export default function DragAndDropSortingSource({
   children,
   className,
   index,
-  onRegisterDragItem
+  onRegisterStateSetters,
+  onRegisterEventInfo
 }: PropsTypes) {
   const [isActive, setActiveState] = useState<boolean>(false);
   const [position, setPosition] = useState<number>(0);
+  const [translatePosition, setTranslatePosition] = useState<number>(0);
   const elementRef = useRef<HTMLDivElement | null>(null);
   const elementWidth = useRef<number>(100);
 
+  useEffect(() => {
+    if (onRegisterStateSetters) {
+      onRegisterStateSetters(setPosition, setActiveState, setTranslatePosition, index);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index, onRegisterStateSetters]);
+
   const onMouseDown = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    if (typeof onRegisterDragItem === 'function' && elementRef.current) {
-      const elementClientRect = elementRef.current.getBoundingClientRect();
-      elementWidth.current = elementClientRect.width;
-      onRegisterDragItem(
-        setPosition,
-        setActiveState,
-        event as unknown as MouseEvent,
-        index,
-        elementClientRect
-      );
+    if (!!onRegisterEventInfo && elementRef.current) {
+      const elementDomRect = elementRef.current.getBoundingClientRect();
+      elementWidth.current = elementDomRect.width;
+      onRegisterEventInfo(index, event as unknown as MouseEvent, elementDomRect);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -55,7 +53,7 @@ export default function DragAndDropSortingSource({
         <DragAndDropBaseSource
           styles={
             {
-              '--cord-y': position + 'px',
+              '--cord-top-y': position + 'px',
               '--width': elementWidth.current + 'px'
             } as React.CSSProperties
           }
@@ -67,6 +65,11 @@ export default function DragAndDropSortingSource({
       <DragAndDropBaseSource
         ref={elementRef}
         index={index}
+        styles={
+          {
+            '--cord-translate-y': translatePosition + 'px'
+          } as React.CSSProperties
+        }
         className={isActive ? currentClassName + ' inactive' : currentClassName}
         onMouseDown={onMouseDown}
       >

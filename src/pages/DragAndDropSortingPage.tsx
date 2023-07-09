@@ -52,11 +52,12 @@ export default function DragAndDropSortingPage() {
           console.log(newItems);
         }}
       >
-        {(item, i, onRegisterDragItem) => (
+        {(item, i, registerEventInfo, registerStateSetters) => (
           <DragAndDropSortingSource
             key={item.value + i}
             index={i}
-            onRegisterDragItem={onRegisterDragItem}
+            onRegisterEventInfo={registerEventInfo}
+            onRegisterStateSetters={registerStateSetters}
           >
             <input
               type="checkbox"

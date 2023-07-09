@@ -1,6 +1,8 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 
 import DnDropSortingManager from '@/drag-and-drop-sorting/DnDropSortingManager';
+import { onRegisterEventInfo, onRegisterStateSetters } from '@/drag-and-drop-sorting/types';
+import { arrayMove } from '@/drag-and-drop-sorting/utils';
 
 type PropsTypes<TSortItem> = {
   items: ReadonlyArray<TSortItem>;
@@ -9,15 +11,8 @@ type PropsTypes<TSortItem> = {
   children: (
     item: TSortItem,
     index: number,
-    onRegisterDragItem:
-      | ((
-          setPosition: (posY: number) => void,
-          setActiveState: (isActive: boolean) => void,
-          event: MouseEvent | Touch,
-          index: number,
-          elementClientRect: DOMRect
-        ) => void)
-      | undefined
+    onRegisterEventInfo: onRegisterEventInfo,
+    onRegisterStateSetters: onRegisterStateSetters
   ) => React.ReactNode;
 };
 
@@ -30,9 +25,11 @@ export default function DragAndDropSorting<TSortItem>({
   const dndSortManager = useRef<DnDropSortingManager | null>(null);
   const [sortItems, setSortItems] = useState<ReadonlyArray<TSortItem>>(items);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     console.log('DragAndDropSorting created');
-    dndSortManager.current = new DnDropSortingManager(dndSortingArea);
+    dndSortManager.current = new DnDropSortingManager(dndSortingArea, (from: number, to: number) =>
+      setSortItems(prevItems => arrayMove(prevItems, from, to))
+    );
 
     const handleMouseUp = (e: MouseEvent) => {
       e.preventDefault();
@@ -58,21 +55,29 @@ export default function DragAndDropSorting<TSortItem>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const registerDragItem = useCallback(
+  const registerEventInfo = useCallback(
+    (index: number, event: MouseEvent, elementDomRect: DOMRect) => {
+      if (dndSortManager.current) {
+        dndSortManager.current.onRegisterEventInfo(index, event, elementDomRect);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    []
+  );
+
+  const registerStateSetters = useCallback(
     (
-      setPosition: (posY: number) => void,
+      setPosition: (topY: number) => void,
       setActiveState: (isActive: boolean) => void,
-      event: MouseEvent | Touch,
-      index: number,
-      elementClientRect: DOMRect
+      setTranslatePosition: (translateY: number) => void,
+      index: number
     ) => {
       if (dndSortManager.current) {
-        dndSortManager.current.onRegisterDragItem(
+        dndSortManager.current.onRegisterStateSetters(
           setPosition,
           setActiveState,
-          event,
-          index,
-          elementClientRect
+          setTranslatePosition,
+          index
         );
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -82,7 +87,7 @@ export default function DragAndDropSorting<TSortItem>({
 
   return (
     <div ref={dndSortingArea} className={className ? 'dnd-area ' + className : 'dnd-area'}>
-      {sortItems.map((item, i) => children(item, i, registerDragItem))}
+      {sortItems.map((item, i) => children(item, i, registerEventInfo, registerStateSetters))}
     </div>
   );
 }

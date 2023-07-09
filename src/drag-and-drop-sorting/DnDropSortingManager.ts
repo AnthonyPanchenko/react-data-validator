@@ -9,8 +9,8 @@ type AccelerationType = {
 
 export default class DnDropSortingEventManager {
   container: MutableRefObject<HTMLDivElement | null>;
-  setPosition: ((posY: number) => void) | undefined;
-  setActiveState: ((isActive: boolean) => void) | undefined;
+  // onSwapArrayItems: ((from: number, to: number) => void) | undefined;
+  onRearrangeItems: ((from: number, to: number) => void) | undefined;
   startIndex = 0;
   startPosY = 0;
   isMoveActive = false;
@@ -26,21 +26,40 @@ export default class DnDropSortingEventManager {
     thresholdActivator: 0.4 // unit range from 0 to 1
   };
 
-  constructor(container: MutableRefObject<HTMLDivElement | null>) {
+  stateSetters: Record<
+    number,
+    {
+      setPosition: (topY: number) => void;
+      setActiveState: (isActive: boolean) => void;
+      setTranslatePosition: (translateY: number) => void;
+    }
+  > = {};
+
+  constructor(
+    container: MutableRefObject<HTMLDivElement | null>,
+    onRearrangeItems: (from: number, to: number) => void
+  ) {
     this.container = container;
+    this.onRearrangeItems = onRearrangeItems;
   }
 
-  onRegisterDragItem(
-    setPosition: (posY: number) => void,
+  onRegisterStateSetters(
+    setPosition: (topY: number) => void,
     setActiveState: (isActive: boolean) => void,
-    event: MouseEvent | Touch,
-    index: number,
-    elementRect: DOMRect
+    setTranslatePosition: (translateY: number) => void,
+    index: number
   ) {
+    console.log('onRegisterStateSetters: ', index);
+    this.stateSetters[index] = {
+      setPosition,
+      setActiveState,
+      setTranslatePosition
+    };
+  }
+
+  onRegisterEventInfo(index: number, event: MouseEvent | Touch, elementRect: DOMRect) {
     if (this.container.current) {
       this.startIndex = index;
-      this.setPosition = setPosition;
-      this.setActiveState = setActiveState;
       this.startPosY = event.clientY;
       this.elementRect = elementRect;
       this.containerRect = this.container.current.getBoundingClientRect();
@@ -49,13 +68,13 @@ export default class DnDropSortingEventManager {
   }
 
   onMove(e: MouseEvent | Touch) {
-    if (!this.setPosition) {
+    if (!this.elementRect || !this.containerRect) {
       return;
     }
 
-    if (!this.isMoveActive && this.setActiveState) {
+    if (!this.isMoveActive && !!this.stateSetters[this.startIndex].setActiveState) {
       this.isMoveActive = true;
-      this.setActiveState(true);
+      this.stateSetters[this.startIndex].setActiveState(true);
     }
 
     if (this.container.current && this.elementRect && this.containerRect) {
@@ -70,7 +89,7 @@ export default class DnDropSortingEventManager {
           : delta / (this.containerRect.height - this.elementRelativeOffsetTop)
       );
 
-      this.setPosition(y);
+      this.stateSetters[this.startIndex].setPosition(y);
       this.clearMouseMoveTimer();
 
       this.onStopMove(
@@ -94,13 +113,12 @@ export default class DnDropSortingEventManager {
   onEndMove() {
     this.clearScrollView();
     this.clearMouseMoveTimer();
-    this.isMoveActive = false;
     this.elementRect = null;
     this.containerRect = null;
-    this.setPosition = undefined;
-    if (this.setActiveState) {
-      this.setActiveState(false);
-      this.setActiveState = undefined;
+
+    if (this.isMoveActive && !!this.stateSetters[this.startIndex].setActiveState) {
+      this.isMoveActive = false;
+      this.stateSetters[this.startIndex].setActiveState(false);
     }
   }
 
@@ -118,6 +136,7 @@ export default class DnDropSortingEventManager {
 
         this.container.current.childNodes.forEach(node => {
           if ((node as HTMLElement).dataset.sourceIndex !== undefined) {
+            console.dir(node);
             arr.push({
               offsetTop: (node as HTMLElement).offsetTop,
               index: Number((node as HTMLElement).dataset.sourceIndex)
@@ -131,15 +150,22 @@ export default class DnDropSortingEventManager {
             : prev
         );
 
-        console.log('direction: ', direction);
-        console.log('swap: ', this.startIndex, 'to: ', closest);
+        if (this.startIndex !== closest.index) {
+          console.log(arr);
+          console.log('direction: ', direction);
+          console.log('swap: ', this.startIndex, 'to: ', closest);
+
+          // this.stateSetters[0].setTranslatePosition(109);
+          // this.stateSetters[1].setTranslatePosition(-109);
+
+          // for (let i = 0; i < array.length; i++) {
+          //   const element = array[i];
+
+          // }
+        }
       }
     }, 200);
   }
-
-  // onRearrangeElements() {
-
-  // }
 
   clearScrollView() {
     if (this.acceleration.timer !== null) {

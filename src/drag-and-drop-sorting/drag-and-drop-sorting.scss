@@ -44,6 +44,8 @@
   border-radius: inherit;
   background-color: #033639;
   border: 2px solid #8e8e8e;
+  transform: translateY(var(--cord-translate-y));
+  transition: transform 300ms linear;
 
   .drag-handler {
     color: #000;
@@ -66,7 +68,7 @@
     border-style: dashed;
     border-color: #4464ee;
     width: var(--width);
-    top: var(--cord-y);
+    top: var(--cord-top-y);
     z-index: 1;
   }
 

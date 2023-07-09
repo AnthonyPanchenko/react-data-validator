@@ -1,5 +1,5 @@
-export function arrayMove<T>(array: T[], from: number, to: number): T[] {
-  const newArray = array.slice();
+export function arrayMove<T>(arr: ReadonlyArray<T>, from: number, to: number): ReadonlyArray<T> {
+  const newArray = [...arr];
   newArray.splice(to < 0 ? newArray.length + to : to, 0, newArray.splice(from, 1)[0]);
 
   return newArray;
