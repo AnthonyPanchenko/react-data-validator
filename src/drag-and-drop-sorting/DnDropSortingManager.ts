@@ -1,11 +1,15 @@
 import { MutableRefObject } from 'react';
 
+import getClosestIndex from '@/drag-and-drop-sorting/utils';
+
 type AccelerationType = {
   min: number;
   max: number;
   timer: NodeJS.Timer | null;
   thresholdActivator: number;
 };
+
+// type SortedNode = { offsetTop: number; index: number };
 
 export default class DnDropSortingEventManager {
   container: MutableRefObject<HTMLDivElement | null>;
@@ -18,6 +22,7 @@ export default class DnDropSortingEventManager {
   elementRect: DOMRect | null = null;
   containerRect: DOMRect | null = null;
   mouseMoveTimer: NodeJS.Timer | null = null;
+  sortedNodes: Array<number> = [];
 
   acceleration: AccelerationType = {
     min: 2, // px
@@ -111,10 +116,12 @@ export default class DnDropSortingEventManager {
   }
 
   onEndMove() {
+    // this.onRearrangeItems(this.startIndex, closestIndex);
     this.clearScrollView();
     this.clearMouseMoveTimer();
     this.elementRect = null;
     this.containerRect = null;
+    this.sortedNodes = [];
 
     if (this.isMoveActive && !!this.stateSetters[this.startIndex].setActiveState) {
       this.isMoveActive = false;
@@ -132,31 +139,38 @@ export default class DnDropSortingEventManager {
   onStopMove(currentElementY: number, direction: number) {
     this.mouseMoveTimer = setTimeout(() => {
       if (this.container.current) {
-        const arr: Array<{ offsetTop: number; index: number }> = [];
+        if (!this.sortedNodes.length) {
+          this.container.current.childNodes.forEach(node => {
+            if ((node as HTMLElement).dataset.sourceIndex !== undefined) {
+              this.sortedNodes.push((node as HTMLElement).offsetTop);
+            }
+          });
+        }
 
-        this.container.current.childNodes.forEach(node => {
-          if ((node as HTMLElement).dataset.sourceIndex !== undefined) {
-            console.dir(node);
-            arr.push({
-              offsetTop: (node as HTMLElement).offsetTop,
-              index: Number((node as HTMLElement).dataset.sourceIndex)
-            });
-          }
-        });
+        const closestIndex = getClosestIndex(this.sortedNodes, currentElementY);
 
-        const closest = arr.reduce((prev, curr) =>
-          Math.abs(curr.offsetTop - currentElementY) < Math.abs(prev.offsetTop - currentElementY)
-            ? curr
-            : prev
-        );
-
-        if (this.startIndex !== closest.index) {
-          console.log(arr);
+        if (this.startIndex !== closestIndex && direction !== 0 && this.onRearrangeItems) {
+          console.clear();
+          console.log(this.sortedNodes);
+          console.log('closestIndex: ', closestIndex);
           console.log('direction: ', direction);
-          console.log('swap: ', this.startIndex, 'to: ', closest);
+          console.log('swap: ', this.startIndex, 'to: ', closestIndex);
 
-          // this.stateSetters[0].setTranslatePosition(109);
-          // this.stateSetters[1].setTranslatePosition(-109);
+          if (Math.abs(this.startIndex - closestIndex) === 1) {
+            this.stateSetters[this.startIndex].setTranslatePosition(
+              this.sortedNodes[closestIndex] - 10
+            );
+            this.stateSetters[closestIndex].setTranslatePosition(
+              10 - this.sortedNodes[closestIndex]
+            );
+
+            const b = this.sortedNodes[this.startIndex];
+            this.sortedNodes[this.startIndex] = this.sortedNodes[closestIndex];
+            this.sortedNodes[closestIndex] = b;
+            this.startIndex = closestIndex;
+          } else {
+            console.log('other');
+          }
 
           // for (let i = 0; i < array.length; i++) {
           //   const element = array[i];

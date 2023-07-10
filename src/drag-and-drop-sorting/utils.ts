@@ -5,24 +5,26 @@ export function arrayMove<T>(arr: ReadonlyArray<T>, from: number, to: number): R
   return newArray;
 }
 
-// export default function getClosestElement<T>(arr: Array<T>, y: number) {
-//   let curr = arr[0];
-//   let diff = Math.abs(y - curr.y);
+export default function getClosestIndex(arr: Array<number>, y: number) {
+  let index = 0;
+  let diff = Math.abs(y - arr[0]);
 
-//   for (let i = 0; i < arr.length; i++) {
-//     const nextDiff = Math.abs(y - arr[i].y);
+  for (let i = 0; i < arr.length; i++) {
+    const nextDiff = Math.abs(y - arr[i]);
 
-//     if (nextDiff < diff) {
-//       diff = nextDiff;
-//       curr = arr[i];
-//     }
-//   }
+    if (nextDiff < diff) {
+      diff = nextDiff;
+      index = i;
+    }
+  }
 
-//   return curr;
-// }
+  return index;
+}
 
-// const closest = [].reduce((prev, curr) =>
-//   Math.abs(curr.y - y) < Math.abs(prev.y - y) ? curr : prev
+// .reduce((prev, curr, currentIndex) =>
+// Math.abs(curr.offsetTop - currentElementY) < Math.abs(prev.offsetTop - currentElementY)
+//   ? curr
+//   : prev
 // );
 
 // export function recursivelyGetOffset(node: HTMLElement | null) {

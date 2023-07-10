@@ -8,6 +8,7 @@ type PropsTypes = {
   index: number;
   className?: string;
   children?: React.ReactNode | React.ReactNode[] | null;
+  onRegisterRef: (instance: HTMLDivElement | null) => void;
   onRegisterEventInfo: onRegisterEventInfo;
   onRegisterStateSetters: onRegisterStateSetters;
 };
@@ -16,6 +17,7 @@ export default function DragAndDropSortingSource({
   children,
   className,
   index,
+  onRegisterRef,
   onRegisterStateSetters,
   onRegisterEventInfo
 }: PropsTypes) {
@@ -24,6 +26,13 @@ export default function DragAndDropSortingSource({
   const [translatePosition, setTranslatePosition] = useState<number>(0);
   const elementRef = useRef<HTMLDivElement | null>(null);
   const elementWidth = useRef<number>(100);
+
+  // useEffect(() => {
+  //   if (onRegisterStateSetters) {
+  //     onRegisterStateSetters(setPosition, setActiveState, setTranslatePosition, index);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [index, onRegisterStateSetters]);
 
   useEffect(() => {
     if (onRegisterStateSetters) {
@@ -63,7 +72,10 @@ export default function DragAndDropSortingSource({
         </DragAndDropBaseSource>
       )}
       <DragAndDropBaseSource
-        ref={elementRef}
+        ref={c => {
+          elementRef.current = c;
+          onRegisterRef(c);
+        }}
         index={index}
         styles={
           {

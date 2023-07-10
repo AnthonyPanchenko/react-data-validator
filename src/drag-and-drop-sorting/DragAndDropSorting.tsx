@@ -12,7 +12,8 @@ type PropsTypes<TSortItem> = {
     item: TSortItem,
     index: number,
     onRegisterEventInfo: onRegisterEventInfo,
-    onRegisterStateSetters: onRegisterStateSetters
+    onRegisterStateSetters: onRegisterStateSetters,
+    onRegisterRef: (instance: HTMLDivElement | null) => void
   ) => React.ReactNode;
 };
 
@@ -24,6 +25,7 @@ export default function DragAndDropSorting<TSortItem>({
   const dndSortingArea = useRef<HTMLDivElement | null>(null);
   const dndSortManager = useRef<DnDropSortingManager | null>(null);
   const [sortItems, setSortItems] = useState<ReadonlyArray<TSortItem>>(items);
+  // const [activeId, setActiveId] = useState<>(items);
 
   useLayoutEffect(() => {
     console.log('DragAndDropSorting created');
@@ -85,9 +87,18 @@ export default function DragAndDropSorting<TSortItem>({
     []
   );
 
+  const registerRef = useCallback((instance: HTMLDivElement | null) => {
+    if (instance) {
+      // console.dir(instance);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div ref={dndSortingArea} className={className ? 'dnd-area ' + className : 'dnd-area'}>
-      {sortItems.map((item, i) => children(item, i, registerEventInfo, registerStateSetters))}
+      {sortItems.map((item, i) =>
+        children(item, i, registerEventInfo, registerStateSetters, registerRef)
+      )}
     </div>
   );
 }
