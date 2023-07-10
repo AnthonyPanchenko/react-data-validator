@@ -8,3 +8,18 @@
   display: flex;
   gap: 2rem;
 }
+
+.sortable-list {
+  padding: 20px;
+  max-height: 400px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  li {
+    border: 1px solid #08c;
+    padding: 20px;
+    background-color: #444444;
+  }
+}

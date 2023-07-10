@@ -56,7 +56,7 @@
       "version": "detect" // auto-detect React version from package.json.
     },
     "import/parsers": {
-      "@typescript-eslint/parser": [".ts", ".tsx"] // use typescript-eslint parser for .ts|tsx files.
+      "@typescript-eslint/parser": [".ts", ".tsx", ".js"] // use typescript-eslint parser for .ts|tsx files.
     },
     "import/resolver": {
       "typescript": {
