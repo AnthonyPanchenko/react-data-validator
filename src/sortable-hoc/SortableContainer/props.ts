@@ -19,7 +19,6 @@ export const propTypes = {
     typeof HTMLElement === 'undefined' ? PropTypes.any : PropTypes.instanceOf(HTMLElement)
   ]),
   hideSortableGhost: PropTypes.bool,
-  keyboardSortingTransitionDuration: PropTypes.number,
   lockAxis: PropTypes.string,
   lockOffset: PropTypes.oneOfType([
     PropTypes.number,
@@ -33,13 +32,6 @@ export const propTypes = {
   onSortStart: PropTypes.func,
   pressDelay: PropTypes.number,
   pressThreshold: PropTypes.number,
-  keyCodes: PropTypes.shape({
-    lift: PropTypes.arrayOf(PropTypes.number),
-    drop: PropTypes.arrayOf(PropTypes.number),
-    cancel: PropTypes.arrayOf(PropTypes.number),
-    up: PropTypes.arrayOf(PropTypes.number),
-    down: PropTypes.arrayOf(PropTypes.number)
-  }),
   shouldCancelStart: PropTypes.func,
   transitionDuration: PropTypes.number,
   updateBeforeSortStart: PropTypes.func,

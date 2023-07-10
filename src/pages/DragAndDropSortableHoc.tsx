@@ -19,16 +19,32 @@ const SORTING_ITEMS = [
   { label: '1', value: '1' },
   { label: '2', value: '2' },
   { label: '3', value: '3' },
-  { label: '4', value: '4' },
+  {
+    label:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+    value: '4'
+  },
   { label: '5', value: '5' },
   { label: '6', value: '6' },
-  { label: '7', value: '7' },
+  {
+    label:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+    value: '7'
+  },
   { label: '8', value: '8' },
-  { label: '9', value: '9' },
+  {
+    label:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+    value: '9'
+  },
   { label: '10', value: '10' },
   { label: '11', value: '11' },
   { label: '12', value: '12' },
-  { label: '13', value: '13' },
+  {
+    label:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+    value: '13'
+  },
   { label: '14', value: '14' },
   { label: '15', value: '15' },
   { label: '16', value: '16' },
@@ -49,10 +65,22 @@ const SortableItem = SortableElement(({ item }: { item: { label: string; value: 
   </li>
 ));
 
-const SortableList = SortableContainer(
+const SortableListY = SortableContainer(
   ({ items }: { items: Array<{ label: string; value: string }> }) => {
     return (
-      <ul className="sortable-list">
+      <ul className="sortable-list-y">
+        {items.map((item, index) => (
+          <SortableItem key={`item-${item.value}`} index={index} item={item} />
+        ))}
+      </ul>
+    );
+  }
+);
+
+const SortableListX = SortableContainer(
+  ({ items }: { items: Array<{ label: string; value: string }> }) => {
+    return (
+      <ul className="sortable-list-x">
         {items.map((item, index) => (
           <SortableItem key={`item-${item.value}`} index={index} item={item} />
         ))}
@@ -62,11 +90,15 @@ const SortableList = SortableContainer(
 );
 
 export default function DragAndDropSortableHoc() {
-  const [sortingItems, setSortingItemsState] = useState<ReadonlyArray<ItemType>>(SORTING_ITEMS);
+  const [sortingItemsY, setSortingItemsStateY] = useState<ReadonlyArray<ItemType>>(SORTING_ITEMS);
+  const [sortingItemsX, setSortingItemsStateX] = useState<ReadonlyArray<ItemType>>(SORTING_ITEMS);
   // const [checkedItems, setChecked] = useState<Record<string, boolean>>({});
 
-  const onSortEnd = ({ oldIndex, newIndex }) => {
-    setSortingItemsState(prevItems => arrayMove(prevItems, oldIndex, newIndex));
+  const onSortEndX = ({ oldIndex, newIndex }) => {
+    setSortingItemsStateX(prevItems => arrayMove(prevItems, oldIndex, newIndex));
+  };
+  const onSortEndY = ({ oldIndex, newIndex }) => {
+    setSortingItemsStateY(prevItems => arrayMove(prevItems, oldIndex, newIndex));
   };
 
   return (
@@ -79,7 +111,8 @@ export default function DragAndDropSortableHoc() {
         cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
       </div>
 
-      <SortableList items={sortingItems} onSortEnd={onSortEnd} />
+      <SortableListY axis="y" items={sortingItemsY} onSortEnd={onSortEndY} />
+      <SortableListX axis="x" items={sortingItemsX} onSortEnd={onSortEndX} />
     </Fragment>
   );
 }

@@ -1,20 +1,8 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 
-export function arrayMove(array, from, to) {
-  // Will be deprecated soon. Consumers should install 'array-move' instead
-  // https://www.npmjs.com/package/array-move
-
-  if (process.env.NODE_ENV !== 'production') {
-    if (typeof console !== 'undefined') {
-      // eslint-disable-next-line no-console
-      console.warn(
-        "Deprecation warning: arrayMove will no longer be exported by 'react-sortable-hoc' in the next major release. Please install the `array-move` package locally instead. https://www.npmjs.com/package/array-move"
-      );
-    }
-  }
-
-  array = array.slice();
+export function arrayMove(arr, from, to) {
+  const array = [...arr];
   array.splice(to < 0 ? array.length + to : to, 0, array.splice(from, 1)[0]);
 
   return array;
@@ -68,7 +56,7 @@ export function setInlineStyles(node, styles) {
 
 export function setTranslate3d(node, translate) {
   node.style[`${vendorPrefix}Transform`] =
-    translate == null ? '' : `translate3d(${translate.x}px,${translate.y}px,0)`;
+    translate == null ? '' : `translate(${translate.x}px,${translate.y}px)`;
 }
 
 export function setTransitionDuration(node, duration) {

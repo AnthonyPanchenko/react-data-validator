@@ -48,7 +48,7 @@ export type SortEndHandler = (sort: SortEnd, event: SortEvent) => void;
 export type SortOverHandler = (sort: SortOver, event: SortEvent) => void;
 
 export type ContainerGetter = (
-  element: React.ReactElement<any>,
+  element: React.ReactElement<any>
 ) => HTMLElement | Promise<HTMLElement>;
 
 export type HelperContainerGetter = () => HTMLElement;
@@ -63,14 +63,6 @@ export interface SortableContainerProps {
   lockAxis?: Axis;
   helperClass?: string;
   transitionDuration?: number;
-  keyboardSortingTransitionDuration?: number;
-  keyCodes?: {
-    lift?: number[];
-    drop?: number[];
-    cancel?: number[];
-    up?: number[];
-    down?: number[];
-  };
   pressDelay?: number;
   pressThreshold?: number;
   distance?: number;
@@ -110,21 +102,17 @@ export type WrappedComponent<P> =
 
 export function SortableContainer<P>(
   wrappedComponent: WrappedComponent<P>,
-  config?: Config,
+  config?: Config
 ): React.ComponentClass<P & SortableContainerProps>;
 
 export function SortableElement<P>(
   wrappedComponent: WrappedComponent<P>,
-  config?: Config,
+  config?: Config
 ): React.ComponentClass<P & SortableElementProps>;
 
 export function SortableHandle<P>(
   wrappedComponent: WrappedComponent<P>,
-  config?: Config,
+  config?: Config
 ): React.ComponentClass<P>;
 
-export function arrayMove<T>(
-  collection: T[],
-  previousIndex: number,
-  newIndex: number,
-): T[];
+export function arrayMove<T>(collection: T[], previousIndex: number, newIndex: number): T[];
