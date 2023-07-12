@@ -8,35 +8,3 @@
   display: flex;
   gap: 2rem;
 }
-
-.sortable-list-x {
-  padding: 20px;
-  overflow-x: auto;
-  display: flex;
-  flex-direction: row;
-  gap: 20px;
-
-  li {
-    height: 100px;
-    overflow: hidden;
-    border: 1px solid #08c;
-    padding: 20px;
-    background-color: #444444;
-    flex-shrink: 0;
-    max-width: 200px;
-  }
-}
-.sortable-list-y {
-  padding: 20px;
-  max-height: 400px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-
-  li {
-    border: 1px solid #08c;
-    padding: 20px;
-    background-color: #444444;
-  }
-}

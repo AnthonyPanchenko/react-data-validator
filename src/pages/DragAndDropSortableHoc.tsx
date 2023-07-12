@@ -1,18 +1,10 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
-
 import './drag-and-drop-page.scss';
 
 import { Fragment, useState } from 'react';
 
-import { arrayMove } from '@/drag-and-drop-sorting/utils';
-
-// eslint-disable-next-line import/namespace, import/default, import/no-named-as-default
-import SortableContainer from '../sortable-hoc/SortableContainer';
-// eslint-disable-next-line import/namespace, import/default, import/no-named-as-default
-import SortableElement from '../sortable-hoc/SortableElement';
-// eslint-disable-next-line import/namespace, import/default, import/no-named-as-default
-import SortableHandle from '../sortable-hoc/SortableHandle';
+import DragAndDropSortingContainer from '@/sortable-hoc/SortableContainer/DragAndDropSortingContainer';
+import DragAndDropSortingSource from '@/sortable-hoc/SortableContainer/DragAndDropSortingSource';
+import { arrayMove } from '@/sortable-hoc/utils';
 
 const SORTING_ITEMS = [
   { label: '0', value: '0' },
@@ -21,20 +13,20 @@ const SORTING_ITEMS = [
   { label: '3', value: '3' },
   {
     label:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      'Lorem ipsum dolor sit amet, consectetur adipiscaliquip ex voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
     value: '4'
   },
   { label: '5', value: '5' },
   { label: '6', value: '6' },
   {
     label:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      'Lorem ipsum dolor sit amet, consectetur adna alsi ehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
     value: '7'
   },
   { label: '8', value: '8' },
   {
     label:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      'Lorem ipsum dolor sit amet, consectet dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
     value: '9'
   },
   { label: '10', value: '10' },
@@ -42,7 +34,7 @@ const SORTING_ITEMS = [
   { label: '12', value: '12' },
   {
     label:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      'Lorem ipsum dolor sit amet, consectetur aduis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
     value: '13'
   },
   { label: '14', value: '14' },
@@ -55,49 +47,14 @@ const SORTING_ITEMS = [
 
 type ItemType = { label: string; value: string };
 
-const DragHandle = SortableHandle(() => <span>::</span>);
-
-const SortableItem = SortableElement(({ item }: { item: { label: string; value: string } }) => (
-  <li>
-    <DragHandle />
-    <input type="checkbox" name={item.label} id={item.value} />
-    <label>{item.label}</label>
-  </li>
-));
-
-const SortableListY = SortableContainer(
-  ({ items }: { items: Array<{ label: string; value: string }> }) => {
-    return (
-      <ul className="sortable-list-y">
-        {items.map((item, index) => (
-          <SortableItem key={`item-${item.value}`} index={index} item={item} />
-        ))}
-      </ul>
-    );
-  }
-);
-
-const SortableListX = SortableContainer(
-  ({ items }: { items: Array<{ label: string; value: string }> }) => {
-    return (
-      <ul className="sortable-list-x">
-        {items.map((item, index) => (
-          <SortableItem key={`item-${item.value}`} index={index} item={item} />
-        ))}
-      </ul>
-    );
-  }
-);
-
 export default function DragAndDropSortableHoc() {
   const [sortingItemsY, setSortingItemsStateY] = useState<ReadonlyArray<ItemType>>(SORTING_ITEMS);
   const [sortingItemsX, setSortingItemsStateX] = useState<ReadonlyArray<ItemType>>(SORTING_ITEMS);
-  // const [checkedItems, setChecked] = useState<Record<string, boolean>>({});
 
-  const onSortEndX = ({ oldIndex, newIndex }) => {
+  const onSortEndX = (oldIndex: number, newIndex: number) => {
     setSortingItemsStateX(prevItems => arrayMove(prevItems, oldIndex, newIndex));
   };
-  const onSortEndY = ({ oldIndex, newIndex }) => {
+  const onSortEndY = (oldIndex: number, newIndex: number) => {
     setSortingItemsStateY(prevItems => arrayMove(prevItems, oldIndex, newIndex));
   };
 
@@ -108,11 +65,31 @@ export default function DragAndDropSortableHoc() {
         labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
         laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
         voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+        cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem
+        ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+        labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
+        laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
+        voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
         cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
       </div>
 
-      <SortableListY axis="y" items={sortingItemsY} onSortEnd={onSortEndY} />
-      <SortableListX axis="x" items={sortingItemsX} onSortEnd={onSortEndX} />
+      <DragAndDropSortingContainer axis="y" className="y-area" onSortDropChange={onSortEndY}>
+        {sortingItemsY.map((item, i) => (
+          <DragAndDropSortingSource key={item.value} index={i}>
+            <input type="checkbox" name={item.label} id={item.value} />
+            <label>{item.label}</label>
+          </DragAndDropSortingSource>
+        ))}
+      </DragAndDropSortingContainer>
+
+      <DragAndDropSortingContainer axis="x" className="x-area" onSortDropChange={onSortEndX}>
+        {sortingItemsX.map((item, i) => (
+          <DragAndDropSortingSource key={item.value} index={i}>
+            <input type="checkbox" name={item.label} id={item.value} />
+            <label>{item.label}</label>
+          </DragAndDropSortingSource>
+        ))}
+      </DragAndDropSortingContainer>
     </Fragment>
   );
 }

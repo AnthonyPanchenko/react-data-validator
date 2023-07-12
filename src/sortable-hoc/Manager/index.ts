@@ -26,7 +26,7 @@ export default class Manager {
 
   getActive() {
     return this.refs[this.active.collection].find(
-      // eslint-disable-next-line eqeqeq
+      // eslint-disable-next-line
       ({ node }) => node.sortableInfo.index == this.active.index
     );
   }

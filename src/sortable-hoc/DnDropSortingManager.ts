@@ -26,13 +26,13 @@ export default class DnDropSortingEventManager {
 
   acceleration: AccelerationType = {
     min: 2, // px
-    max: 8, // px
+    max: 10, // px
     timer: null, // NodeJS.Timer
     thresholdActivator: 0.4 // unit range from 0 to 1
   };
 
   stateSetters: Record<
-    number,
+    string,
     {
       setPosition: (topY: number) => void;
       setActiveState: (isActive: boolean) => void;
@@ -52,19 +52,19 @@ export default class DnDropSortingEventManager {
     setPosition: (topY: number) => void,
     setActiveState: (isActive: boolean) => void,
     setTranslatePosition: (translateY: number) => void,
-    index: number
+    sourceKye: string
   ) {
-    console.log('onRegisterStateSetters: ', index);
-    this.stateSetters[index] = {
+    console.log('onRegisterStateSetters: ', sourceKye);
+    this.stateSetters[sourceKye] = {
       setPosition,
       setActiveState,
       setTranslatePosition
     };
   }
 
-  onRegisterEventInfo(index: number, event: MouseEvent | Touch, elementRect: DOMRect) {
+  onRegisterEventInfo(sourceKye: string, event: MouseEvent | Touch, elementRect: DOMRect) {
     if (this.container.current) {
-      this.startIndex = index;
+      // this.startIndex = index;
       this.startPosY = event.clientY;
       this.elementRect = elementRect;
       this.containerRect = this.container.current.getBoundingClientRect();

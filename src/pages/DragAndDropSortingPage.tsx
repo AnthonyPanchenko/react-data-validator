@@ -52,10 +52,9 @@ export default function DragAndDropSortingPage() {
           console.log(newItems);
         }}
       >
-        {(item, i, registerEventInfo, registerStateSetters, registerRef) => (
+        {(item, registerEventInfo, registerStateSetters, registerRef) => (
           <DragAndDropSortingSource
-            key={item.value + i}
-            index={i}
+            key={item.value}
             onRegisterRef={registerRef}
             onRegisterEventInfo={registerEventInfo}
             onRegisterStateSetters={registerStateSetters}

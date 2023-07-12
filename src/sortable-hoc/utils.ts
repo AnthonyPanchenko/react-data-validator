@@ -1,21 +1,29 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
+import { Coordinates, Offsets } from '@/sortable-hoc/types';
 
-export function arrayMove(arr, from, to) {
-  const array = [...arr];
-  array.splice(to < 0 ? array.length + to : to, 0, array.splice(from, 1)[0]);
-
-  return array;
+export enum Direction {
+  Forward = 1,
+  Backward = -1,
+  Static = 0
 }
 
-export function omit(obj, keysToOmit) {
-  return Object.keys(obj).reduce((acc, key) => {
-    if (keysToOmit.indexOf(key) === -1) {
-      acc[key] = obj[key];
-    }
+export function arrayMove<T>(arr: ReadonlyArray<T>, from: number, to: number): ReadonlyArray<T> {
+  const newArray = [...arr];
+  newArray.splice(to < 0 ? newArray.length + to : to, 0, newArray.splice(from, 1)[0]);
 
-    return acc;
-  }, {});
+  return newArray;
+}
+
+export function arraySwap<T>(array: ReadonlyArray<T>, from: number, to: number): ReadonlyArray<T> {
+  const newArray = array.slice();
+
+  newArray[from] = array[to];
+  newArray[to] = array[from];
+
+  return newArray;
+}
+
+export function miniUID(): string {
+  return Math.random().toString(36).substring(2, 12) + Math.random().toString(36).substring(2, 10);
 }
 
 export const events = {
@@ -24,81 +32,56 @@ export const events = {
   start: ['touchstart', 'mousedown']
 };
 
-export const vendorPrefix = (function () {
-  if (typeof window === 'undefined' || typeof document === 'undefined') {
-    // Server environment
-    return '';
-  }
+// export function setTranslate3d(node, translate) {
+//   node.style.transform = translate == null ? '' : `translate(${translate.x}px,${translate.y}px)`;
+// }
 
-  // fix for: https://bugzilla.mozilla.org/show_bug.cgi?id=548397
-  // window.getComputedStyle() returns null inside an iframe with display: none
-  // in this case return an array with a fake mozilla style in it.
-  const styles = window.getComputedStyle(document.documentElement, '') || ['-moz-hidden-iframe'];
-  const pre = (Array.prototype.slice
-    .call(styles)
-    .join('')
-    .match(/-(moz|webkit|ms)-/) ||
-    (styles.OLink === '' && ['', 'o']))[1];
-
-  switch (pre) {
-    case 'ms':
-      return 'ms';
-    default:
-      return pre && pre.length ? pre[0].toUpperCase() + pre.substr(1) : '';
-  }
-})();
-
-export function setInlineStyles(node, styles) {
-  Object.keys(styles).forEach(key => {
-    node.style[key] = styles[key];
-  });
-}
-
-export function setTranslate3d(node, translate) {
-  node.style[`${vendorPrefix}Transform`] =
-    translate == null ? '' : `translate(${translate.x}px,${translate.y}px)`;
-}
-
-export function setTransitionDuration(node, duration) {
-  node.style[`${vendorPrefix}TransitionDuration`] = duration == null ? '' : `${duration}ms`;
-}
-
-export function closest(el, fn) {
-  while (el) {
-    if (fn(el)) {
-      return el;
-    }
-
-    el = el.parentNode;
-  }
-
-  return null;
-}
-
-export function limit(min, max, value) {
+export function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(value, max));
 }
 
-function getPixelValue(stringValue) {
-  if (stringValue.substr(-2) === 'px') {
-    return parseFloat(stringValue);
-  }
+// function decimalAdjust(num: number, fixed = 0, round: (num: number) => number) {
+//   fixed = Math.pow(10, fixed);
+//   return round(num * fixed) / fixed;
+// }
 
-  return 0;
-}
+// function toNum(value?: string | number, precision = 0): number {
+//   if (typeof value !== 'string') {
+//     return 0;
+//   }
 
-export function getElementMargin(element) {
-  const style = window.getComputedStyle(element);
+//   if (precision) {
+//     const n = parseFloat(value) || 0;
+//     return !n || isNaN(n) ? 0 : decimalAdjust(n, precision, Math.round);
+//   }
 
-  return {
-    bottom: getPixelValue(style.marginBottom),
-    left: getPixelValue(style.marginLeft),
-    right: getPixelValue(style.marginRight),
-    top: getPixelValue(style.marginTop)
-  };
-}
+//   const n = parseInt(value, 10);
+//   return isNaN(n) ? 0 : n;
+// }
 
-export function getScrollAdjustedBoundingClientRect(node, scrollDelta) {
+// export function getElementMargin(element: HTMLElement | null) {
+//   if (!element) {
+//     return {
+//       bottom: 0,
+//       left: 0,
+//       right: 0,
+//       top: 0
+//     };
+//   }
+//   const style = window.getComputedStyle(element);
+
+//   return {
+//     bottom: toNum(style.marginBottom),
+//     left: toNum(style.marginLeft),
+//     right: toNum(style.marginRight),
+//     top: toNum(style.marginTop)
+//   };
+// }
+
+export function getScrollAdjustedBoundingClientRect(
+  node: HTMLElement,
+  scrollDelta: { top: number; left: number }
+) {
   const boundingClientRect = node.getBoundingClientRect();
 
   return {
@@ -107,37 +90,144 @@ export function getScrollAdjustedBoundingClientRect(node, scrollDelta) {
   };
 }
 
-export function getPosition(event) {
-  if (event.touches && event.touches.length) {
-    return {
-      x: event.touches[0].pageX,
-      y: event.touches[0].pageY
-    };
-  } else if (event.changedTouches && event.changedTouches.length) {
-    return {
-      x: event.changedTouches[0].pageX,
-      y: event.changedTouches[0].pageY
-    };
-  } else {
-    return {
-      x: event.pageX,
-      y: event.pageY
-    };
-  }
+export function getWindowClientRect(element: typeof window) {
+  const width = element.innerWidth;
+  const height = element.innerHeight;
+
+  return {
+    top: 0,
+    left: 0,
+    right: width,
+    bottom: height,
+    width,
+    height
+  };
 }
 
-export function isTouchEvent(event) {
-  return (
-    (event.touches && event.touches.length) || (event.changedTouches && event.changedTouches.length)
-  );
+export function isWindow(element: EventTarget | Element): element is typeof window {
+  const resultString = Object.prototype.toString.call(element);
+  return resultString === '[object Window]' || resultString === '[object global]';
 }
 
-export function getEdgeOffset(node, parent, offset = { left: 0, top: 0 }) {
-  if (!node) {
-    return undefined;
+export function isNode(node: EventTarget | Element): node is Node {
+  return 'nodeType' in node;
+}
+
+export function getWindow(
+  target: Event['target'] | Element | HTMLElement | null | undefined
+): typeof window {
+  if (!target) {
+    return window;
   }
 
-  // Get the actual offsetTop / offsetLeft value, no matter how deep the node is nested
+  if (isWindow(target)) {
+    return target as typeof window;
+  }
+
+  if (!isNode(target)) {
+    return window;
+  }
+
+  return (target as HTMLElement).ownerDocument?.defaultView ?? window;
+}
+
+export function isHTMLElement(node: Node | Window): node is HTMLElement {
+  if (isWindow(node)) {
+    return false;
+  }
+
+  return node instanceof getWindow(node).HTMLElement;
+}
+
+function isTouchEvent(event: Event | undefined | null): event is TouchEvent {
+  if (!event) {
+    return false;
+  }
+
+  return getWindow(event.target) && event instanceof TouchEvent;
+}
+
+export function isDocument(node: Node): node is Document {
+  const { Document } = getWindow(node);
+
+  return node instanceof Document;
+}
+
+export function getEventCoordinates(event: MouseEvent | TouchEvent): Coordinates {
+  if (isTouchEvent(event)) {
+    if (event.touches && event.touches.length) {
+      const { clientX: x, clientY: y } = event.touches[0];
+
+      return { x, y };
+    } else if (event.changedTouches && event.changedTouches.length) {
+      const { clientX: x, clientY: y } = event.changedTouches[0];
+
+      return { x, y };
+    }
+  }
+
+  return {
+    x: (event as MouseEvent).clientX,
+    y: (event as MouseEvent).clientY
+  };
+}
+
+export const canUseDOM = () =>
+  typeof window !== 'undefined' &&
+  typeof window.document !== 'undefined' &&
+  typeof window.document.createElement !== 'undefined';
+
+function isDocumentScrollingElement(element: Element | null) {
+  if (!canUseDOM() || !element) {
+    return false;
+  }
+
+  return element === document.scrollingElement;
+}
+
+export function getScrollPosition(scrollingContainer: Element) {
+  const minScroll = {
+    x: 0,
+    y: 0
+  };
+  const dimensions = isDocumentScrollingElement(scrollingContainer)
+    ? {
+        height: window.innerHeight,
+        width: window.innerWidth
+      }
+    : {
+        height: scrollingContainer.clientHeight,
+        width: scrollingContainer.clientWidth
+      };
+  const maxScroll = {
+    x: scrollingContainer.scrollWidth - dimensions.width,
+    y: scrollingContainer.scrollHeight - dimensions.height
+  };
+
+  const isTop = scrollingContainer.scrollTop <= minScroll.y;
+  const isLeft = scrollingContainer.scrollLeft <= minScroll.x;
+  const isBottom = scrollingContainer.scrollTop >= maxScroll.y;
+  const isRight = scrollingContainer.scrollLeft >= maxScroll.x;
+
+  return {
+    isTop,
+    isLeft,
+    isBottom,
+    isRight,
+    maxScroll,
+    minScroll
+  };
+}
+
+export function getEdgeOffset(
+  node: HTMLElement | null,
+  parent: HTMLElement | null,
+  offset = { left: 0, top: 0 }
+): Offsets {
+  if (!node || !parent) {
+    return offset;
+  }
+
   const nodeOffset = {
     left: offset.left + node.offsetLeft,
     top: offset.top + node.offsetTop
@@ -147,10 +237,10 @@ export function getEdgeOffset(node, parent, offset = { left: 0, top: 0 }) {
     return nodeOffset;
   }
 
-  return getEdgeOffset(node.parentNode, parent, nodeOffset);
+  return getEdgeOffset(node.parentNode as HTMLElement, parent, nodeOffset);
 }
 
-export function getTargetIndex(newIndex, prevIndex, oldIndex) {
+export function getTargetIndex(newIndex: number, prevIndex: number, oldIndex: number) {
   if (newIndex < oldIndex && newIndex > prevIndex) {
     return newIndex - 1;
   } else if (newIndex > oldIndex && newIndex < prevIndex) {
@@ -160,104 +250,66 @@ export function getTargetIndex(newIndex, prevIndex, oldIndex) {
   }
 }
 
-export function getLockPixelOffset({ lockOffset, width, height }) {
-  let offsetX = lockOffset;
-  let offsetY = lockOffset;
-  let unit = 'px';
+// export function getContainerGridGap(el: HTMLElement | null) {
+//   if (!el) {
+//     return { x: 0, y: 0 };
+//   }
+//   const style = window.getComputedStyle(el);
 
-  if (typeof lockOffset === 'string') {
-    const match = /^[+-]?\d*(?:\.\d*)?(px|%)$/.exec(lockOffset);
+//   if (style.display === 'grid' || style.display === 'inline-grid') {
+//     return {
+//       x: toNum(style.columnGap),
+//       y: toNum(style.rowGap)
+//     };
+//   }
 
-    offsetX = parseFloat(lockOffset);
-    offsetY = parseFloat(lockOffset);
-    unit = match[1];
-  }
+//   return { x: 0, y: 0 };
+// }
 
-  if (unit === '%') {
-    offsetX = (offsetX * width) / 100;
-    offsetY = (offsetY * height) / 100;
-  }
+// height: node.offsetHeight,
+// width: node.offsetWidth
 
-  return {
-    x: offsetX,
-    y: offsetY
-  };
-}
+export default function getClosestIndex(arr: Array<number>, y: number) {
+  let index = 0;
+  let diff = Math.abs(y - arr[0]);
 
-export function getLockPixelOffsets({ height, width, lockOffset }) {
-  const offsets = Array.isArray(lockOffset) ? lockOffset : [lockOffset, lockOffset];
+  for (let i = 0; i < arr.length; i++) {
+    const nextDiff = Math.abs(y - arr[i]);
 
-  const [minLockOffset, maxLockOffset] = offsets;
-
-  return [
-    getLockPixelOffset({ height, lockOffset: minLockOffset, width }),
-    getLockPixelOffset({ height, lockOffset: maxLockOffset, width })
-  ];
-}
-
-function isScrollable(el) {
-  const computedStyle = window.getComputedStyle(el);
-  const overflowRegex = /(auto|scroll)/;
-  const properties = ['overflow', 'overflowX', 'overflowY'];
-
-  return properties.find(property => overflowRegex.test(computedStyle[property]));
-}
-
-export function getScrollingParent(el) {
-  if (!(el instanceof HTMLElement)) {
-    return null;
-  } else if (isScrollable(el)) {
-    return el;
-  } else {
-    return getScrollingParent(el.parentNode);
-  }
-}
-
-export function getContainerGridGap(element) {
-  const style = window.getComputedStyle(element);
-
-  if (style.display === 'grid') {
-    return {
-      x: getPixelValue(style.gridColumnGap),
-      y: getPixelValue(style.gridRowGap)
-    };
-  }
-
-  return { x: 0, y: 0 };
-}
-
-export const NodeType = {
-  Anchor: 'A',
-  Button: 'BUTTON',
-  Canvas: 'CANVAS',
-  Input: 'INPUT',
-  Option: 'OPTION',
-  Textarea: 'TEXTAREA',
-  Select: 'SELECT'
-};
-
-export function cloneNode(node) {
-  const selector = 'input, textarea, select, canvas, [contenteditable]';
-  const fields = node.querySelectorAll(selector);
-  const clonedNode = node.cloneNode(true);
-  const clonedFields = [...clonedNode.querySelectorAll(selector)];
-
-  clonedFields.forEach((field, i) => {
-    if (field.type !== 'file') {
-      field.value = fields[i].value;
+    if (nextDiff < diff) {
+      diff = nextDiff;
+      index = i;
     }
+  }
 
-    // Fixes an issue with original radio buttons losing their value once the
-    // clone is inserted in the DOM, as radio button `name` attributes must be unique
-    if (field.type === 'radio' && field.name) {
-      field.name = `__sortableClone__${field.name}`;
-    }
-
-    if (field.tagName === NodeType.Canvas && fields[i].width > 0 && fields[i].height > 0) {
-      const destCtx = field.getContext('2d');
-      destCtx.drawImage(fields[i], 0, 0);
-    }
-  });
-
-  return clonedNode;
+  return index;
 }
+
+// .reduce((prev, curr, currentIndex) =>
+// Math.abs(curr.offsetTop - currentElementY) < Math.abs(prev.offsetTop - currentElementY)
+//   ? curr
+//   : prev
+// );
+
+// export function recursivelyGetOffset(node: HTMLElement | null) {
+//   let currOffset = 0;
+//   let newOffset = 0;
+
+//   if (node !== null) {
+//     if ((node as HTMLElement).scrollTop) {
+//       currOffset = node.scrollTop;
+//     }
+
+//     if ((node as HTMLElement).offsetTop) {
+//       currOffset -= node.offsetTop;
+//     }
+
+//     if (node && node.parentElement) {
+//       newOffset = recursivelyGetOffset(node.parentElement);
+//     }
+
+//     currOffset = currOffset + newOffset;
+//   }
+
+//   return currOffset;
+// }

@@ -4,6 +4,54 @@ export type Axis = 'x' | 'y' | 'xy';
 
 export type Offset = number | string;
 
+export interface ClientRect {
+  width: number;
+  height: number;
+  top: number;
+  left: number;
+  right: number;
+  bottom: number;
+}
+
+export type DnDSortingValues = {
+  isMoving: boolean;
+  activeIndex: number;
+  index: number;
+  overIndex: number;
+  sourceKey: string;
+  direction: Direction;
+  containerScroll: Position;
+  deltaRects: Position;
+  startPosition: Coordinates;
+  deltaPosition: Coordinates;
+  containerRect: DOMRect | null;
+  sourceOffsets: Offsets;
+  containerScrollOffsets: Coordinates;
+  sourceScrollOffsets: Coordinates;
+  edgeOffsets: Offsets;
+  activeNodeRect: DOMRect | null;
+  registeredItems: Record<string, SortingItemsData>;
+};
+
+export type SortingItemsData = {
+  setListRelatedPosition: (cords: Coordinates) => void;
+  setActiveSourceState: (isActive: boolean) => void;
+  setHelperNodePosition: (cords: Coordinates) => void;
+  domRect: DOMRect;
+};
+
+export type Coordinates = {
+  x: number;
+  y: number;
+};
+
+export type Offsets = {
+  top: number;
+  left: number;
+};
+
+export type Position = Offsets;
+
 export interface SortStart {
   node: Element;
   index: number;
@@ -60,27 +108,17 @@ export interface Dimensions {
 
 export interface SortableContainerProps {
   axis?: Axis;
-  lockAxis?: Axis;
-  helperClass?: string;
   transitionDuration?: number;
   pressDelay?: number;
   pressThreshold?: number;
-  distance?: number;
   shouldCancelStart?: (event: SortEvent | SortEventWithTag) => boolean;
-  updateBeforeSortStart?: SortStartHandler;
-  onSortStart?: SortStartHandler;
   onSortMove?: SortMoveHandler;
   onSortEnd?: SortEndHandler;
-  onSortOver?: SortOverHandler;
   useDragHandle?: boolean;
   useWindowAsScrollContainer?: boolean;
-  hideSortableGhost?: boolean;
-  lockToContainerEdges?: boolean;
-  lockOffset?: Offset | [Offset, Offset];
   getContainer?: ContainerGetter;
   getHelperDimensions?: (sort: SortStart) => Dimensions;
   helperContainer?: HTMLElement | HelperContainerGetter;
-  disableAutoscroll?: boolean;
 }
 
 export interface SortableElementProps {
