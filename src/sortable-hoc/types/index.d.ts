@@ -24,6 +24,7 @@ export type DnDSortingValues = {
   deltaRects: Position;
   startPosition: Coordinates;
   deltaPosition: Coordinates;
+  initClickPosition: Coordinates;
   containerRect: DOMRect | null;
   sourceOffsets: Offsets;
   containerScrollOffsets: Coordinates;

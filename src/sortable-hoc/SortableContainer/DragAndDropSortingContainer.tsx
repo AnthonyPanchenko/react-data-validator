@@ -22,14 +22,6 @@ export default function DragAndDropSortingContainer({
   onSortDropChange,
   isWindowScrollContainer = false
 }: PropsTypes) {
-  const [dndSortingContainer, updateScroll] = useAutoScroller({
-    axis,
-    interval: 5,
-    threshold: 0.45,
-    minSpeed: 2,
-    maxSpeed: 10
-  });
-
   const sort = useRef<DnDSortingValues>({
     isMoving: false,
     activeIndex: 0,
@@ -41,6 +33,7 @@ export default function DragAndDropSortingContainer({
     containerScrollOffsets: { x: 0, y: 0 },
     startPosition: { x: 0, y: 0 },
     deltaPosition: { x: 0, y: 0 },
+    initClickPosition: { x: 0, y: 0 },
     deltaRects: { top: 0, left: 0 },
     containerRect: null,
     sourceOffsets: { top: 0, left: 0 },
@@ -68,6 +61,18 @@ export default function DragAndDropSortingContainer({
     },
     []
   );
+
+  const reRangeNodesPositions = () => {
+    console.log('STOP SCROLLING');
+  };
+
+  const [dndSortingContainer, updateScroll] = useAutoScroller(reRangeNodesPositions, {
+    axis,
+    interval: 5,
+    threshold: 0.45,
+    minSpeed: 2,
+    maxSpeed: 10
+  });
 
   const onDrag = (event: MouseEvent) => {
     if (typeof event.preventDefault === 'function' && event.cancelable) {
@@ -110,7 +115,7 @@ export default function DragAndDropSortingContainer({
       node.setHelperNodePosition(translate);
     }
 
-    updateScroll(meta.deltaPosition);
+    updateScroll(meta.deltaPosition, meta.initClickPosition);
 
     // Adjust for window scroll
     //  translate.y -= window.scrollY - this.initialWindowScroll.top;
@@ -145,7 +150,6 @@ export default function DragAndDropSortingContainer({
       const meta = sort.current;
 
       meta.startPosition = getEventCoordinates(event);
-
       document.addEventListener('mousemove', onDrag, { passive: false });
       document.addEventListener('mouseup', onDrop);
 
@@ -161,6 +165,21 @@ export default function DragAndDropSortingContainer({
       meta.activeNodeRect = sourceDomRect;
       meta.sourceKey = sourceKye;
       meta.containerRect = dndSortingContainer.current?.getBoundingClientRect() || null;
+
+      meta.initClickPosition = {
+        x: meta.startPosition.x - (meta.containerRect?.x || 0),
+        y: meta.startPosition.y - (meta.containerRect?.y || 0)
+      };
+
+      console.log(
+        'scrollHeight: ',
+        dndSortingContainer.current?.scrollHeight,
+        'clientHeight: ',
+        dndSortingContainer.current?.clientHeight,
+        'offsetHeight: ',
+        dndSortingContainer.current?.offsetHeight
+      );
+
       meta.containerScroll = isWindowScrollContainer
         ? {
             left: window.scrollX,

@@ -1,5 +1,6 @@
 import { useCallback, useRef } from 'react';
 
+import { debounce } from '@/components/utils';
 import { useInterval } from '@/sortable-hoc/SortableContainer/scroll/useInterval';
 import { Coordinates } from '@/sortable-hoc/types';
 import { clamp } from '@/sortable-hoc/utils';
@@ -18,15 +19,12 @@ type AutoScrollerSettings = {
   max: Coordinates;
 };
 
-export function useAutoScroller({
-  axis,
-  interval,
-  threshold,
-  minSpeed,
-  maxSpeed
-}: AutoScrollerOptions): [
+export function useAutoScroller(
+  onStopScroll: () => void,
+  { axis, interval, threshold, minSpeed, maxSpeed }: AutoScrollerOptions
+): [
   React.MutableRefObject<HTMLDivElement | null>,
-  (delta: Coordinates) => void
+  (delta: Coordinates, initClickPos: Coordinates) => void
 ] {
   const scrollContainer = useRef<HTMLDivElement | null>(null);
   const scroll = useRef<AutoScrollerSettings>({
@@ -37,47 +35,58 @@ export function useAutoScroller({
 
   const [setScrollInterval, clearScrollInterval] = useInterval(interval);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedStopScroll = useCallback(debounce(onStopScroll, 300), [onStopScroll]);
+
   const scrollView = useCallback(() => {
-    // const scrollTopValue = Math.min(
-    //   Math.max(container.scrollTop + acceleration * direction, 0),
-    //   maxScroll
-    // );
+    const container = scrollContainer.current;
 
-    // if (scrollTopValue === maxScroll || scrollTopValue === 0) {
-    //   this.clearMouseMoveTimer();
-    //   this.onStopMove(delta + this.elementRelativeOffsetTop + scrollTopValue, direction);
-    //   this.clearScrollView();
-    // }
-
-    if (scrollContainer.current) {
+    if (container) {
       const speed = scroll.current.speed[axis] * scroll.current.direction[axis];
-      const scrollSpeed = clamp(speed, 0, scroll.current.max[axis]);
 
-      const scrollLeft = axis === 'x' ? scrollSpeed : 0;
-      const scrollTop = axis === 'y' ? scrollSpeed : 0;
+      const scrollLeft = axis === 'x' ? speed : 0;
+      const scrollTop = axis === 'y' ? speed : 0;
 
-      scrollContainer.current.scrollBy(scrollLeft, scrollTop);
+      container.scrollBy(scrollLeft, scrollTop);
+
+      if (container.scrollTop === scroll.current.max[axis] || container.scrollTop === 0) {
+        clearScrollInterval();
+        debouncedStopScroll();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const updateScroll = useCallback((delta: Coordinates) => {
+  const updateScroll = useCallback((delta: Coordinates, pos: Coordinates) => {
     const container = scrollContainer.current;
-    if (container) {
-      scroll.current.max.y = container.scrollHeight - container.clientHeight;
-      scroll.current.max.x = container.scrollWidth - container.clientWidth;
+
+    if (container && container.scrollHeight <= container.clientHeight) {
+      return;
     }
 
-    const axisDirection = Math.sign(delta[axis]);
-    scroll.current.direction[axis] = axisDirection;
-
-    const normAcceleration = getNormalizedAcceleration(axisDirection, delta[axis]);
-    scroll.current.speed[axis] = clamp(normAcceleration * maxSpeed, minSpeed, maxSpeed);
-
-    if (normAcceleration > threshold) {
-      setScrollInterval(scrollView);
-    } else {
+    if (container) {
       clearScrollInterval();
+
+      scroll.current.max.y = container.scrollHeight - container.clientHeight;
+      scroll.current.max.x = container.scrollWidth - container.clientWidth;
+
+      const axisDirection = Math.sign(delta[axis]);
+      scroll.current.direction[axis] = axisDirection;
+
+      const normAcceleration = getNormalizedAcceleration(
+        axisDirection,
+        delta[axis],
+        pos[axis],
+        container.clientHeight
+      );
+
+      scroll.current.speed[axis] = clamp(normAcceleration * maxSpeed, minSpeed, maxSpeed);
+
+      if (normAcceleration > threshold) {
+        setScrollInterval(scrollView);
+      } else {
+        clearScrollInterval();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -88,17 +97,14 @@ export function useAutoScroller({
 function getNormalizedAcceleration(
   direction: number,
   delta: number,
-  containerHeight: number
+  clickPos: number,
+  h: number
 ): number {
   if (direction === 0) {
     return 0;
   }
 
-  return Math.abs(
-    direction < 0
-      ? delta / this.elementRelativeOffsetTop
-      : delta / (this.containerRect.height - this.elementRelativeOffsetTop)
-  );
+  return Math.abs(direction < 0 ? delta / clickPos : delta / (h - clickPos));
 }
 
 /*

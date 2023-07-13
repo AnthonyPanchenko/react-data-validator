@@ -39,7 +39,8 @@
     color: #000;
     display: inline-block;
     width: 20px;
-    cursor: grab;
+    cursor: default;
+    // cursor: grab;
 
     svg {
       stroke: currentColor;
