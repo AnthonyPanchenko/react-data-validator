@@ -7,7 +7,7 @@ import {
   getScrollYCoordinate
 } from './getScrollCoordinates';
 
-export function getScrollOffsets(scrollableAncestors: Element[]): Coordinates {
+export function getNestedScrollOffsets(scrollableAncestors: Element[]): Coordinates {
   return scrollableAncestors.reduce<Coordinates>(
     (acc, node) => {
       return add(acc, getScrollCoordinates(node));

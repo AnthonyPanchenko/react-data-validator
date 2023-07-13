@@ -111,7 +111,7 @@ onstart = () => {
 
       // If we haven't cached the node's offsetTop / offsetLeft value
       if (!edgeOffset) {
-        edgeOffset = getEdgeOffset(node, this.container);
+        edgeOffset = getNestedNodeOffset(node, this.container);
         nodes[i].edgeOffset = edgeOffset;
       }
 

@@ -219,7 +219,7 @@ export function getScrollPosition(scrollingContainer: Element) {
   };
 }
 
-export function getEdgeOffset(
+export function getNestedNodeOffset(
   node: HTMLElement | null,
   parent: HTMLElement | null,
   offset = { x: 0, y: 0 }
@@ -237,7 +237,7 @@ export function getEdgeOffset(
     return nodeOffset;
   }
 
-  return getEdgeOffset(node.parentNode as HTMLElement, parent, nodeOffset);
+  return getNestedNodeOffset(node.parentNode as HTMLElement, parent, nodeOffset);
 }
 
 export function getTargetIndex(newIndex: number, prevIndex: number, oldIndex: number) {

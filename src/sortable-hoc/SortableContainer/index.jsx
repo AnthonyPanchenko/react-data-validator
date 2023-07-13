@@ -12,8 +12,8 @@ import {
     closest,
     events,
     getContainerGridGap,
-    getEdgeOffset,
     getElementMargin,
+    getNestedNodeOffset,
     getPosition,
     getScrollingParent,
     isTouchEvent,
@@ -209,7 +209,7 @@ export default function sortableContainer(WrappedComponent, config = { withRef: 
           x: axis.indexOf('x') >= 0,
           y: axis.indexOf('y') >= 0
         };
-        this.offsetEdge = getEdgeOffset(node, this.container);
+        this.offsetEdge = getNestedNodeOffset(node, this.container);
 
         this.initialOffset = getPosition(event);
 
@@ -424,7 +424,7 @@ export default function sortableContainer(WrappedComponent, config = { withRef: 
 
         // If we haven't cached the node's offsetTop / offsetLeft value
         if (!edgeOffset) {
-          edgeOffset = getEdgeOffset(node, this.container);
+          edgeOffset = getNestedNodeOffset(node, this.container);
           nodes[i].edgeOffset = edgeOffset;
         }
 

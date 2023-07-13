@@ -1,9 +1,9 @@
-import { getScrollableAncestors } from '@/sortable-hoc/SortableContainer/scroll/getScrollableAncestors';
 import {
-  getScrollOffsets,
+  getNestedScrollOffsets,
   getScrollXOffset,
   getScrollYOffset
-} from '@/sortable-hoc/SortableContainer/scroll/getScrollOffsets';
+} from '@/sortable-hoc/SortableContainer/scroll/getNestedScrollOffsets';
+import { getScrollableAncestors } from '@/sortable-hoc/SortableContainer/scroll/getScrollableAncestors';
 
 import type { ClientRect } from '../../types';
 
@@ -15,7 +15,7 @@ const properties = [
 export class Rect {
   constructor(rect: ClientRect, element: Element) {
     const scrollableAncestors = getScrollableAncestors(element);
-    const scrollOffsets = getScrollOffsets(scrollableAncestors);
+    const scrollOffsets = getNestedScrollOffsets(scrollableAncestors);
 
     this.rect = { ...rect };
     this.width = rect.width;

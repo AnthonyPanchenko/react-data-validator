@@ -4,9 +4,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Coordinates } from '../../types';
 import {
   defaultCoordinates,
+  getNestedScrollOffsets,
   getScrollableElement,
-  getScrollCoordinates,
-  getScrollOffsets
+  getScrollCoordinates
 } from '../../utilities';
 
 type ScrollCoordinates = Map<HTMLElement | Window, Coordinates>;
@@ -85,7 +85,7 @@ export function useScrollOffsets(elements: Element[]): Coordinates {
             (acc, coordinates) => add(acc, coordinates),
             defaultCoordinates
           )
-        : getScrollOffsets(elements);
+        : getNestedScrollOffsets(elements);
     }
 
     return defaultCoordinates;

@@ -1,11 +1,11 @@
 import { useCallback, useRef } from 'react';
 
 import { DragAndDropSortingContext } from '@/sortable-hoc/SortableContainer/drag-and-drop-sorting-context';
+import { getNestedScrollOffsets } from '@/sortable-hoc/SortableContainer/scroll/getNestedScrollOffsets';
 import { getScrollableAncestors } from '@/sortable-hoc/SortableContainer/scroll/getScrollableAncestors';
-import { getScrollOffsets } from '@/sortable-hoc/SortableContainer/scroll/getScrollOffsets';
 import { useAutoScroller } from '@/sortable-hoc/SortableContainer/scroll/useAutoScroller';
 import { Coordinates, DnDSortingValues } from '@/sortable-hoc/types';
-import { Direction, getEdgeOffset, getEventCoordinates } from '@/sortable-hoc/utils';
+import { Direction, getEventCoordinates, getNestedNodeOffset } from '@/sortable-hoc/utils';
 
 type PropsTypes = {
   axis: keyof Coordinates;
@@ -29,13 +29,13 @@ export default function DragAndDropSortingContainer({
     index: 0,
     sourceKey: '',
     direction: Direction.Static,
-    containerScrollOffsets: { x: 0, y: 0 },
-    sourceScrollOffsets: { x: 0, y: 0 },
-    initClickPosition: { x: 0, y: 0 },
-    containerScroll: { x: 0, y: 0 },
-    startPosition: { x: 0, y: 0 },
+    initRelatedContainerPosition: { x: 0, y: 0 },
+    initContainerNestedScroll: { x: 0, y: 0 },
+    initContainerScroll: { x: 0, y: 0 },
+    initNodeNestedScroll: { x: 0, y: 0 },
+    initPosition: { x: 0, y: 0 },
     deltaPosition: { x: 0, y: 0 },
-    edgeOffsets: { x: 0, y: 0 },
+    initNestedNodeOffsets: { x: 0, y: 0 },
     deltaRects: { x: 0, y: 0 },
     containerRect: null,
     activeNodeRect: null,
@@ -89,41 +89,42 @@ export default function DragAndDropSortingContainer({
     const pos = getEventCoordinates(event);
 
     meta.deltaPosition = {
-      x: pos.x - meta.startPosition.x,
-      y: pos.y - meta.startPosition.y
+      x: pos.x - meta.initPosition.x,
+      y: pos.y - meta.initPosition.y
     };
 
-    if (meta.containerRect && meta.containerScroll) {
+    if (meta.containerRect && meta.initContainerScroll) {
       const gap = 30;
       const translate = {
         x:
           axis === 'x'
-            ? meta.deltaPosition.x + meta.edgeOffsets.x + meta.containerScroll.x - gap
+            ? meta.deltaPosition.x + meta.initNestedNodeOffsets.x + meta.initContainerScroll.x - gap
             : 0,
         y:
           axis === 'y'
-            ? meta.deltaPosition.y + meta.deltaRects.y - meta.sourceScrollOffsets.y
-            : // ? meta.deltaPosition.y + meta.edgeOffsets.y - gap - meta.sourceScrollOffsets.y
+            ? meta.deltaPosition.y + meta.deltaRects.y - meta.initNodeNestedScroll.y
+            : // ? meta.deltaPosition.y + meta.initNestedNodeOffsets.y - gap - meta.initNodeNestedScroll.y
               0
       };
 
-      // containerScrollOffsets: { x: 0, y: 0 },
-      // sourceScrollOffsets: { x: 0, y: 0 },
-      // initClickPosition: { x: 0, y: 0 },
-      // containerScroll: { x: 0, y: 0 },
-      // startPosition: { x: 0, y: 0 },
+      // initContainerNestedScroll: { x: 0, y: 0 },
+      // initNodeNestedScroll: { x: 0, y: 0 },
+
+      // initContainerScroll: { x: 0, y: 0 },
+      // initRelatedContainerPosition: { x: 0, y: 0 },
+      // initPosition: { x: 0, y: 0 },
       // deltaPosition: { x: 0, y: 0 },
-      // edgeOffsets: { x: 0, y: 0 },
+      // initNestedNodeOffsets: { x: 0, y: 0 },
       // deltaRects: { x: 0, y: 0 },
 
       // meta.deltaRects
-      // meta.containerScrollOffsets
-      // meta.sourceScrollOffsets
+      // meta.initContainerNestedScroll
+      // meta.initNodeNestedScroll
 
       node.setHelperNodePosition(translate);
     }
 
-    updateScroll(meta.deltaPosition, meta.initClickPosition);
+    updateScroll(meta.deltaPosition, meta.initRelatedContainerPosition);
 
     // Adjust for window scroll
     //  translate.y -= window.scrollY - this.initialWindowScroll.top;
@@ -157,26 +158,26 @@ export default function DragAndDropSortingContainer({
     ) => {
       const meta = sort.current;
 
-      meta.startPosition = getEventCoordinates(event);
+      meta.initPosition = getEventCoordinates(event);
       document.addEventListener('mousemove', onDrag, { passive: false });
       document.addEventListener('mouseup', onDrop);
 
-      meta.edgeOffsets = getEdgeOffset(node.current, dndSortingContainer.current);
+      meta.initNestedNodeOffsets = getNestedNodeOffset(node.current, dndSortingContainer.current);
 
       const scrollableNodeAncestors = getScrollableAncestors(node.current);
-      meta.sourceScrollOffsets = getScrollOffsets(scrollableNodeAncestors);
+      meta.initNodeNestedScroll = getNestedScrollOffsets(scrollableNodeAncestors);
 
-      const scrollableContainerAncestors = getScrollableAncestors(node.current?.parentElement);
-      meta.containerScrollOffsets = getScrollOffsets(scrollableContainerAncestors);
+      const scrollableContainerAncestors = getScrollableAncestors(dndSortingContainer.current);
+      meta.initContainerNestedScroll = getNestedScrollOffsets(scrollableContainerAncestors);
 
       meta.activeIndex = index;
       meta.activeNodeRect = sourceDomRect;
       meta.sourceKey = sourceKye;
       meta.containerRect = dndSortingContainer.current?.getBoundingClientRect() || null;
 
-      meta.initClickPosition = {
-        x: meta.startPosition.x - (meta.containerRect?.x || 0),
-        y: meta.startPosition.y - (meta.containerRect?.y || 0)
+      meta.initRelatedContainerPosition = {
+        x: meta.initPosition.x - (meta.containerRect?.x || 0),
+        y: meta.initPosition.y - (meta.containerRect?.y || 0)
       };
 
       console.log(
@@ -188,7 +189,7 @@ export default function DragAndDropSortingContainer({
         dndSortingContainer.current?.offsetHeight
       );
 
-      meta.containerScroll = isWindowScrollContainer
+      meta.initContainerScroll = isWindowScrollContainer
         ? {
             x: window.scrollX,
             y: window.scrollY
