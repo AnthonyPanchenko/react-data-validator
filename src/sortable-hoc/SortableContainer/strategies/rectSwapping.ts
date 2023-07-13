@@ -1,6 +1,4 @@
-import type { SortingStrategy } from '../types';
-
-export const rectSwappingStrategy: SortingStrategy = ({ activeIndex, index, rects, overIndex }) => {
+export default function rectSwappingStrategy({ activeIndex, index, rects, overIndex }) {
   let oldRect;
   let newRect;
 
@@ -20,8 +18,6 @@ export const rectSwappingStrategy: SortingStrategy = ({ activeIndex, index, rect
 
   return {
     x: newRect.left - oldRect.left,
-    y: newRect.top - oldRect.top,
-    scaleX: newRect.width / oldRect.width,
-    scaleY: newRect.height / oldRect.height
+    y: newRect.top - oldRect.top
   };
-};
+}

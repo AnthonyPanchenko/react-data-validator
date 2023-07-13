@@ -1,20 +1,10 @@
-import type { ClientRect } from '@dnd-kit/core';
-
-import type { SortingStrategy } from '../types';
-
-// To-do: We should be calculating scale transformation
-const defaultScale = {
-  scaleX: 1,
-  scaleY: 1
-};
-
-export const verticalListSortingStrategy: SortingStrategy = ({
+export default function verticalListSorting({
   activeIndex,
   activeNodeRect: fallbackActiveRect,
   index,
   rects,
   overIndex
-}) => {
+}) {
   const activeNodeRect = rects[activeIndex] ?? fallbackActiveRect;
 
   if (!activeNodeRect) {
@@ -33,8 +23,7 @@ export const verticalListSortingStrategy: SortingStrategy = ({
       y:
         activeIndex < overIndex
           ? overIndexRect.top + overIndexRect.height - (activeNodeRect.top + activeNodeRect.height)
-          : overIndexRect.top - activeNodeRect.top,
-      ...defaultScale
+          : overIndexRect.top - activeNodeRect.top
     };
   }
 
@@ -43,25 +32,22 @@ export const verticalListSortingStrategy: SortingStrategy = ({
   if (index > activeIndex && index <= overIndex) {
     return {
       x: 0,
-      y: -activeNodeRect.height - itemGap,
-      ...defaultScale
+      y: -activeNodeRect.height - itemGap
     };
   }
 
   if (index < activeIndex && index >= overIndex) {
     return {
       x: 0,
-      y: activeNodeRect.height + itemGap,
-      ...defaultScale
+      y: activeNodeRect.height + itemGap
     };
   }
 
   return {
     x: 0,
-    y: 0,
-    ...defaultScale
+    y: 0
   };
-};
+}
 
 function getItemGap(clientRects: ClientRect[], index: number, activeIndex: number) {
   const currentRect: ClientRect | undefined = clientRects[index];

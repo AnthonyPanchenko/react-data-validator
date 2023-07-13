@@ -65,13 +65,16 @@ export default function DragAndDropSortingContainer({
     console.log('STOP SCROLLING');
   };
 
-  const [dndSortingContainer, updateScroll] = useAutoScroller(reRangeNodesPositions, {
-    axis,
-    interval: 5,
-    threshold: 0.45,
-    minSpeed: 2,
-    maxSpeed: 10
-  });
+  const [dndSortingContainer, updateScroll, clearAutoScrollInterval] = useAutoScroller(
+    reRangeNodesPositions,
+    {
+      axis,
+      interval: 5,
+      threshold: 0.45,
+      minSpeed: 2,
+      maxSpeed: 10
+    }
+  );
 
   const onDrag = (event: MouseEvent) => {
     if (typeof event.preventDefault === 'function' && event.cancelable) {
@@ -95,33 +98,13 @@ export default function DragAndDropSortingContainer({
 
     if (meta.containerRect && meta.initContainerScroll) {
       const gap = 30;
-      const translate = {
-        x:
-          axis === 'x'
-            ? meta.deltaPosition.x + meta.initNestedNodeOffsets.x + meta.initContainerScroll.x - gap
-            : 0,
-        y:
-          axis === 'y'
-            ? meta.deltaPosition.y + meta.deltaRects.y - meta.initNodeNestedScroll.y
-            : // ? meta.deltaPosition.y + meta.initNestedNodeOffsets.y - gap - meta.initNodeNestedScroll.y
-              0
-      };
 
-      // initContainerNestedScroll: { x: 0, y: 0 },
-      // initNodeNestedScroll: { x: 0, y: 0 },
+      const translate =
+        meta.deltaPosition.y + meta.initNestedNodeOffsets.y - gap - meta.initNodeNestedScroll.y;
 
-      // initContainerScroll: { x: 0, y: 0 },
-      // initRelatedContainerPosition: { x: 0, y: 0 },
-      // initPosition: { x: 0, y: 0 },
-      // deltaPosition: { x: 0, y: 0 },
-      // initNestedNodeOffsets: { x: 0, y: 0 },
-      // deltaRects: { x: 0, y: 0 },
+      // const translate = meta.deltaPosition.y + meta.initNestedNodeOffsets.y - gap - meta.initNodeNestedScroll.y;
 
-      // meta.deltaRects
-      // meta.initContainerNestedScroll
-      // meta.initNodeNestedScroll
-
-      node.setHelperNodePosition(translate);
+      node.setHelperNodePosition({ x: 0, y: translate });
     }
 
     updateScroll(meta.deltaPosition, meta.initRelatedContainerPosition);
@@ -132,7 +115,8 @@ export default function DragAndDropSortingContainer({
   };
 
   const onDrop = (event: MouseEvent) => {
-    console.log(event);
+    clearAutoScrollInterval();
+
     const meta = sort.current;
     document.removeEventListener('mousemove', onDrag);
     document.removeEventListener('mouseup', onDrop);
@@ -180,15 +164,6 @@ export default function DragAndDropSortingContainer({
         y: meta.initPosition.y - (meta.containerRect?.y || 0)
       };
 
-      console.log(
-        'scrollHeight: ',
-        dndSortingContainer.current?.scrollHeight,
-        'clientHeight: ',
-        dndSortingContainer.current?.clientHeight,
-        'offsetHeight: ',
-        dndSortingContainer.current?.offsetHeight
-      );
-
       meta.initContainerScroll = isWindowScrollContainer
         ? {
             x: window.scrollX,
@@ -200,9 +175,24 @@ export default function DragAndDropSortingContainer({
           };
 
       meta.deltaRects = {
-        x: sourceDomRect.top - (meta.containerRect?.top || 0),
-        y: sourceDomRect.left - (meta.containerRect?.left || 0)
+        x: meta.activeNodeRect.x - (meta.containerRect?.x || 0),
+        y: meta.activeNodeRect.y - (meta.containerRect?.y || 0)
       };
+
+      const result = meta.deltaPosition.y + meta.deltaRects.y - meta.initNodeNestedScroll.y;
+      // const result = meta.deltaPosition.y + meta.initNestedNodeOffsets.y - gap - meta.initNodeNestedScroll.y;
+      console.clear();
+      console.table({
+        initContainerNestedScroll: meta.initContainerNestedScroll.y,
+        initNodeNestedScroll: meta.initNodeNestedScroll.y,
+        initContainerScroll: meta.initContainerScroll.y,
+        deltaPosition: meta.deltaPosition.y,
+        initNestedNodeOffsets: meta.initNestedNodeOffsets.y,
+        deltaRects: meta.deltaRects.y,
+        containerRect: meta.containerRect?.y,
+        activeNodeRect: meta.activeNodeRect?.y,
+        result
+      });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []

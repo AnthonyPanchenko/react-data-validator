@@ -32,10 +32,6 @@ export const events = {
   start: ['touchstart', 'mousedown']
 };
 
-// export function setTranslate3d(node, translate) {
-//   node.style.transform = translate == null ? '' : `translate(${translate.x}px,${translate.y}px)`;
-// }
-
 export function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(value, max));
 }

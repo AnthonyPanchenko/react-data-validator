@@ -1,7 +1,7 @@
 import { useCallback, useRef } from 'react';
 
-import { debounce } from '@/components/utils';
 import { useInterval } from '@/sortable-hoc/SortableContainer/scroll/useInterval';
+import { useTimeOut } from '@/sortable-hoc/SortableContainer/scroll/useTimeOut';
 import { Coordinates } from '@/sortable-hoc/types';
 import { clamp } from '@/sortable-hoc/utils';
 
@@ -20,11 +20,12 @@ type AutoScrollerSettings = {
 };
 
 export function useAutoScroller(
-  onStopScroll: () => void,
+  onStopInteraction: () => void,
   { axis, interval, threshold, minSpeed, maxSpeed }: AutoScrollerOptions
 ): [
   React.MutableRefObject<HTMLDivElement | null>,
-  (delta: Coordinates, initClickPos: Coordinates) => void
+  (delta: Coordinates, initClickPos: Coordinates) => void,
+  () => void
 ] {
   const scrollContainer = useRef<HTMLDivElement | null>(null);
   const scroll = useRef<AutoScrollerSettings>({
@@ -34,9 +35,7 @@ export function useAutoScroller(
   });
 
   const [setScrollInterval, clearScrollInterval] = useInterval(interval);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedStopScroll = useCallback(debounce(onStopScroll, 300), [onStopScroll]);
+  const [setInteractionTimeOut, clearInteractionTimeOut] = useTimeOut(300);
 
   const scrollView = useCallback(() => {
     const container = scrollContainer.current;
@@ -51,7 +50,8 @@ export function useAutoScroller(
 
       if (container.scrollTop === scroll.current.max[axis] || container.scrollTop === 0) {
         clearScrollInterval();
-        debouncedStopScroll();
+        clearInteractionTimeOut();
+        setInteractionTimeOut(onStopInteraction);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -59,7 +59,8 @@ export function useAutoScroller(
 
   const updateScroll = useCallback((delta: Coordinates, pos: Coordinates) => {
     const container = scrollContainer.current;
-
+    clearInteractionTimeOut();
+    setInteractionTimeOut(onStopInteraction);
     if (container && container.scrollHeight <= container.clientHeight) {
       return;
     }
@@ -83,6 +84,7 @@ export function useAutoScroller(
       scroll.current.speed[axis] = clamp(normAcceleration * maxSpeed, minSpeed, maxSpeed);
 
       if (normAcceleration > threshold) {
+        clearInteractionTimeOut();
         setScrollInterval(scrollView);
       } else {
         clearScrollInterval();
@@ -91,7 +93,7 @@ export function useAutoScroller(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return [scrollContainer, updateScroll];
+  return [scrollContainer, updateScroll, clearScrollInterval];
 }
 
 function getNormalizedAcceleration(

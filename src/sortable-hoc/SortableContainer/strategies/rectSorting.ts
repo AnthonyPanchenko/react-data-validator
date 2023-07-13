@@ -1,7 +1,4 @@
-import type { SortingStrategy } from '../types';
-import { arrayMove } from '../utilities';
-
-export const rectSortingStrategy: SortingStrategy = ({ rects, activeIndex, overIndex, index }) => {
+export default function rectSortingStrategy({ rects, activeIndex, overIndex, index }) {
   const newRects = arrayMove(rects, overIndex, activeIndex);
 
   const oldRect = rects[index];
@@ -13,8 +10,6 @@ export const rectSortingStrategy: SortingStrategy = ({ rects, activeIndex, overI
 
   return {
     x: newRect.left - oldRect.left,
-    y: newRect.top - oldRect.top,
-    scaleX: newRect.width / oldRect.width,
-    scaleY: newRect.height / oldRect.height
+    y: newRect.top - oldRect.top
   };
-};
+}
