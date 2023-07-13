@@ -29,16 +29,15 @@ export default function DragAndDropSortingContainer({
     index: 0,
     sourceKey: '',
     direction: Direction.Static,
-    containerScroll: { top: 0, left: 0 },
     containerScrollOffsets: { x: 0, y: 0 },
+    sourceScrollOffsets: { x: 0, y: 0 },
+    initClickPosition: { x: 0, y: 0 },
+    containerScroll: { x: 0, y: 0 },
     startPosition: { x: 0, y: 0 },
     deltaPosition: { x: 0, y: 0 },
-    initClickPosition: { x: 0, y: 0 },
-    deltaRects: { top: 0, left: 0 },
+    edgeOffsets: { x: 0, y: 0 },
+    deltaRects: { x: 0, y: 0 },
     containerRect: null,
-    sourceOffsets: { top: 0, left: 0 },
-    sourceScrollOffsets: { x: 0, y: 0 },
-    edgeOffsets: { top: 0, left: 0 },
     activeNodeRect: null,
     registeredItems: {}
   });
@@ -99,14 +98,23 @@ export default function DragAndDropSortingContainer({
       const translate = {
         x:
           axis === 'x'
-            ? meta.deltaPosition.x + meta.edgeOffsets.left + meta.containerScroll.left - gap
+            ? meta.deltaPosition.x + meta.edgeOffsets.x + meta.containerScroll.x - gap
             : 0,
         y:
           axis === 'y'
-            ? meta.deltaPosition.y + meta.deltaRects.top - meta.sourceScrollOffsets.y
-            : // ? meta.deltaPosition.y + meta.edgeOffsets.top - gap - meta.sourceScrollOffsets.y
+            ? meta.deltaPosition.y + meta.deltaRects.y - meta.sourceScrollOffsets.y
+            : // ? meta.deltaPosition.y + meta.edgeOffsets.y - gap - meta.sourceScrollOffsets.y
               0
       };
+
+      // containerScrollOffsets: { x: 0, y: 0 },
+      // sourceScrollOffsets: { x: 0, y: 0 },
+      // initClickPosition: { x: 0, y: 0 },
+      // containerScroll: { x: 0, y: 0 },
+      // startPosition: { x: 0, y: 0 },
+      // deltaPosition: { x: 0, y: 0 },
+      // edgeOffsets: { x: 0, y: 0 },
+      // deltaRects: { x: 0, y: 0 },
 
       // meta.deltaRects
       // meta.containerScrollOffsets
@@ -182,17 +190,17 @@ export default function DragAndDropSortingContainer({
 
       meta.containerScroll = isWindowScrollContainer
         ? {
-            left: window.scrollX,
-            top: window.scrollY
+            x: window.scrollX,
+            y: window.scrollY
           }
         : {
-            left: dndSortingContainer.current?.scrollLeft || 0,
-            top: dndSortingContainer.current?.scrollTop || 0
+            x: dndSortingContainer.current?.scrollLeft || 0,
+            y: dndSortingContainer.current?.scrollTop || 0
           };
 
       meta.deltaRects = {
-        top: sourceDomRect.top - (meta.containerRect?.top || 0),
-        left: sourceDomRect.left - (meta.containerRect?.left || 0)
+        x: sourceDomRect.top - (meta.containerRect?.top || 0),
+        y: sourceDomRect.left - (meta.containerRect?.left || 0)
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

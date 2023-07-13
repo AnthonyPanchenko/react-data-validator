@@ -1,4 +1,4 @@
-import { Coordinates, Offsets } from '@/sortable-hoc/types';
+import { Coordinates } from '@/sortable-hoc/types';
 
 export enum Direction {
   Forward = 1,
@@ -222,15 +222,15 @@ export function getScrollPosition(scrollingContainer: Element) {
 export function getEdgeOffset(
   node: HTMLElement | null,
   parent: HTMLElement | null,
-  offset = { left: 0, top: 0 }
-): Offsets {
+  offset = { x: 0, y: 0 }
+): Coordinates {
   if (!node || !parent) {
     return offset;
   }
 
   const nodeOffset = {
-    left: offset.left + node.offsetLeft,
-    top: offset.top + node.offsetTop
+    x: offset.x + node.offsetLeft,
+    y: offset.y + node.offsetTop
   };
 
   if (node.parentNode === parent) {
