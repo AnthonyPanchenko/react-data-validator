@@ -13,33 +13,6 @@ export interface ClientRect {
   bottom: number;
 }
 
-export type DnDSortingValues = {
-  isMoving: boolean;
-  activeIndex: number;
-  index: number;
-  overIndex: number;
-  sourceKey: string;
-  direction: Direction;
-  deltaRects: Coordinates;
-  initPosition: Coordinates;
-  deltaPosition: Coordinates;
-  initRelatedContainerPosition: Coordinates;
-  containerRect: DOMRect | null;
-  initContainerScroll: Coordinates;
-  initContainerNestedScroll: Coordinates;
-  initNodeNestedScroll: Coordinates;
-  initNestedNodeOffsets: Coordinates;
-  activeNodeRect: DOMRect | null;
-  registeredItems: Record<string, SortingItemsData>;
-};
-
-export type SortingItemsData = {
-  setListRelatedPosition: (cords: Coordinates) => void;
-  setActiveSourceState: (isActive: boolean) => void;
-  setHelperNodePosition: (cords: Coordinates) => void;
-  domRect: DOMRect;
-};
-
 export type Coordinates = {
   x: number;
   y: number;

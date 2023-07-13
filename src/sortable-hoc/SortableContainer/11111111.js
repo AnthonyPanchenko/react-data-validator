@@ -28,62 +28,7 @@ onstart = () => {
   }
 }
 
-  handleSortEnd = event => {
-    const { onSortEnd } = this.props;
-    const {
-      active: { collection }
-    } = this.manager;
-    const nodes = this.manager.getOrderedRefs();
-
-    // Remove the helper from the DOM
-    this.helper.parentNode.removeChild(this.helper);
-
-    if (this.sortableGhost) {
-      setInlineStyles(this.sortableGhost, {
-        opacity: '',
-        visibility: ''
-      });
-    }
-
-    for (let i = 0, len = nodes.length; i < len; i++) {
-      const node = nodes[i];
-      const el = node.node;
-
-      // Clear the cached offset/boundingClientRect
-      node.edgeOffset = null;
-      node.boundingClientRect = null;
-
-      // Remove the transforms / transitions
-      setTranslate3d(el, null);
-      node.translate = null;
-    }
-
-    // Stop autoscroll
-    this.autoScroller.clear();
-
-    // Update manager state
-    this.manager.active = null;
-
-    this.setState({
-      sorting: false,
-      sortingIndex: null
-    });
-
-    if (typeof onSortEnd === 'function') {
-      onSortEnd(
-        {
-          collection,
-          newIndex: this.newIndex,
-          oldIndex: this.index,
-          nodes
-        },
-        event
-      );
-    }
-  };
-
   animateNodes() {
-    const { transitionDuration } = this.props;
     const { containerScrollDelta, windowScrollDelta } = this;
     const nodes = this.manager.getOrderedRefs();
     const sortingOffset = {
@@ -96,6 +41,7 @@ onstart = () => {
     for (let i = 0, len = nodes.length; i < len; i++) {
       const { node } = nodes[i];
       const { index } = node.sortableInfo;
+      
       const width = node.offsetWidth;
       const height = node.offsetHeight;
       const offset = {
@@ -130,10 +76,6 @@ onstart = () => {
         });
 
         continue;
-      }
-
-      if (transitionDuration) {
-        setTransitionDuration(node, transitionDuration);
       }
 
       if (this.axis.x) {

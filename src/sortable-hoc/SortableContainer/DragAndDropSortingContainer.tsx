@@ -1,72 +1,70 @@
 import { useCallback, useRef } from 'react';
 
+import { DraggableSortableNode } from '@/sortable-hoc/getDraggableSortableNode';
 import { DragAndDropSortingContext } from '@/sortable-hoc/SortableContainer/drag-and-drop-sorting-context';
 import { getNestedScrollOffsets } from '@/sortable-hoc/SortableContainer/scroll/getNestedScrollOffsets';
 import { getScrollableAncestors } from '@/sortable-hoc/SortableContainer/scroll/getScrollableAncestors';
 import { useAutoScroller } from '@/sortable-hoc/SortableContainer/scroll/useAutoScroller';
-import { Coordinates, DnDSortingValues } from '@/sortable-hoc/types';
-import { Direction, getEventCoordinates, getNestedNodeOffset } from '@/sortable-hoc/utils';
+import { Coordinates } from '@/sortable-hoc/types';
+import { getEventCoordinates, getNestedNodeOffset } from '@/sortable-hoc/utils';
 
 type PropsTypes = {
   axis: keyof Coordinates;
   className?: string;
-  isWindowScrollContainer?: boolean;
   children: React.ReactNode | React.ReactNode[] | null;
   onSortDropChange: (fromIndex: number, toIndex: number) => void;
+};
+
+type DragAndDropSortableState = {
+  activeNode: DraggableSortableNode | null;
+  containerRect: DOMRect | null;
+  deltaRects: Coordinates;
+  initPosition: Coordinates;
+  deltaPosition: Coordinates;
+  initRelatedContainerPosition: Coordinates;
+  initContainerScroll: Coordinates;
+  initContainerNestedScroll: Coordinates;
+  initNodeNestedScroll: Coordinates;
+  initNestedNodeOffsets: Coordinates;
+  entries: Array<DraggableSortableNode>;
 };
 
 export default function DragAndDropSortingContainer({
   axis,
   className,
   children,
-  onSortDropChange,
-  isWindowScrollContainer = false
+  onSortDropChange
 }: PropsTypes) {
-  const sort = useRef<DnDSortingValues>({
-    isMoving: false,
-    activeIndex: 0,
-    overIndex: 0,
-    index: 0,
-    sourceKey: '',
-    direction: Direction.Static,
+  const sort = useRef<DragAndDropSortableState>({
+    activeNode: null,
+    containerRect: null,
     initRelatedContainerPosition: { x: 0, y: 0 },
     initContainerNestedScroll: { x: 0, y: 0 },
+    initNestedNodeOffsets: { x: 0, y: 0 },
     initContainerScroll: { x: 0, y: 0 },
     initNodeNestedScroll: { x: 0, y: 0 },
     initPosition: { x: 0, y: 0 },
     deltaPosition: { x: 0, y: 0 },
-    initNestedNodeOffsets: { x: 0, y: 0 },
     deltaRects: { x: 0, y: 0 },
-    containerRect: null,
-    activeNodeRect: null,
-    registeredItems: {}
+    entries: []
   });
 
-  const registerStateSetters = useCallback(
-    (
-      setListRelatedPosition: (cords: Coordinates) => void,
-      setActiveSourceState: (isActive: boolean) => void,
-      setHelperNodePosition: (cords: Coordinates) => void,
-      sourceKye: string,
-      domRect: DOMRect
-    ) => {
-      sort.current.registeredItems[sourceKye] = {
-        setListRelatedPosition,
-        setActiveSourceState,
-        setHelperNodePosition,
-        domRect
-      };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    },
-    []
-  );
+  const registerSortableNode = useCallback((node: DraggableSortableNode) => {
+    sort.current.entries.push(node);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const reRangeNodesPositions = () => {
+  const unRegisterSortableNode = useCallback((index: number) => {
+    sort.current.entries.splice(index, 1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const reGroupPositionsOfNodes = () => {
     console.log('STOP SCROLLING');
   };
 
   const [dndSortingContainer, updateScroll, clearAutoScrollInterval] = useAutoScroller(
-    reRangeNodesPositions,
+    reGroupPositionsOfNodes,
     {
       axis,
       interval: 5,
@@ -82,34 +80,29 @@ export default function DragAndDropSortingContainer({
     }
 
     const meta = sort.current;
-    const node = meta.registeredItems[meta.sourceKey];
 
-    if (!meta.isMoving) {
-      meta.isMoving = true;
-      node.setActiveSourceState(true);
-    }
+    if (meta.activeNode && meta.containerRect && meta.initContainerScroll) {
+      meta.activeNode.setActiveState(true);
 
-    const pos = getEventCoordinates(event);
+      const pos = getEventCoordinates(event);
 
-    meta.deltaPosition = {
-      x: pos.x - meta.initPosition.x,
-      y: pos.y - meta.initPosition.y
-    };
+      meta.deltaPosition[axis] = pos[axis] - meta.initPosition[axis];
 
-    if (meta.containerRect && meta.initContainerScroll) {
       const gap = 30;
 
       const translate =
-        meta.deltaPosition.y + meta.initNestedNodeOffsets.y - gap - meta.initNodeNestedScroll.y;
+        meta.deltaPosition[axis] +
+        meta.initNestedNodeOffsets[axis] -
+        gap -
+        meta.initNodeNestedScroll[axis];
 
       // const translate = meta.deltaPosition.y + meta.initNestedNodeOffsets.y - gap - meta.initNodeNestedScroll.y;
 
-      node.setHelperNodePosition({ x: 0, y: translate });
+      meta.activeNode.setHelperPosition({ x: 0, y: translate });
+
+      updateScroll(meta.deltaPosition, meta.initRelatedContainerPosition);
     }
 
-    updateScroll(meta.deltaPosition, meta.initRelatedContainerPosition);
-
-    // Adjust for window scroll
     //  translate.y -= window.scrollY - this.initialWindowScroll.top;
     //  translate.x -= window.scrollX - this.initialWindowScroll.left;
   };
@@ -121,78 +114,70 @@ export default function DragAndDropSortingContainer({
     document.removeEventListener('mousemove', onDrag);
     document.removeEventListener('mouseup', onDrop);
 
-    if (meta.isMoving) {
-      meta.isMoving = false;
-      meta.registeredItems[meta.sourceKey].setActiveSourceState(false);
+    if (meta.activeNode) {
+      meta.activeNode.setActiveState(false);
+      meta.activeNode = null;
     }
   };
 
-  const unRegisterStateSetters = useCallback((sourceKye: string) => {
-    delete sort.current.registeredItems[sourceKye];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const reRange = (container: HTMLElement) => {
+    const meta = sort.current;
+    const result = meta.deltaPosition.y + meta.deltaRects.y - meta.initNodeNestedScroll.y;
+    // const result = meta.deltaPosition.y + meta.initNestedNodeOffsets.y - gap - meta.initNodeNestedScroll.y;
+    console.clear();
+    console.table({
+      initContainerNestedScroll: meta.initContainerNestedScroll.y,
+      initNodeNestedScroll: meta.initNodeNestedScroll.y,
+      initContainerScroll: meta.initContainerScroll.y,
+      deltaPosition: meta.deltaPosition.y,
+      initNestedNodeOffsets: meta.initNestedNodeOffsets.y,
+      deltaRects: meta.deltaRects.y,
+      containerRect: meta.containerRect?.y,
+      activeNode: meta.activeNode?.initPosition.y,
+      result
+    });
+    console.log(meta.entries);
+  };
 
   const onStartDrag = useCallback(
     (
-      index: number,
-      sourceKye: string,
       event: MouseEvent | TouchEvent,
-      sourceDomRect: DOMRect,
-      node: React.MutableRefObject<HTMLElement | null>
+      node: DraggableSortableNode,
+      originNode: React.MutableRefObject<HTMLElement | null>
     ) => {
       const meta = sort.current;
 
+      meta.activeNode = node;
       meta.initPosition = getEventCoordinates(event);
       document.addEventListener('mousemove', onDrag, { passive: false });
       document.addEventListener('mouseup', onDrop);
 
-      meta.initNestedNodeOffsets = getNestedNodeOffset(node.current, dndSortingContainer.current);
+      meta.initNestedNodeOffsets = getNestedNodeOffset(
+        originNode.current,
+        dndSortingContainer.current
+      );
 
-      const scrollableNodeAncestors = getScrollableAncestors(node.current);
+      const scrollableNodeAncestors = getScrollableAncestors(originNode.current);
       meta.initNodeNestedScroll = getNestedScrollOffsets(scrollableNodeAncestors);
 
       const scrollableContainerAncestors = getScrollableAncestors(dndSortingContainer.current);
       meta.initContainerNestedScroll = getNestedScrollOffsets(scrollableContainerAncestors);
 
-      meta.activeIndex = index;
-      meta.activeNodeRect = sourceDomRect;
-      meta.sourceKey = sourceKye;
-      meta.containerRect = dndSortingContainer.current?.getBoundingClientRect() || null;
+      if (dndSortingContainer.current) {
+        meta.containerRect = dndSortingContainer.current.getBoundingClientRect();
 
-      meta.initRelatedContainerPosition = {
-        x: meta.initPosition.x - (meta.containerRect?.x || 0),
-        y: meta.initPosition.y - (meta.containerRect?.y || 0)
-      };
+        meta.initRelatedContainerPosition[axis] =
+          meta.initPosition[axis] - meta.containerRect[axis];
 
-      meta.initContainerScroll = isWindowScrollContainer
-        ? {
-            x: window.scrollX,
-            y: window.scrollY
-          }
-        : {
-            x: dndSortingContainer.current?.scrollLeft || 0,
-            y: dndSortingContainer.current?.scrollTop || 0
-          };
+        meta.initContainerScroll = {
+          x: dndSortingContainer.current.scrollLeft,
+          y: dndSortingContainer.current.scrollTop
+        };
 
-      meta.deltaRects = {
-        x: meta.activeNodeRect.x - (meta.containerRect?.x || 0),
-        y: meta.activeNodeRect.y - (meta.containerRect?.y || 0)
-      };
+        meta.deltaRects[axis] = meta.activeNode.initPosition[axis] - meta.containerRect[axis];
 
-      const result = meta.deltaPosition.y + meta.deltaRects.y - meta.initNodeNestedScroll.y;
-      // const result = meta.deltaPosition.y + meta.initNestedNodeOffsets.y - gap - meta.initNodeNestedScroll.y;
-      console.clear();
-      console.table({
-        initContainerNestedScroll: meta.initContainerNestedScroll.y,
-        initNodeNestedScroll: meta.initNodeNestedScroll.y,
-        initContainerScroll: meta.initContainerScroll.y,
-        deltaPosition: meta.deltaPosition.y,
-        initNestedNodeOffsets: meta.initNestedNodeOffsets.y,
-        deltaRects: meta.deltaRects.y,
-        containerRect: meta.containerRect?.y,
-        activeNodeRect: meta.activeNodeRect?.y,
-        result
-      });
+        reRange(dndSortingContainer.current);
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
@@ -201,8 +186,8 @@ export default function DragAndDropSortingContainer({
   return (
     <DragAndDropSortingContext.Provider
       value={{
-        registerStateSetters,
-        unRegisterStateSetters,
+        registerSortableNode,
+        unRegisterSortableNode,
         onStartDrag
       }}
     >

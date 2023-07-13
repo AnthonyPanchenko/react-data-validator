@@ -1,98 +1,67 @@
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 
+import { getDraggableSortableNode } from '@/sortable-hoc/getDraggableSortableNode';
 import { DragAndDropSortingContext } from '@/sortable-hoc/SortableContainer/drag-and-drop-sorting-context';
 import { Coordinates } from '@/sortable-hoc/types';
-import { miniUID } from '@/sortable-hoc/utils';
-
-type CurrentMetaDataType = {
-  sourceKye: string;
-  rect: DOMRect | null;
-};
-
-// const PRESS_DELAY =
-
-// pressDelay: 0,
-// pressThreshold: 5,
 
 export default function useDragAndDropSortingSource<TElement extends HTMLElement>(
-  currentIndex: number
+  index: number
 ): [
-  string,
   React.MutableRefObject<TElement | null>,
-  (event: React.MouseEvent<TElement>) => void,
+  Coordinates,
+  Coordinates,
   boolean,
-  Coordinates,
-  Coordinates,
-  DOMRect | null
+  (event: React.MouseEvent<TElement>) => void
 ] {
   const sortingContext = useContext(DragAndDropSortingContext);
-  const [isActive, setActiveSourceState] = useState<boolean>(false);
-  const [listRelatedPosition, setListRelatedPosition] = useState<Coordinates>({ x: 0, y: 0 });
-  const [globalTranslatePosition, setHelperNodePosition] = useState<Coordinates>({
+  const [isActive, setActiveNodeState] = useState<boolean>(false);
+  const [offsetPosition, setNodePosition] = useState<Coordinates>({ x: 0, y: 0 });
+  const [helperPosition, setHelperNodePosition] = useState<Coordinates>({
     x: 0,
     y: 0
   });
 
-  const sourceElementRef = useRef<TElement | null>(null);
-
-  const currentMetaData = useRef<CurrentMetaDataType>({
-    sourceKye: '',
-    rect: null
-  });
+  const sortableNodeRef = useRef<TElement | null>(null);
 
   useEffect(() => {
-    let constantSourceKye = '';
-
-    if (!currentMetaData.current.sourceKye && !constantSourceKye && sourceElementRef.current) {
-      constantSourceKye = miniUID();
-
-      const domRect = sourceElementRef.current.getBoundingClientRect();
-      currentMetaData.current.rect = domRect;
-
-      sortingContext.registerStateSetters(
-        setListRelatedPosition,
-        setActiveSourceState,
-        setHelperNodePosition,
-        constantSourceKye,
-        domRect
+    if (sortableNodeRef.current) {
+      const node = getDraggableSortableNode(
+        sortableNodeRef.current,
+        index,
+        setNodePosition,
+        setActiveNodeState,
+        setHelperNodePosition
       );
 
-      currentMetaData.current.sourceKye = constantSourceKye;
+      sortingContext.registerSortableNode(node);
+      console.log('registerSortableNode: ', node);
     }
 
     return () => {
-      sortingContext.unRegisterStateSetters(constantSourceKye);
+      console.log('unRegisterSortableNode: ', index);
+      sortingContext.unRegisterSortableNode(index);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [index]);
 
   const onStartPressElement = useCallback(
     (event: React.MouseEvent<TElement>) => {
-      if (sourceElementRef.current && !shouldCancelStart(event as unknown as MouseEvent)) {
-        const sourceDomRect = sourceElementRef.current.getBoundingClientRect();
-        currentMetaData.current.rect = sourceDomRect;
-        sortingContext.onStartDrag(
-          currentIndex,
-          currentMetaData.current.sourceKye,
-          event as unknown as MouseEvent,
-          sourceDomRect,
-          sourceElementRef
+      if (sortableNodeRef.current && !shouldCancelStart(event as unknown as MouseEvent)) {
+        const node = getDraggableSortableNode(
+          sortableNodeRef.current,
+          index,
+          setNodePosition,
+          setActiveNodeState,
+          setHelperNodePosition
         );
+        sortingContext.onStartDrag(event as unknown as MouseEvent, node, sortableNodeRef);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
-  return [
-    currentMetaData.current.sourceKye,
-    sourceElementRef,
-    onStartPressElement,
-    isActive,
-    listRelatedPosition,
-    globalTranslatePosition,
-    currentMetaData.current.rect
-  ];
+  return [sortableNodeRef, helperPosition, offsetPosition, isActive, onStartPressElement];
 }
 
 const interactiveElements = ['A', 'BUTTON', 'CANVAS', 'INPUT', 'OPTION', 'TEXTAREA', 'SELECT'];
@@ -105,23 +74,6 @@ function shouldCancelStart(event: MouseEvent | TouchEvent) {
 }
 
 /*
-   componentDidUpdate(prevProps) {
-      if (this.node) {
-        if (prevProps.index !== this.props.index) {
-          this.node.sortableInfo.index = this.props.index;
-        }
-
-        if (prevProps.disabled !== this.props.disabled) {
-          this.node.sortableInfo.disabled = this.props.disabled;
-        }
-      }
-
-      if (prevProps.collection !== this.props.collection) {
-        this.unregister(prevProps.collection);
-        this.register();
-      }
-    }
-
    if (!isTouchEvent(event) && event.target.tagName === NodeType.Anchor) {
         event.preventDefault();
       }

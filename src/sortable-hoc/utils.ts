@@ -22,9 +22,9 @@ export function arraySwap<T>(array: ReadonlyArray<T>, from: number, to: number):
   return newArray;
 }
 
-export function miniUID(): string {
-  return Math.random().toString(36).substring(2, 12) + Math.random().toString(36).substring(2, 10);
-}
+// export function miniUID(): string {
+//   return Math.random().toString(36).substring(2, 12) + Math.random().toString(36).substring(2, 10);
+// }
 
 export const events = {
   end: ['touchend', 'touchcancel', 'mouseup'],

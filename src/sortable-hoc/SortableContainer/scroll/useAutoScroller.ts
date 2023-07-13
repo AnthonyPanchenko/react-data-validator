@@ -28,6 +28,7 @@ export function useAutoScroller(
   () => void
 ] {
   const scrollContainer = useRef<HTMLDivElement | null>(null);
+
   const scroll = useRef<AutoScrollerSettings>({
     speed: { x: 0, y: 0 },
     direction: { x: 0, y: 0 },
@@ -108,73 +109,3 @@ function getNormalizedAcceleration(
 
   return Math.abs(direction < 0 ? delta / clickPos : delta / (h - clickPos));
 }
-
-/*
-  useEffect(
-    () => {
-      if (!enabled || !scrollableAncestors.length || !rect) {
-        clearAutoScrollInterval();
-        return;
-      }
-
-      const index = scrollableAncestors.indexOf(scrollContainer);
-      const scrollContainerRect = scrollableAncestorRects[index];
-
-      if (!scrollContainerRect) {
-        continue;
-      }
-
-      const { direction, speed } = getScrollDirectionAndSpeed(
-        scrollContainer,
-        scrollContainerRect,
-        rect,
-        acceleration,
-        threshold
-      );
-
-      for (const axis of ['x', 'y'] as const) {
-        if (!scrollIntent[axis][direction[axis] as Direction]) {
-          speed[axis] = 0;
-          direction[axis] = 0;
-        }
-      }
-
-      if (speed.x > 0 || speed.y > 0) {
-        clearAutoScrollInterval();
-
-        scrollContainerRef.current = scrollContainer;
-        setAutoScrollInterval(autoScroll, interval);
-
-        scrollSpeed.current = speed;
-        scrollDirection.current = direction;
-
-        return;
-      }
-
-      scrollSpeed.current = { x: 0, y: 0 };
-      scrollDirection.current = { x: 0, y: 0 };
-      clearAutoScrollInterval();
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      scrollContainer,
-      acceleration,
-      autoScroll,
-      canScroll,
-      clearAutoScrollInterval,
-      enabled,
-      interval,
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      JSON.stringify(rect),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      JSON.stringify(scrollIntent),
-      setAutoScrollInterval,
-      scrollableAncestors,
-      sortedScrollableAncestors,
-      scrollableAncestorRects,
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      JSON.stringify(threshold)
-    ]
-  );
-
-*/
