@@ -131,16 +131,16 @@ export default function DragAndDropSortingContainer({
 
   const onDrop = (event: MouseEvent) => {
     onClearAutoScrollInterval();
-
-    const meta = sort.current;
     document.removeEventListener('mousemove', onDrag);
     document.removeEventListener('mouseup', onDrop);
+
+    const meta = sort.current;
 
     if (meta.activeNode) {
       meta.activeNode.setActiveState(false);
       meta.activeNode = null;
 
-      onDropChange(1, 2);
+      onDropChange(0, 0);
     }
   };
 
@@ -178,8 +178,6 @@ export default function DragAndDropSortingContainer({
 
       meta.activeNode = node;
       meta.initPosition = getEventCoordinates(event);
-      document.addEventListener('mousemove', onDrag, { passive: false });
-      document.addEventListener('mouseup', onDrop);
 
       meta.initNestedNodeOffsets = getNestedNodeOffset(originNode.current, container);
 
@@ -192,22 +190,12 @@ export default function DragAndDropSortingContainer({
       if (container) {
         onSetScrollableContainer(container);
         meta.containerRect = container.getBoundingClientRect();
-
         meta.initRelatedContainerPosition = getDelta(meta.containerRect, meta.initPosition);
-
-        // meta.initRelatedContainerPosition = {
-        //   x: meta.initPosition.x - meta.containerRect.x,
-        //   y: meta.initPosition.y - meta.containerRect.y
-        // };
-
-        // meta.deltaRects = {
-        //   x: meta.activeNode.initPosition.x - meta.containerRect.x,
-        //   y: meta.activeNode.initPosition.y - meta.containerRect.y
-        // };
-
         meta.deltaRects = getDelta(meta.activeNode.initPosition, meta.containerRect);
-
         meta.nodeMargin = getElementMargin(originNode.current);
+
+        document.addEventListener('mousemove', onDrag, { passive: false });
+        document.addEventListener('mouseup', onDrop);
 
         LOG_INFO(container);
       }

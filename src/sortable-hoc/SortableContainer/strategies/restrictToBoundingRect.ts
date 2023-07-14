@@ -1,6 +1,3 @@
-import type { ClientRect } from '@dnd-kit/core';
-import type { Transform } from '@dnd-kit/utilities';
-
 export function restrictToBoundingRect(
   transform: Transform,
   rect: ClientRect,

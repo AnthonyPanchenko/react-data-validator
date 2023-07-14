@@ -2,8 +2,7 @@ export default function verticalListSorting({
   activeIndex,
   activeNodeRect: fallbackActiveRect,
   index,
-  rects,
-  overIndex
+  rects
 }) {
   const activeNodeRect = rects[activeIndex] ?? fallbackActiveRect;
 
@@ -11,32 +10,16 @@ export default function verticalListSorting({
     return null;
   }
 
-  if (index === activeIndex) {
-    const overIndexRect = rects[overIndex];
-
-    if (!overIndexRect) {
-      return null;
-    }
-
-    return {
-      x: 0,
-      y:
-        activeIndex < overIndex
-          ? overIndexRect.top + overIndexRect.height - (activeNodeRect.top + activeNodeRect.height)
-          : overIndexRect.top - activeNodeRect.top
-    };
-  }
-
   const itemGap = getItemGap(rects, index, activeIndex);
 
-  if (index > activeIndex && index <= overIndex) {
+  if (index > activeIndex) {
     return {
       x: 0,
       y: -activeNodeRect.height - itemGap
     };
   }
 
-  if (index < activeIndex && index >= overIndex) {
+  if (index < activeIndex) {
     return {
       x: 0,
       y: activeNodeRect.height + itemGap

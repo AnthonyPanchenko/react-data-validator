@@ -2,7 +2,6 @@ export default function horizontalListSorting({
   rects,
   activeNodeRect: fallbackActiveRect,
   activeIndex,
-  overIndex,
   index
 }) {
   const activeNodeRect = rects[activeIndex] ?? fallbackActiveRect;
@@ -13,30 +12,14 @@ export default function horizontalListSorting({
 
   const itemGap = getItemGap(rects, index, activeIndex);
 
-  if (index === activeIndex) {
-    const newIndexRect = rects[overIndex];
-
-    if (!newIndexRect) {
-      return null;
-    }
-
-    return {
-      x:
-        activeIndex < overIndex
-          ? newIndexRect.left + newIndexRect.width - (activeNodeRect.left + activeNodeRect.width)
-          : newIndexRect.left - activeNodeRect.left,
-      y: 0
-    };
-  }
-
-  if (index > activeIndex && index <= overIndex) {
+  if (index > activeIndex) {
     return {
       x: -activeNodeRect.width - itemGap,
       y: 0
     };
   }
 
-  if (index < activeIndex && index >= overIndex) {
+  if (index < activeIndex) {
     return {
       x: activeNodeRect.width + itemGap,
       y: 0

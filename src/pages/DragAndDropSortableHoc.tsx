@@ -52,10 +52,14 @@ export default function DragAndDropSortableHoc() {
   const [sortingItemsX, setSortingItemsStateX] = useState<ReadonlyArray<ItemType>>(SORTING_ITEMS);
 
   const onSortEndX = (oldIndex: number, newIndex: number) => {
-    setSortingItemsStateX(prevItems => arrayMove(prevItems, oldIndex, newIndex));
+    if (oldIndex !== newIndex) {
+      setSortingItemsStateX(prevItems => arrayMove(prevItems, oldIndex, newIndex));
+    }
   };
   const onSortEndY = (oldIndex: number, newIndex: number) => {
-    setSortingItemsStateY(prevItems => arrayMove(prevItems, oldIndex, newIndex));
+    if (oldIndex !== newIndex) {
+      setSortingItemsStateY(prevItems => arrayMove(prevItems, oldIndex, newIndex));
+    }
   };
 
   return (
