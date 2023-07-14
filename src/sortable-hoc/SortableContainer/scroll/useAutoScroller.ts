@@ -42,14 +42,23 @@ export function useAutoScroller(
     const container = scrollContainer.current;
 
     if (container) {
-      const speed = scroll.current.speed[axis] * scroll.current.direction[axis];
+      const scrollPosition = {
+        x: scroll.current.speed.x * scroll.current.direction.x,
+        y: scroll.current.speed.y * scroll.current.direction.y
+      };
 
-      const scrollLeft = axis === 'x' ? speed : 0;
-      const scrollTop = axis === 'y' ? speed : 0;
+      if (axis === 'y') {
+        container.scrollBy(0, scrollPosition.y);
+      } else if (axis === 'x') {
+        container.scrollBy(scrollPosition.x, 0);
+      }
 
-      container.scrollBy(scrollLeft, scrollTop);
+      const isBoundaryPosition = {
+        x: container.scrollLeft === scroll.current.max.x || container.scrollLeft === 0,
+        y: container.scrollTop === scroll.current.max.y || container.scrollTop === 0
+      };
 
-      if (container.scrollTop === scroll.current.max[axis] || container.scrollTop === 0) {
+      if (isBoundaryPosition[axis]) {
         clearScrollInterval();
         clearInteractionTimeOut();
         setInteractionTimeOut(onStopInteraction);
@@ -62,29 +71,43 @@ export function useAutoScroller(
     const container = scrollContainer.current;
     clearInteractionTimeOut();
     setInteractionTimeOut(onStopInteraction);
-    if (container && container.scrollHeight <= container.clientHeight) {
+
+    const shouldScrollBy = {
+      x: container && container.scrollWidth <= container.clientWidth,
+      y: container && container.scrollHeight <= container.clientHeight
+    };
+
+    if (shouldScrollBy[axis]) {
       return;
     }
 
     if (container) {
       clearScrollInterval();
 
-      scroll.current.max.y = container.scrollHeight - container.clientHeight;
-      scroll.current.max.x = container.scrollWidth - container.clientWidth;
+      scroll.current.max = {
+        x: container.scrollWidth - container.clientWidth,
+        y: container.scrollHeight - container.clientHeight
+      };
 
-      const axisDirection = Math.sign(delta[axis]);
-      scroll.current.direction[axis] = axisDirection;
+      scroll.current.direction = {
+        x: Math.sign(delta.x),
+        y: Math.sign(delta.y)
+      };
 
       const normAcceleration = getNormalizedAcceleration(
-        axisDirection,
-        delta[axis],
-        pos[axis],
-        container.clientHeight
+        scroll.current.direction,
+        delta,
+        pos,
+        container.clientHeight,
+        container.clientWidth
       );
 
-      scroll.current.speed[axis] = clamp(normAcceleration * maxSpeed, minSpeed, maxSpeed);
+      scroll.current.speed = {
+        x: clamp(normAcceleration.x * maxSpeed, minSpeed, maxSpeed),
+        y: clamp(normAcceleration.y * maxSpeed, minSpeed, maxSpeed)
+      };
 
-      if (normAcceleration > threshold) {
+      if (normAcceleration[axis] > threshold) {
         clearInteractionTimeOut();
         setScrollInterval(scrollView);
       } else {
@@ -98,14 +121,20 @@ export function useAutoScroller(
 }
 
 function getNormalizedAcceleration(
-  direction: number,
-  delta: number,
-  clickPos: number,
-  h: number
-): number {
-  if (direction === 0) {
-    return 0;
-  }
-
-  return Math.abs(direction < 0 ? delta / clickPos : delta / (h - clickPos));
+  direction: Coordinates,
+  delta: Coordinates,
+  clickPos: Coordinates,
+  h: number,
+  w: number
+): Coordinates {
+  return {
+    x:
+      direction.x === 0
+        ? 0
+        : Math.abs(direction.x < 0 ? delta.x / clickPos.x : delta.x / (w - clickPos.x)),
+    y:
+      direction.y === 0
+        ? 0
+        : Math.abs(direction.y < 0 ? delta.y / clickPos.y : delta.y / (h - clickPos.y))
+  };
 }

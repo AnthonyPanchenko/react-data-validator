@@ -22,8 +22,8 @@ export function getDraggableSortableNode(
   const rect: DOMRect = element.getBoundingClientRect();
 
   return {
-    width: rect.width,
-    height: rect.height,
+    width: Math.round(rect.width),
+    height: Math.round(rect.height),
     initIndex: index,
     currentIndex: index,
     initPosition: { x: rect.left, y: rect.top },

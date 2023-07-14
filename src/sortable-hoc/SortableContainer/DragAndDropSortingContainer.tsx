@@ -21,6 +21,7 @@ type DragAndDropSortableState = {
   deltaRects: Coordinates;
   initPosition: Coordinates;
   deltaPosition: Coordinates;
+  currentPosition: Coordinates;
   initRelatedContainerPosition: Coordinates;
   initContainerScroll: Coordinates;
   initContainerNestedScroll: Coordinates;
@@ -43,6 +44,7 @@ export default function DragAndDropSortingContainer({
     initNestedNodeOffsets: { x: 0, y: 0 },
     initContainerScroll: { x: 0, y: 0 },
     initNodeNestedScroll: { x: 0, y: 0 },
+    currentPosition: { x: 0, y: 0 },
     initPosition: { x: 0, y: 0 },
     deltaPosition: { x: 0, y: 0 },
     deltaRects: { x: 0, y: 0 },
@@ -81,24 +83,36 @@ export default function DragAndDropSortingContainer({
 
     const meta = sort.current;
 
-    if (meta.activeNode && meta.containerRect && meta.initContainerScroll) {
+    if (
+      meta.activeNode &&
+      meta.containerRect &&
+      meta.initContainerScroll &&
+      dndSortingContainer.current
+    ) {
       meta.activeNode.setActiveState(true);
 
       const pos = getEventCoordinates(event);
 
-      meta.deltaPosition[axis] = pos[axis] - meta.initPosition[axis];
+      meta.deltaPosition = {
+        x: pos.x - meta.initPosition.x,
+        y: pos.y - meta.initPosition.y
+      };
+
+      const deltaContainerScroll = {
+        x: dndSortingContainer.current.scrollLeft - meta.initContainerScroll.x,
+        y: dndSortingContainer.current.scrollTop - meta.initContainerScroll.y
+      };
 
       const gap = 30;
 
-      const translate =
-        meta.deltaPosition[axis] +
-        meta.initNestedNodeOffsets[axis] -
-        gap -
-        meta.initNodeNestedScroll[axis];
+      meta.currentPosition = {
+        x: meta.deltaPosition.x + meta.initNestedNodeOffsets.x - gap - meta.initNodeNestedScroll.x,
+        y: meta.deltaPosition.y + meta.initNestedNodeOffsets.y - gap - meta.initNodeNestedScroll.y
+      };
 
       // const translate = meta.deltaPosition.y + meta.initNestedNodeOffsets.y - gap - meta.initNodeNestedScroll.y;
 
-      meta.activeNode.setHelperPosition({ x: 0, y: translate });
+      meta.activeNode.setHelperPosition(meta.currentPosition);
 
       updateScroll(meta.deltaPosition, meta.initRelatedContainerPosition);
     }
@@ -122,18 +136,19 @@ export default function DragAndDropSortingContainer({
 
   const reRange = (container: HTMLElement) => {
     const meta = sort.current;
-    const result = meta.deltaPosition.y + meta.deltaRects.y - meta.initNodeNestedScroll.y;
-    // const result = meta.deltaPosition.y + meta.initNestedNodeOffsets.y - gap - meta.initNodeNestedScroll.y;
+    const result =
+      meta.deltaPosition[axis] + meta.deltaRects[axis] - meta.initNodeNestedScroll[axis];
+    // const result = meta.deltaPosition[axis] + meta.initNestedNodeOffsets[axis] - gap - meta.initNodeNestedScroll[axis];
     console.clear();
     console.table({
-      initContainerNestedScroll: meta.initContainerNestedScroll.y,
-      initNodeNestedScroll: meta.initNodeNestedScroll.y,
-      initContainerScroll: meta.initContainerScroll.y,
-      deltaPosition: meta.deltaPosition.y,
-      initNestedNodeOffsets: meta.initNestedNodeOffsets.y,
-      deltaRects: meta.deltaRects.y,
-      containerRect: meta.containerRect?.y,
-      activeNode: meta.activeNode?.initPosition.y,
+      initContainerNestedScroll: meta.initContainerNestedScroll[axis],
+      initNodeNestedScroll: meta.initNodeNestedScroll[axis],
+      initContainerScroll: meta.initContainerScroll[axis],
+      deltaPosition: meta.deltaPosition[axis],
+      initNestedNodeOffsets: meta.initNestedNodeOffsets[axis],
+      deltaRects: meta.deltaRects[axis],
+      containerRect: meta.containerRect?.[axis],
+      activeNode: meta.activeNode?.initPosition[axis],
       result
     });
     console.log(meta.entries);
@@ -166,15 +181,20 @@ export default function DragAndDropSortingContainer({
       if (dndSortingContainer.current) {
         meta.containerRect = dndSortingContainer.current.getBoundingClientRect();
 
-        meta.initRelatedContainerPosition[axis] =
-          meta.initPosition[axis] - meta.containerRect[axis];
+        meta.initRelatedContainerPosition = {
+          x: meta.initPosition.x - meta.containerRect.x,
+          y: meta.initPosition.y - meta.containerRect.y
+        };
 
         meta.initContainerScroll = {
           x: dndSortingContainer.current.scrollLeft,
           y: dndSortingContainer.current.scrollTop
         };
 
-        meta.deltaRects[axis] = meta.activeNode.initPosition[axis] - meta.containerRect[axis];
+        meta.deltaRects = {
+          x: meta.activeNode.initPosition.x - meta.containerRect.x,
+          y: meta.activeNode.initPosition.y - meta.containerRect.y
+        };
 
         reRange(dndSortingContainer.current);
       }
