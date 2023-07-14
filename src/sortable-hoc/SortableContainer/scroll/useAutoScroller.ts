@@ -16,11 +16,11 @@ type AutoScrollerOptions = {
 type AutoScrollerSettings = {
   speed: Coordinates;
   direction: Coordinates;
-  max: Coordinates;
 };
 
 export function useAutoScroller(
   onStopInteraction: () => void,
+  onScrollContainer: (pos: Coordinates, axis: keyof Coordinates) => { x: boolean; y: boolean },
   { axis, interval, threshold, minSpeed, maxSpeed }: AutoScrollerOptions
 ): [
   React.MutableRefObject<HTMLDivElement | null>,
@@ -31,8 +31,7 @@ export function useAutoScroller(
 
   const scroll = useRef<AutoScrollerSettings>({
     speed: { x: 0, y: 0 },
-    direction: { x: 0, y: 0 },
-    max: { x: 0, y: 0 }
+    direction: { x: 0, y: 0 }
   });
 
   const [setScrollInterval, clearScrollInterval] = useInterval(interval);
@@ -47,16 +46,7 @@ export function useAutoScroller(
         y: scroll.current.speed.y * scroll.current.direction.y
       };
 
-      if (axis === 'y') {
-        container.scrollBy(0, scrollPosition.y);
-      } else if (axis === 'x') {
-        container.scrollBy(scrollPosition.x, 0);
-      }
-
-      const isBoundaryPosition = {
-        x: container.scrollLeft === scroll.current.max.x || container.scrollLeft === 0,
-        y: container.scrollTop === scroll.current.max.y || container.scrollTop === 0
-      };
+      const isBoundaryPosition = onScrollContainer(scrollPosition, axis);
 
       // NOTE executing ONLY for single axis
       if (isBoundaryPosition[axis]) {
@@ -84,11 +74,6 @@ export function useAutoScroller(
 
     if (container) {
       clearScrollInterval();
-
-      scroll.current.max = {
-        x: container.scrollWidth - container.clientWidth,
-        y: container.scrollHeight - container.clientHeight
-      };
 
       scroll.current.direction = {
         x: Math.sign(delta.x),

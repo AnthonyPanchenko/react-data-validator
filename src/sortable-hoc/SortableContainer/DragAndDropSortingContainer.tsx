@@ -2,6 +2,7 @@ import { useCallback, useRef } from 'react';
 
 import { DraggableSortableNode } from '@/sortable-hoc/getDraggableSortableNode';
 import { DragAndDropSortingContext } from '@/sortable-hoc/SortableContainer/drag-and-drop-sorting-context';
+import { getDelta } from '@/sortable-hoc/SortableContainer/scroll/getDelta';
 import { getNestedScrollOffsets } from '@/sortable-hoc/SortableContainer/scroll/getNestedScrollOffsets';
 import { getScrollableAncestors } from '@/sortable-hoc/SortableContainer/scroll/getScrollableAncestors';
 import { useAutoScroller } from '@/sortable-hoc/SortableContainer/scroll/useAutoScroller';
@@ -38,7 +39,7 @@ export default function DragAndDropSortingContainer({
   isScrollableWindow = false,
   onDropChange
 }: PropsTypes) {
-  const [containerScrollBy] = useScrollableContainer(isScrollableWindow);
+  const [containerScrollBy, setScrollContainer] = useScrollableContainer(isScrollableWindow);
 
   const sort = useRef<DragAndDropSortableState>({
     activeNode: null,
@@ -102,11 +103,7 @@ export default function DragAndDropSortingContainer({
     if (meta.activeNode) {
       meta.activeNode.setActiveState(true);
       const pos = getEventCoordinates(event);
-
-      meta.deltaPosition = {
-        x: pos.x - meta.initPosition.x,
-        y: pos.y - meta.initPosition.y
-      };
+      meta.deltaPosition = getDelta(pos, meta.initPosition);
 
       // based on position: fixed > top and left positions
       meta.currentPosition = {
@@ -180,22 +177,22 @@ export default function DragAndDropSortingContainer({
       meta.initContainerNestedScroll = getNestedScrollOffsets(scrollableContainerAncestors);
 
       if (container) {
+        setScrollContainer(container);
         meta.containerRect = container.getBoundingClientRect();
 
-        meta.initRelatedContainerPosition = {
-          x: meta.initPosition.x - meta.containerRect.x,
-          y: meta.initPosition.y - meta.containerRect.y
-        };
+        meta.initRelatedContainerPosition = getDelta(meta.containerRect, meta.initPosition);
 
-        meta.initContainerScroll = {
-          x: container.scrollLeft,
-          y: container.scrollTop
-        };
+        // meta.initRelatedContainerPosition = {
+        //   x: meta.initPosition.x - meta.containerRect.x,
+        //   y: meta.initPosition.y - meta.containerRect.y
+        // };
 
-        meta.deltaRects = {
-          x: meta.activeNode.initPosition.x - meta.containerRect.x,
-          y: meta.activeNode.initPosition.y - meta.containerRect.y
-        };
+        // meta.deltaRects = {
+        //   x: meta.activeNode.initPosition.x - meta.containerRect.x,
+        //   y: meta.activeNode.initPosition.y - meta.containerRect.y
+        // };
+
+        meta.deltaRects = getDelta(meta.activeNode.initPosition, meta.containerRect);
 
         meta.nodeMargin = getElementMargin(originNode.current);
 

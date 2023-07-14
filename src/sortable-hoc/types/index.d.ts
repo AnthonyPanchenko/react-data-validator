@@ -4,6 +4,13 @@ export type Axis = 'x' | 'y' | 'xy';
 
 export type Offset = number | string;
 
+export type ContainerScrollBoundary = {
+  isTop: boolean;
+  isLeft: boolean;
+  isBottom: boolean;
+  isRight: boolean;
+};
+
 export interface ClientRect {
   width: number;
   height: number;
