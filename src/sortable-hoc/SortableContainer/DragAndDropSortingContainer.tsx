@@ -39,7 +39,8 @@ export default function DragAndDropSortingContainer({
   isScrollableWindow = false,
   onDropChange
 }: PropsTypes) {
-  const [containerScrollBy, setScrollContainer] = useScrollableContainer(isScrollableWindow);
+  const [containerDescriptor, onScrollContainer, onSetScrollableContainer] =
+    useScrollableContainer(isScrollableWindow);
 
   const sort = useRef<DragAndDropSortableState>({
     activeNode: null,
@@ -67,7 +68,7 @@ export default function DragAndDropSortingContainer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onStopScrollAndDrag = () => {
+  const onStopInteraction = () => {
     console.log('ON STOP SCROLLING / ON STOP DRAGGING');
 
     // const deltaContainerScroll = {
@@ -85,13 +86,17 @@ export default function DragAndDropSortingContainer({
     //  translate.x -= window.scrollX - this.initialWindowScroll.left;
   };
 
-  const [updateScroll, clearAutoScrollInterval] = useAutoScroller(onStopScrollAndDrag, {
-    axis,
-    interval: 5,
-    threshold: 0.45,
-    minSpeed: 2,
-    maxSpeed: 10
-  });
+  const [onUpdateScroll, onClearAutoScrollInterval] = useAutoScroller(
+    onStopInteraction,
+    onScrollContainer,
+    {
+      axis,
+      interval: 5,
+      threshold: 0.45,
+      minSpeed: 2,
+      maxSpeed: 10
+    }
+  );
 
   const onDrag = (event: MouseEvent) => {
     if (typeof event.preventDefault === 'function' && event.cancelable) {
@@ -112,12 +117,20 @@ export default function DragAndDropSortingContainer({
       };
 
       meta.activeNode.setHelperPosition(meta.currentPosition);
-      updateScroll(meta.deltaPosition, meta.initRelatedContainerPosition);
+
+      if (containerDescriptor.current.hasScroll[axis]) {
+        onUpdateScroll(
+          meta.deltaPosition,
+          meta.initRelatedContainerPosition,
+          containerDescriptor.current.height,
+          containerDescriptor.current.width
+        );
+      }
     }
   };
 
   const onDrop = (event: MouseEvent) => {
-    clearAutoScrollInterval();
+    onClearAutoScrollInterval();
 
     const meta = sort.current;
     document.removeEventListener('mousemove', onDrag);
@@ -177,7 +190,7 @@ export default function DragAndDropSortingContainer({
       meta.initContainerNestedScroll = getNestedScrollOffsets(scrollableContainerAncestors);
 
       if (container) {
-        setScrollContainer(container);
+        onSetScrollableContainer(container);
         meta.containerRect = container.getBoundingClientRect();
 
         meta.initRelatedContainerPosition = getDelta(meta.containerRect, meta.initPosition);

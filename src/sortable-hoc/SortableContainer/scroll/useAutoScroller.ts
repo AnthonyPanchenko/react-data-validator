@@ -2,7 +2,7 @@ import { useCallback, useRef } from 'react';
 
 import { useInterval } from '@/sortable-hoc/SortableContainer/scroll/useInterval';
 import { useTimeOut } from '@/sortable-hoc/SortableContainer/scroll/useTimeOut';
-import { Coordinates } from '@/sortable-hoc/types';
+import { ContainerScrollBoundary, Coordinates } from '@/sortable-hoc/types';
 import { clamp } from '@/sortable-hoc/utils';
 
 type AutoScrollerOptions = {
@@ -18,18 +18,22 @@ type AutoScrollerSettings = {
   direction: Coordinates;
 };
 
+type AutoScrollerReturnType = [
+  (
+    delta: Coordinates,
+    initClickPos: Coordinates,
+    containerHeight: number,
+    containerWidth: number
+  ) => void,
+  () => void
+];
+
 export function useAutoScroller(
   onStopInteraction: () => void,
-  onScrollContainer: (pos: Coordinates, axis: keyof Coordinates) => { x: boolean; y: boolean },
+  onScrollContainer: (pos: Coordinates, axis: keyof Coordinates) => ContainerScrollBoundary,
   { axis, interval, threshold, minSpeed, maxSpeed }: AutoScrollerOptions
-): [
-  React.MutableRefObject<HTMLDivElement | null>,
-  (delta: Coordinates, initClickPos: Coordinates) => void,
-  () => void
-] {
-  const scrollContainer = useRef<HTMLDivElement | null>(null);
-
-  const scroll = useRef<AutoScrollerSettings>({
+): AutoScrollerReturnType {
+  const scrollSettings = useRef<AutoScrollerSettings>({
     speed: { x: 0, y: 0 },
     direction: { x: 0, y: 0 }
   });
@@ -38,57 +42,47 @@ export function useAutoScroller(
   const [setInteractionTimeOut, clearInteractionTimeOut] = useTimeOut(300);
 
   const scrollView = useCallback(() => {
-    const container = scrollContainer.current;
+    const scrollPosition = {
+      x: scrollSettings.current.speed.x * scrollSettings.current.direction.x,
+      y: scrollSettings.current.speed.y * scrollSettings.current.direction.y
+    };
 
-    if (container) {
-      const scrollPosition = {
-        x: scroll.current.speed.x * scroll.current.direction.x,
-        y: scroll.current.speed.y * scroll.current.direction.y
-      };
+    const boundary = onScrollContainer(scrollPosition, axis);
 
-      const isBoundaryPosition = onScrollContainer(scrollPosition, axis);
+    const boundaryByAxis = {
+      x: boundary.isLeft || boundary.isRight,
+      y: boundary.isTop || boundary.isBottom
+    };
 
-      // NOTE executing ONLY for single axis
-      if (isBoundaryPosition[axis]) {
-        clearScrollInterval();
-        clearInteractionTimeOut();
-        setInteractionTimeOut(onStopInteraction);
-      }
+    // NOTE executing ONLY for single axis
+    if (boundaryByAxis[axis]) {
+      clearScrollInterval();
+      clearInteractionTimeOut();
+      setInteractionTimeOut(onStopInteraction);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const updateScroll = useCallback((delta: Coordinates, pos: Coordinates) => {
-    const container = scrollContainer.current;
-    clearInteractionTimeOut();
-    setInteractionTimeOut(onStopInteraction);
-
-    const shouldScrollBy = {
-      x: container && container.scrollWidth <= container.clientWidth,
-      y: container && container.scrollHeight <= container.clientHeight
-    };
-
-    if (shouldScrollBy[axis]) {
-      return;
-    }
-
-    if (container) {
+  const updateScroll = useCallback(
+    (delta: Coordinates, pos: Coordinates, h: number, w: number) => {
+      clearInteractionTimeOut();
+      setInteractionTimeOut(onStopInteraction);
       clearScrollInterval();
 
-      scroll.current.direction = {
+      scrollSettings.current.direction = {
         x: Math.sign(delta.x),
         y: Math.sign(delta.y)
       };
 
       const normAcceleration = getNormalizedScrollAcceleration(
-        scroll.current.direction,
+        scrollSettings.current.direction,
         delta,
         pos,
-        container.clientHeight,
-        container.clientWidth
+        h,
+        w
       );
 
-      scroll.current.speed = {
+      scrollSettings.current.speed = {
         x: clamp(normAcceleration.x * maxSpeed, minSpeed, maxSpeed),
         y: clamp(normAcceleration.y * maxSpeed, minSpeed, maxSpeed)
       };
@@ -100,11 +94,12 @@ export function useAutoScroller(
       } else {
         clearScrollInterval();
       }
-    }
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    []
+  );
 
-  return [scrollContainer, updateScroll, clearScrollInterval];
+  return [updateScroll, clearScrollInterval];
 }
 
 function getNormalizedScrollAcceleration(

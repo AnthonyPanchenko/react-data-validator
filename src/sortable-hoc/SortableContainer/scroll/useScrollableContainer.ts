@@ -7,13 +7,15 @@ import {
 } from '@/sortable-hoc/SortableContainer/scroll/getScrollableContainerDescriptor';
 import { ContainerScrollBoundary, Coordinates } from '@/sortable-hoc/types';
 
-export default function useScrollableContainer(
-  isScrollableWindow = false
-): [
+type ScrollableContainerReturnType = [
   React.MutableRefObject<ScrollableContainerDescriptor>,
   (pos: Coordinates, axis: keyof Coordinates) => ContainerScrollBoundary,
   (element: HTMLElement | null) => void
-] {
+];
+
+export default function useScrollableContainer(
+  isScrollableWindow = false
+): ScrollableContainerReturnType {
   const scrollableContainer = useRef<HTMLElement | null>(null);
 
   const containerScrollBoundary = useRef<ContainerScrollBoundary>({
@@ -28,11 +30,12 @@ export default function useScrollableContainer(
     height: 0,
     scrollWidth: 0,
     scrollHeight: 0,
+    offsets: { x: 0, y: 0 },
     initScroll: { x: 0, y: 0 },
     deltaScroll: { x: 0, y: 0 },
     currentScroll: { x: 0, y: 0 },
     maxScroll: { x: 0, y: 0 },
-    offsets: { x: 0, y: 0 }
+    hasScroll: { x: false, y: false }
   });
 
   const defineContainerScrollBoundary = (container: HTMLElement) => {

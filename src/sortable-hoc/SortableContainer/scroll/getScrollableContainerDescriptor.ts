@@ -10,36 +10,33 @@ export type ScrollableContainerDescriptor = {
   currentScroll: Coordinates;
   maxScroll: Coordinates;
   offsets: Coordinates;
+  hasScroll: { x: boolean; y: boolean };
 };
 
-export function getScrollableDocumentDescriptor(): ScrollableContainerDescriptor {
-  const doc = document.documentElement;
-
+function getScrollableContainerDescriptor(el: HTMLElement, offsets: Coordinates) {
   return {
-    offsets: { x: 0, y: 0 },
-    initScroll: { x: doc.scrollLeft, y: doc.scrollTop },
-    maxScroll: { x: doc.scrollWidth - doc.clientWidth, y: doc.scrollHeight - doc.clientHeight },
-    deltaScroll: { x: 0, y: 0 },
-    currentScroll: { x: 0, y: 0 },
-    scrollWidth: doc.scrollWidth,
-    scrollHeight: doc.scrollHeight,
-    width: doc.clientWidth,
-    height: doc.clientHeight
-  };
-}
-
-export function getScrollableParentDescriptor(el: HTMLElement): ScrollableContainerDescriptor {
-  const rect = el.getBoundingClientRect();
-
-  return {
-    offsets: { x: rect.left, y: rect.top },
+    offsets,
     initScroll: { x: el.scrollLeft, y: el.scrollTop },
     maxScroll: { x: el.scrollWidth - el.clientWidth, y: el.scrollHeight - el.clientHeight },
     deltaScroll: { x: 0, y: 0 },
     currentScroll: { x: 0, y: 0 },
     scrollWidth: el.scrollWidth,
     scrollHeight: el.scrollHeight,
-    width: rect.width,
-    height: rect.height
+    width: el.clientWidth,
+    height: el.clientHeight,
+    hasScroll: {
+      x: el.scrollWidth > el.clientWidth,
+      y: el.scrollHeight > el.clientHeight
+    }
   };
+}
+
+export function getScrollableDocumentDescriptor(): ScrollableContainerDescriptor {
+  const doc = document.documentElement;
+  return getScrollableContainerDescriptor(doc, { x: 0, y: 0 });
+}
+
+export function getScrollableParentDescriptor(el: HTMLElement): ScrollableContainerDescriptor {
+  const rect = el.getBoundingClientRect();
+  return getScrollableContainerDescriptor(el, { x: rect.left, y: rect.top });
 }
