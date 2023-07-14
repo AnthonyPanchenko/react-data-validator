@@ -106,8 +106,8 @@ export default function DragAndDropSortingContainer({
       const gap = 30;
 
       meta.currentPosition = {
-        x: meta.deltaPosition.x + meta.initNestedNodeOffsets.x - gap - meta.initNodeNestedScroll.x,
-        y: meta.deltaPosition.y + meta.initNestedNodeOffsets.y - gap - meta.initNodeNestedScroll.y
+        x: meta.deltaPosition.x + meta.initNestedNodeOffsets.x - meta.initNodeNestedScroll.x,
+        y: meta.deltaPosition.y + meta.initNestedNodeOffsets.y - meta.initNodeNestedScroll.y
       };
 
       // const translate = meta.deltaPosition.y + meta.initNestedNodeOffsets.y - gap - meta.initNodeNestedScroll.y;

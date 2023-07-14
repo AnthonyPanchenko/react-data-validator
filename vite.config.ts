@@ -1,10 +1,18 @@
 import react from '@vitejs/plugin-react';
 import { fileURLToPath } from 'url';
-import { defineConfig } from 'vite';
+import { defineConfig, Plugin } from 'vite';
+
+const fullReloadAlways: Plugin = {
+  name: 'full-reload',
+  handleHotUpdate({ server }) {
+    server.ws.send({ type: 'full-reload' });
+    return [];
+  }
+};
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), fullReloadAlways],
   resolve: {
     alias: {
       // for TypeScript path alias import like : @/x/y/z
