@@ -36,43 +36,36 @@ export function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(value, max));
 }
 
-// function decimalAdjust(num: number, fixed = 0, round: (num: number) => number) {
-//   fixed = Math.pow(10, fixed);
-//   return round(num * fixed) / fixed;
-// }
+function decimalAdjust(num: number, fixed = 0, round: (num: number) => number) {
+  fixed = Math.pow(10, fixed);
+  return round(num * fixed) / fixed;
+}
 
-// function toNum(value?: string | number, precision = 0): number {
-//   if (typeof value !== 'string') {
-//     return 0;
-//   }
+function toNum(value?: string | number, precision = 0): number {
+  if (typeof value !== 'string') {
+    return 0;
+  }
 
-//   if (precision) {
-//     const n = parseFloat(value) || 0;
-//     return !n || isNaN(n) ? 0 : decimalAdjust(n, precision, Math.round);
-//   }
+  if (precision) {
+    const n = parseFloat(value) || 0;
+    return !n || isNaN(n) ? 0 : decimalAdjust(n, precision, Math.round);
+  }
 
-//   const n = parseInt(value, 10);
-//   return isNaN(n) ? 0 : n;
-// }
+  const n = parseInt(value, 10);
+  return isNaN(n) ? 0 : n;
+}
 
-// export function getElementMargin(element: HTMLElement | null) {
-//   if (!element) {
-//     return {
-//       bottom: 0,
-//       left: 0,
-//       right: 0,
-//       top: 0
-//     };
-//   }
-//   const style = window.getComputedStyle(element);
+export function getElementMargin(element: HTMLElement | null) {
+  if (!element) {
+    return { x: 0, y: 0 };
+  }
+  const style = window.getComputedStyle(element);
 
-//   return {
-//     bottom: toNum(style.marginBottom),
-//     left: toNum(style.marginLeft),
-//     right: toNum(style.marginRight),
-//     top: toNum(style.marginTop)
-//   };
-// }
+  return {
+    x: toNum(style.marginLeft),
+    y: toNum(style.marginTop)
+  };
+}
 
 export function getScrollAdjustedBoundingClientRect(
   node: HTMLElement,
@@ -173,7 +166,7 @@ export const canUseDOM = () =>
   typeof window.document !== 'undefined' &&
   typeof window.document.createElement !== 'undefined';
 
-function isDocumentScrollingElement(element: Element | null) {
+export function isDocumentScrollingElement(element: Element | null) {
   if (!canUseDOM() || !element) {
     return false;
   }
@@ -181,43 +174,9 @@ function isDocumentScrollingElement(element: Element | null) {
   return element === document.scrollingElement;
 }
 
-export function getScrollPosition(scrollingContainer: Element) {
-  const minScroll = {
-    x: 0,
-    y: 0
-  };
-  const dimensions = isDocumentScrollingElement(scrollingContainer)
-    ? {
-        height: window.innerHeight,
-        width: window.innerWidth
-      }
-    : {
-        height: scrollingContainer.clientHeight,
-        width: scrollingContainer.clientWidth
-      };
-  const maxScroll = {
-    x: scrollingContainer.scrollWidth - dimensions.width,
-    y: scrollingContainer.scrollHeight - dimensions.height
-  };
-
-  const isTop = scrollingContainer.scrollTop <= minScroll.y;
-  const isLeft = scrollingContainer.scrollLeft <= minScroll.x;
-  const isBottom = scrollingContainer.scrollTop >= maxScroll.y;
-  const isRight = scrollingContainer.scrollLeft >= maxScroll.x;
-
-  return {
-    isTop,
-    isLeft,
-    isBottom,
-    isRight,
-    maxScroll,
-    minScroll
-  };
-}
-
 export function getNestedNodeOffset(
-  node: HTMLElement | null,
-  parent: HTMLElement | null,
+  node: HTMLElement | null | undefined,
+  parent: HTMLElement | null | undefined,
   offset = { x: 0, y: 0 }
 ): Coordinates {
   if (!node || !parent) {
@@ -261,9 +220,6 @@ export function getTargetIndex(newIndex: number, prevIndex: number, oldIndex: nu
 
 //   return { x: 0, y: 0 };
 // }
-
-// height: node.offsetHeight,
-// width: node.offsetWidth
 
 export default function getClosestIndex(arr: Array<number>, y: number) {
   let index = 0;

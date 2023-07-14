@@ -58,6 +58,7 @@ export function useAutoScroller(
         y: container.scrollTop === scroll.current.max.y || container.scrollTop === 0
       };
 
+      // NOTE executing ONLY for single axis
       if (isBoundaryPosition[axis]) {
         clearScrollInterval();
         clearInteractionTimeOut();
@@ -94,7 +95,7 @@ export function useAutoScroller(
         y: Math.sign(delta.y)
       };
 
-      const normAcceleration = getNormalizedAcceleration(
+      const normAcceleration = getNormalizedScrollAcceleration(
         scroll.current.direction,
         delta,
         pos,
@@ -107,6 +108,7 @@ export function useAutoScroller(
         y: clamp(normAcceleration.y * maxSpeed, minSpeed, maxSpeed)
       };
 
+      // NOTE executing ONLY for single axis
       if (normAcceleration[axis] > threshold) {
         clearInteractionTimeOut();
         setScrollInterval(scrollView);
@@ -120,7 +122,7 @@ export function useAutoScroller(
   return [scrollContainer, updateScroll, clearScrollInterval];
 }
 
-function getNormalizedAcceleration(
+function getNormalizedScrollAcceleration(
   direction: Coordinates,
   delta: Coordinates,
   clickPos: Coordinates,

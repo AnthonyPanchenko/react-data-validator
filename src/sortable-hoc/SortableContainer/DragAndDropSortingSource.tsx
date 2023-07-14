@@ -2,7 +2,7 @@ import './drag-and-drop-sorting.scss';
 
 import React, { forwardRef, Fragment, Ref } from 'react';
 
-import useDragAndDropSortingSource from '@/sortable-hoc/SortableContainer/useDragAndDropSortingSource';
+import useDragAndDropSortingSource from '@/sortable-hoc/SortableContainer/scroll/useDragAndDropSortingSource';
 
 type PropsTypes = {
   className?: string;
@@ -26,8 +26,8 @@ export default function DragAndDropSortingSource({ children, className, index }:
         <DragAndDropBaseSource
           styles={
             {
-              transform: `translate(${helperPosition.x}px, ${helperPosition.y}px)`,
-              // transform: `translateY(${globalTranslatePosition.y}px)`,
+              top: `${helperPosition.y}px`,
+              left: `${helperPosition.x}px`,
               width: `${sortableNodeRef.current?.offsetWidth}px`,
               height: `${sortableNodeRef.current?.offsetHeight}px`
             } as React.CSSProperties

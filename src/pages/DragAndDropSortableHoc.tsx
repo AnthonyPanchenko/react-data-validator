@@ -73,22 +73,26 @@ export default function DragAndDropSortableHoc() {
         cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
       </div>
 
-      <DragAndDropSortingContainer axis="y" className="y-area" onSortDropChange={onSortEndY}>
-        {sortingItemsY.map((item, i) => (
-          <DragAndDropSortingSource key={item.value} index={i}>
-            <input type="checkbox" name={item.label} id={item.value} />
-            <label>{item.label}</label>
-          </DragAndDropSortingSource>
-        ))}
+      <DragAndDropSortingContainer axis="y" onDropChange={onSortEndY}>
+        <div className={'dnd-area y-area'}>
+          {sortingItemsY.map((item, i) => (
+            <DragAndDropSortingSource key={item.value} index={i}>
+              <input type="checkbox" name={item.label} id={item.value} />
+              <label>{item.label}</label>
+            </DragAndDropSortingSource>
+          ))}
+        </div>
       </DragAndDropSortingContainer>
 
-      <DragAndDropSortingContainer axis="x" className="x-area" onSortDropChange={onSortEndX}>
-        {sortingItemsX.map((item, i) => (
-          <DragAndDropSortingSource key={item.value} index={i}>
-            <input type="checkbox" name={item.label} id={item.value} />
-            <label>{item.label}</label>
-          </DragAndDropSortingSource>
-        ))}
+      <DragAndDropSortingContainer axis="x" onDropChange={onSortEndX}>
+        <div className={'dnd-area x-area'}>
+          {sortingItemsX.map((item, i) => (
+            <DragAndDropSortingSource key={item.value} index={i}>
+              <input type="checkbox" name={item.label} id={item.value} />
+              <label>{item.label}</label>
+            </DragAndDropSortingSource>
+          ))}
+        </div>
       </DragAndDropSortingContainer>
     </Fragment>
   );
