@@ -221,6 +221,10 @@ export function getTargetIndex(newIndex: number, prevIndex: number, oldIndex: nu
 //   return { x: 0, y: 0 };
 // }
 
+export function distanceBetween(p1: Coordinates, p2: Coordinates) {
+  return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+}
+
 export default function getClosestIndex(arr: Array<number>, y: number) {
   let index = 0;
   let diff = Math.abs(y - arr[0]);

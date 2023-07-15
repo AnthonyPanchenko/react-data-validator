@@ -1,5 +1,6 @@
 import { useCallback, useRef } from 'react';
 
+import { getDelta } from '@/sortable-hoc/SortableContainer/scroll/getDelta';
 import {
   getScrollableDocumentDescriptor,
   getScrollableParentDescriptor,
@@ -45,6 +46,14 @@ export default function useScrollableContainer(
       isBottom: container.scrollTop >= descriptor.current.maxScroll.y,
       isRight: container.scrollLeft >= descriptor.current.maxScroll.x
     };
+
+    const currentScroll = {
+      x: container.scrollLeft,
+      y: container.scrollTop
+    };
+
+    descriptor.current.currentScroll = currentScroll;
+    descriptor.current.deltaScroll = getDelta(currentScroll, descriptor.current.initScroll);
   };
 
   const scrollContainer = useCallback((pos: Coordinates, axis: keyof Coordinates) => {

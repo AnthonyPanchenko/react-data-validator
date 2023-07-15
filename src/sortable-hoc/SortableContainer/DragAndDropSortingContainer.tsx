@@ -70,20 +70,33 @@ export default function DragAndDropSortingContainer({
 
   const onStopInteraction = () => {
     console.log('ON STOP SCROLLING / ON STOP DRAGGING');
+    const meta = sort.current;
 
-    // const deltaContainerScroll = {
-    //   x: dndSortingContainer.current.scrollLeft - meta.initContainerScroll.x,
-    //   y: dndSortingContainer.current.scrollTop - meta.initContainerScroll.y
-    // };
+    if (meta.activeNode) {
+      const relatedListPosition =
+        meta.activeNode.offsets[axis] +
+        containerDescriptor.current.deltaScroll[axis] +
+        meta.deltaPosition[axis];
 
-    // based on position: fixed > translate positions
-    // meta.currentPosition = {
-    //   x: meta.deltaPosition.x + meta.initNestedNodeOffsets.x - 30 - meta.initNodeNestedScroll.x,
-    //   y: meta.deltaPosition.y + meta.initNestedNodeOffsets.y - 30 - meta.initNodeNestedScroll.y
-    // };
+      const closestNode = sort.current.entries.reduce((prev, curr) =>
+        Math.abs(curr.offsets[axis] - relatedListPosition) <
+        Math.abs(prev.offsets[axis] - relatedListPosition)
+          ? curr
+          : prev
+      );
 
-    //  translate.y -= window.scrollY - this.initialWindowScroll.top;
-    //  translate.x -= window.scrollX - this.initialWindowScroll.left;
+      console.log(closestNode);
+
+      // for (let i = 0; i < sort.current.entries.length; i++) {
+      //   const element = array[i];
+
+      // }
+
+      console.table({
+        relatedListPosition,
+        deltaScroll: containerDescriptor.current.deltaScroll
+      });
+    }
   };
 
   const [onUpdateScroll, onClearAutoScrollInterval] = useAutoScroller(

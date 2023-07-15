@@ -11,7 +11,7 @@ type PropsTypes = {
 };
 
 export default function DragAndDropSortingSource({ children, className, index }: PropsTypes) {
-  const [sortableNodeRef, helperPosition, offsetPosition, isActive, onStartPressElement] =
+  const [sortableNodeRef, helperPosition, position, isActive, onStartPressElement] =
     useDragAndDropSortingSource<HTMLDivElement>(index);
 
   let currentClassName = 'dnd-source';
@@ -41,7 +41,7 @@ export default function DragAndDropSortingSource({ children, className, index }:
         ref={sortableNodeRef}
         styles={
           {
-            transform: `translate(${offsetPosition.x}px, ${offsetPosition.y}px)`
+            transform: `translate(${position.x}px, ${position.y}px)`
           } as React.CSSProperties
         }
         className={isActive ? currentClassName + ' inactive' : currentClassName}

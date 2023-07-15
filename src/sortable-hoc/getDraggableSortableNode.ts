@@ -6,6 +6,7 @@ export type DraggableSortableNode = {
   index: number;
   activeIndex: number;
   initPosition: Coordinates;
+  translatePosition: Coordinates;
   offsets: Coordinates;
   setPosition: (cords: Coordinates) => void;
   setActiveState: (isActive: boolean) => void;
@@ -13,19 +14,20 @@ export type DraggableSortableNode = {
 };
 
 export function getDraggableSortableNode(
-  element: HTMLElement,
+  el: HTMLElement,
   index: number,
   setPosition: (cords: Coordinates) => void,
   setActiveState: (isActive: boolean) => void,
   setHelperPosition: (cords: Coordinates) => void
 ): DraggableSortableNode {
-  const rect: DOMRect = element.getBoundingClientRect();
+  const rect: DOMRect = el.getBoundingClientRect();
 
   return {
     index,
     activeIndex: index,
     initPosition: { x: rect.left, y: rect.top },
-    offsets: { x: 0, y: 0 },
+    translatePosition: { x: 0, y: 0 },
+    offsets: { x: el.offsetLeft, y: el.offsetTop },
     width: Math.round(rect.width),
     height: Math.round(rect.height),
     setPosition,

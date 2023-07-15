@@ -15,7 +15,7 @@ export default function useDragAndDropSortingSource<TElement extends HTMLElement
 ] {
   const sortingContext = useContext(DragAndDropSortingContext);
   const [isActive, setActiveNodeState] = useState<boolean>(false);
-  const [offsetPosition, setNodePosition] = useState<Coordinates>({ x: 0, y: 0 });
+  const [position, setNodePosition] = useState<Coordinates>({ x: 0, y: 0 });
   const [helperPosition, setHelperNodePosition] = useState<Coordinates>({
     x: 0,
     y: 0
@@ -61,7 +61,7 @@ export default function useDragAndDropSortingSource<TElement extends HTMLElement
     []
   );
 
-  return [sortableNodeRef, helperPosition, offsetPosition, isActive, onStartPressElement];
+  return [sortableNodeRef, helperPosition, position, isActive, onStartPressElement];
 }
 
 const interactiveElements = ['A', 'BUTTON', 'CANVAS', 'INPUT', 'OPTION', 'TEXTAREA', 'SELECT'];
