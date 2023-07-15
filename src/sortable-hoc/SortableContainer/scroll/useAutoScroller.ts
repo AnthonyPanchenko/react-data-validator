@@ -13,13 +13,9 @@ type AutoScrollerOptions = {
   maxSpeed: number;
 };
 
-type AutoScrollerSettings = {
-  speed: Coordinates;
-  direction: Coordinates;
-};
-
 type AutoScrollerReturnType = [
   (
+    direction: Coordinates,
     delta: Coordinates,
     initClickPos: Coordinates,
     containerHeight: number,
@@ -33,21 +29,13 @@ export function useAutoScroller(
   onScrollContainer: (pos: Coordinates, axis: keyof Coordinates) => ContainerScrollBoundary,
   { axis, interval, threshold, minSpeed, maxSpeed }: AutoScrollerOptions
 ): AutoScrollerReturnType {
-  const scrollSettings = useRef<AutoScrollerSettings>({
-    speed: { x: 0, y: 0 },
-    direction: { x: 0, y: 0 }
-  });
+  const scrollStep = useRef<Coordinates>({ x: 0, y: 0 });
 
   const [setScrollInterval, clearScrollInterval] = useInterval(interval);
   const [setInteractionTimeOut, clearInteractionTimeOut] = useTimeOut(300);
 
   const scrollView = useCallback(() => {
-    const scrollPosition = {
-      x: scrollSettings.current.speed.x * scrollSettings.current.direction.x,
-      y: scrollSettings.current.speed.y * scrollSettings.current.direction.y
-    };
-
-    const boundary = onScrollContainer(scrollPosition, axis);
+    const boundary = onScrollContainer(scrollStep.current, axis);
 
     const boundaryByAxis = {
       x: boundary.isLeft || boundary.isRight,
@@ -64,27 +52,16 @@ export function useAutoScroller(
   }, []);
 
   const updateScroll = useCallback(
-    (delta: Coordinates, pos: Coordinates, h: number, w: number) => {
+    (direction: Coordinates, delta: Coordinates, pos: Coordinates, h: number, w: number) => {
       clearInteractionTimeOut();
       setInteractionTimeOut(onStopInteraction);
       clearScrollInterval();
 
-      scrollSettings.current.direction = {
-        x: Math.sign(delta.x),
-        y: Math.sign(delta.y)
-      };
+      const normAcceleration = getNormalizedScrollAcceleration(direction, delta, pos, h, w);
 
-      const normAcceleration = getNormalizedScrollAcceleration(
-        scrollSettings.current.direction,
-        delta,
-        pos,
-        h,
-        w
-      );
-
-      scrollSettings.current.speed = {
-        x: clamp(normAcceleration.x * maxSpeed, minSpeed, maxSpeed),
-        y: clamp(normAcceleration.y * maxSpeed, minSpeed, maxSpeed)
+      scrollStep.current = {
+        x: clamp(normAcceleration.x * maxSpeed, minSpeed, maxSpeed) * direction.x,
+        y: clamp(normAcceleration.y * maxSpeed, minSpeed, maxSpeed) * direction.y
       };
 
       // NOTE executing ONLY for single axis

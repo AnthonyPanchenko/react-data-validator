@@ -20,6 +20,7 @@ type PropsTypes = {
 type DragAndDropSortableState = {
   activeNode: DraggableSortableNode | null;
   containerRect: DOMRect | null;
+  direction: Coordinates;
   nodeMargin: Coordinates;
   deltaRects: Coordinates;
   initPosition: Coordinates;
@@ -55,6 +56,7 @@ export default function DragAndDropSortingContainer({
     deltaPosition: { x: 0, y: 0 },
     deltaRects: { x: 0, y: 0 },
     nodeMargin: { x: 0, y: 0 },
+    direction: { x: 0, y: 0 },
     entries: []
   });
 
@@ -85,12 +87,14 @@ export default function DragAndDropSortingContainer({
           : prev
       );
 
-      console.log(closestNode);
+      const currentDirection = meta.direction[axis];
+      console.log(closestNode, currentDirection);
 
-      // for (let i = 0; i < sort.current.entries.length; i++) {
-      //   const element = array[i];
-
-      // }
+      if (meta.activeNode.index !== closestNode.index) {
+        for (let i = 0; i < sort.current.entries.length; i++) {
+          // const element = array[i];
+        }
+      }
 
       console.table({
         relatedListPosition,
@@ -105,9 +109,9 @@ export default function DragAndDropSortingContainer({
     {
       axis,
       interval: 5,
-      threshold: 0.45,
-      minSpeed: 2,
-      maxSpeed: 10
+      threshold: 0.4,
+      minSpeed: 4,
+      maxSpeed: 12
     }
   );
 
@@ -129,10 +133,16 @@ export default function DragAndDropSortingContainer({
         y: meta.deltaPosition.y + meta.activeNode.initPosition.y - meta.nodeMargin.y
       };
 
+      meta.direction = {
+        x: Math.sign(meta.deltaPosition.x),
+        y: Math.sign(meta.deltaPosition.y)
+      };
+
       meta.activeNode.setHelperPosition(meta.currentPosition);
 
       if (containerDescriptor.current.hasScroll[axis]) {
         onUpdateScroll(
+          meta.direction,
           meta.deltaPosition,
           meta.initRelatedContainerPosition,
           containerDescriptor.current.height,
@@ -203,7 +213,7 @@ export default function DragAndDropSortingContainer({
       if (container) {
         onSetScrollableContainer(container);
         meta.containerRect = container.getBoundingClientRect();
-        meta.initRelatedContainerPosition = getDelta(meta.containerRect, meta.initPosition);
+        meta.initRelatedContainerPosition = getDelta(meta.initPosition, meta.containerRect);
         meta.deltaRects = getDelta(meta.activeNode.initPosition, meta.containerRect);
         meta.nodeMargin = getElementMargin(originNode.current);
 
