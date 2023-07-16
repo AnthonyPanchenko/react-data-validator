@@ -9,7 +9,12 @@ import { getScrollableAncestors } from '@/sortable-hoc/SortableContainer/scroll/
 import { useAutoScroller } from '@/sortable-hoc/SortableContainer/scroll/useAutoScroller';
 import useScrollableContainer from '@/sortable-hoc/SortableContainer/scroll/useScrollableContainer';
 import { Coordinates } from '@/sortable-hoc/types';
-import { getElementMargin, getEventCoordinates, getNestedNodeOffset } from '@/sortable-hoc/utils';
+import {
+  distanceBetween,
+  getElementMargin,
+  getEventCoordinates,
+  getNestedNodeOffset
+} from '@/sortable-hoc/utils';
 import verticalSorting from '@/sortable-hoc/verticalSorting';
 
 type PropsTypes = {
@@ -81,14 +86,20 @@ export default function DragAndDropSortingContainer({
     const meta = sort.current;
 
     if (meta.activeNode) {
-      const relatedListPosition =
-        meta.activeNode.offsets[axis] +
-        containerDescriptor.current.deltaScroll[axis] +
-        meta.deltaPosition[axis];
+      const relatedListPosition = {
+        x:
+          meta.activeNode.offsets.x +
+          containerDescriptor.current.deltaScroll.x +
+          meta.deltaPosition.x,
+        y:
+          meta.activeNode.offsets.y +
+          containerDescriptor.current.deltaScroll.y +
+          meta.deltaPosition.y
+      };
 
       const closestNode = sort.current.entries.reduce((prev, curr) =>
-        Math.abs(curr.offsets[axis] - relatedListPosition) <
-        Math.abs(prev.offsets[axis] - relatedListPosition)
+        Math.abs(curr.offsets[axis] - relatedListPosition[axis]) <
+        Math.abs(prev.offsets[axis] - relatedListPosition[axis])
           ? curr
           : prev
       );
@@ -96,7 +107,9 @@ export default function DragAndDropSortingContainer({
       console.log(sort.current.entries);
       console.log('from: ', meta.activeNode.index, 'to: ', closestNode.index);
 
-      if (meta.activeNode.index !== closestNode.index) {
+      const distance = distanceBetween(closestNode.offsets, relatedListPosition);
+
+      if (meta.activeNode.index !== closestNode.index && distance <= 15) {
         const currDir = meta.direction[axis];
         const isReversed = currDir === -1;
         const from = meta.activeNode.index + currDir;
@@ -113,15 +126,39 @@ export default function DragAndDropSortingContainer({
         if (axis === 'y') {
           nodeTranslatePosition.y = verticalSorting(meta.entries, meta.to, meta.from);
         }
+        // console.clear();
         console.log(nodeTranslatePosition);
 
         if (len === 1) {
-          sort.current.entries[meta.activeNode.index].setPosition({
-            x: 0,
-            y: -1 * nodeTranslatePosition.y
-          });
+          if (sort.current.entries[closestNode.index].translatePosition.y === 0) {
+            console.log(sort.current.entries[0], sort.current.entries[1]);
+            const activeNodePos = { x: 0, y: -1 * nodeTranslatePosition.y };
+            sort.current.entries[meta.activeNode.index].setPosition(activeNodePos);
+            sort.current.entries[closestNode.index].setPosition(nodeTranslatePosition);
 
-          sort.current.entries[closestNode.index].setPosition(nodeTranslatePosition);
+            sort.current.entries[meta.activeNode.index].translatePosition = activeNodePos;
+            sort.current.entries[closestNode.index].translatePosition = nodeTranslatePosition;
+          } else {
+            sort.current.entries[meta.activeNode.index].setPosition({ x: 0, y: 0 });
+            sort.current.entries[closestNode.index].setPosition({ x: 0, y: 0 });
+
+            sort.current.entries[meta.activeNode.index].translatePosition = { x: 0, y: 0 };
+            sort.current.entries[closestNode.index].translatePosition = { x: 0, y: 0 };
+          }
+
+          const copyActiveNode = {
+            ...sort.current.entries[meta.activeNode.index],
+            index: closestNode.index
+          };
+          const copyClosestNode = {
+            ...sort.current.entries[closestNode.index],
+            index: meta.activeNode.index
+          };
+
+          sort.current.entries[meta.activeNode.index] = copyClosestNode;
+          sort.current.entries[copyClosestNode.index] = copyActiveNode;
+
+          console.log(sort.current.entries[0], sort.current.entries[1]);
         } else if (len > 1) {
           let i = from;
 

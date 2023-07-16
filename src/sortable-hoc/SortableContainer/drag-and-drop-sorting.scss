@@ -34,10 +34,6 @@
   border: 2px solid #8e8e8e;
   margin-top: 2rem;
 
-  &:not(.active) {
-    // transition: transform 200ms linear;
-  }
-
   .drag-handler {
     color: #000;
     display: inline-block;

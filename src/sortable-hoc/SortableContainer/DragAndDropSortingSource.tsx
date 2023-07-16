@@ -41,7 +41,8 @@ export default function DragAndDropSortingSource({ children, className, index }:
         ref={sortableNodeRef}
         styles={
           {
-            transform: `translate(${position.x}px, ${position.y}px)`
+            transform: `translate(${position.x}px, ${position.y}px)`,
+            transition: 'transform 200ms linear'
           } as React.CSSProperties
         }
         className={isActive ? currentClassName + ' inactive' : currentClassName}
