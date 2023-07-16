@@ -6,8 +6,8 @@ export type DragAndDropSortingContextType = {
   registerSortableNode: (node: DraggableSortableNode) => void;
   unRegisterSortableNode: (index: number) => void;
   onStartDrag: (
-    event: MouseEvent | TouchEvent,
     node: DraggableSortableNode,
+    event: MouseEvent | TouchEvent,
     originNode: React.MutableRefObject<HTMLElement | null>
   ) => void;
 };

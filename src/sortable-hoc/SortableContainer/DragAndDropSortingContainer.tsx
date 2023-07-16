@@ -34,6 +34,7 @@ type DragAndDropSortableState = {
   deltaRects: Coordinates;
   initPosition: Coordinates;
   deltaPosition: Coordinates;
+  initNodeOffsets: Coordinates;
   currentPosition: Coordinates;
   initRelatedContainerPosition: Coordinates;
   initContainerScroll: Coordinates;
@@ -63,6 +64,7 @@ export default function DragAndDropSortingContainer({
     initContainerScroll: { x: 0, y: 0 },
     initNodeNestedScroll: { x: 0, y: 0 },
     currentPosition: { x: 0, y: 0 },
+    initNodeOffsets: { x: 0, y: 0 },
     initPosition: { x: 0, y: 0 },
     deltaPosition: { x: 0, y: 0 },
     deltaRects: { x: 0, y: 0 },
@@ -82,7 +84,7 @@ export default function DragAndDropSortingContainer({
   }, []);
 
   const onStopInteraction = () => {
-    console.log('ON STOP SCROLLING / ON STOP DRAGGING');
+    // console.log('ON STOP SCROLLING / ON STOP DRAGGING');
     const meta = sort.current;
 
     if (meta.activeNode) {
@@ -103,10 +105,11 @@ export default function DragAndDropSortingContainer({
           ? curr
           : prev
       );
-      console.clear();
-      console.log(sort.current.entries);
-      console.log('from: ', meta.activeNode.index, 'to: ', closestNode.index);
-
+      // console.clear();
+      // console.log(meta.activeNode);
+      // console.log(sort.current.entries);
+      // console.log('from: ', meta.activeNode.index, 'to: ', closestNode.index);
+      // on drop do not change indexes
       const distance = distanceBetween(closestNode.offsets, relatedListPosition);
 
       if (meta.activeNode.index !== closestNode.index && distance <= 15) {
@@ -127,23 +130,23 @@ export default function DragAndDropSortingContainer({
           nodeTranslatePosition.y = verticalSorting(meta.entries, meta.to, meta.from);
         }
         // console.clear();
-        console.log(nodeTranslatePosition);
+        // console.log(nodeTranslatePosition);
 
         if (len === 1) {
-          if (sort.current.entries[closestNode.index].translatePosition.y === 0) {
-            console.log(sort.current.entries[0], sort.current.entries[1]);
+          if (sort.current.entries[closestNode.index].position.y === 0) {
+            // console.log(sort.current.entries[0], sort.current.entries[1]);
             const activeNodePos = { x: 0, y: -1 * nodeTranslatePosition.y };
             sort.current.entries[meta.activeNode.index].setPosition(activeNodePos);
             sort.current.entries[closestNode.index].setPosition(nodeTranslatePosition);
 
-            sort.current.entries[meta.activeNode.index].translatePosition = activeNodePos;
-            sort.current.entries[closestNode.index].translatePosition = nodeTranslatePosition;
+            sort.current.entries[meta.activeNode.index].position = activeNodePos;
+            sort.current.entries[closestNode.index].position = nodeTranslatePosition;
           } else {
             sort.current.entries[meta.activeNode.index].setPosition({ x: 0, y: 0 });
             sort.current.entries[closestNode.index].setPosition({ x: 0, y: 0 });
 
-            sort.current.entries[meta.activeNode.index].translatePosition = { x: 0, y: 0 };
-            sort.current.entries[closestNode.index].translatePosition = { x: 0, y: 0 };
+            sort.current.entries[meta.activeNode.index].position = { x: 0, y: 0 };
+            sort.current.entries[closestNode.index].position = { x: 0, y: 0 };
           }
 
           const copyActiveNode = {
@@ -158,12 +161,12 @@ export default function DragAndDropSortingContainer({
           sort.current.entries[meta.activeNode.index] = copyClosestNode;
           sort.current.entries[copyClosestNode.index] = copyActiveNode;
 
-          console.log(sort.current.entries[0], sort.current.entries[1]);
+          // console.log(sort.current.entries[0], sort.current.entries[1]);
         } else if (len > 1) {
           let i = from;
 
           while (isReversed ? i > to - 1 : i < len + 1) {
-            console.log(sort.current.entries[i]);
+            // console.log(sort.current.entries[i]);
             i += currDir;
           }
         }
@@ -202,8 +205,8 @@ export default function DragAndDropSortingContainer({
 
       // based on position: fixed > top and left positions
       meta.currentPosition = {
-        x: meta.deltaPosition.x + meta.activeNode.initPosition.x - meta.nodeMargin.x,
-        y: meta.deltaPosition.y + meta.activeNode.initPosition.y - meta.nodeMargin.y
+        x: meta.deltaPosition.x + meta.initNodeOffsets.x - meta.nodeMargin.x,
+        y: meta.deltaPosition.y + meta.initNodeOffsets.y - meta.nodeMargin.y
       };
 
       meta.direction = {
@@ -238,35 +241,37 @@ export default function DragAndDropSortingContainer({
 
       onDropChange(meta.from, meta.to);
     }
+
+    // console.log(sort.current.entries);
   };
 
   // ====================================== LOG_INFO =====================================
-  const LOG_INFO = (container: HTMLElement) => {
-    const meta = sort.current;
-    const result =
-      meta.deltaPosition[axis] + meta.deltaRects[axis] - meta.initNodeNestedScroll[axis];
-    // const result = meta.deltaPosition[axis] + meta.initNestedNodeOffsets[axis] - gap - meta.initNodeNestedScroll[axis];
-    console.clear();
-    console.table({
-      initContainerNestedScroll: meta.initContainerNestedScroll,
-      initNodeNestedScroll: meta.initNodeNestedScroll,
-      initContainerScroll: meta.initContainerScroll,
-      deltaPosition: meta.deltaPosition,
-      initNestedNodeOffsets: meta.initNestedNodeOffsets,
-      deltaRects: meta.deltaRects,
-      containerRect: { x: meta.containerRect?.x, y: meta.containerRect?.y },
-      activeNode: meta.activeNode?.initPosition,
-      nodeMargin: meta.nodeMargin,
-      result
-    });
-    console.log(meta.entries);
-  };
+  // const LOG_INFO = (container: HTMLElement) => {
+  //   const meta = sort.current;
+  //   const result =
+  //     meta.deltaPosition[axis] + meta.deltaRects[axis] - meta.initNodeNestedScroll[axis];
+  //   // const result = meta.deltaPosition[axis] + meta.initNestedNodeOffsets[axis] - gap - meta.initNodeNestedScroll[axis];
+  //   // console.clear();
+  //   console.table({
+  //     initContainerNestedScroll: meta.initContainerNestedScroll,
+  //     initNodeNestedScroll: meta.initNodeNestedScroll,
+  //     initContainerScroll: meta.initContainerScroll,
+  //     deltaPosition: meta.deltaPosition,
+  //     initNestedNodeOffsets: meta.initNestedNodeOffsets,
+  //     deltaRects: meta.deltaRects,
+  //     containerRect: { x: meta.containerRect?.x, y: meta.containerRect?.y },
+  //     activeNode: meta.activeNode?.initPosition,
+  //     nodeMargin: meta.nodeMargin,
+  //     result
+  //   });
+  //   // console.log(meta.entries);
+  // };
   // ====================================== LOG_INFO =====================================
 
   const onStartDrag = useCallback(
     (
-      event: MouseEvent | TouchEvent,
       node: DraggableSortableNode,
+      event: MouseEvent | TouchEvent,
       originNode: React.MutableRefObject<HTMLElement | null>
     ) => {
       const meta = sort.current;
@@ -283,17 +288,19 @@ export default function DragAndDropSortingContainer({
       const scrollableContainerAncestors = getScrollableAncestors(container);
       meta.initContainerNestedScroll = getNestedScrollOffsets(scrollableContainerAncestors);
 
-      if (container) {
+      if (container && originNode.current) {
         onSetScrollableContainer(container);
+        const rect: DOMRect = originNode.current.getBoundingClientRect();
+        meta.initNodeOffsets = { x: rect.left, y: rect.top };
         meta.containerRect = container.getBoundingClientRect();
         meta.initRelatedContainerPosition = getDelta(meta.initPosition, meta.containerRect);
-        meta.deltaRects = getDelta(meta.activeNode.initPosition, meta.containerRect);
+        meta.deltaRects = getDelta(meta.initNodeOffsets, meta.containerRect);
         meta.nodeMargin = getElementMargin(originNode.current);
 
         document.addEventListener('mousemove', onDrag, { passive: false });
         document.addEventListener('mouseup', onDrop);
 
-        LOG_INFO(container);
+        // LOG_INFO(container);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -1,18 +1,57 @@
 import './drag-and-drop-sorting.scss';
 
-import React, { forwardRef, Fragment, Ref } from 'react';
+import React, { forwardRef, Fragment, Ref, useContext, useEffect, useRef, useState } from 'react';
 
-import useDragAndDropSortingSource from '@/sortable-hoc/SortableContainer/scroll/useDragAndDropSortingSource';
+import { getDraggableSortableNode } from '@/sortable-hoc/getDraggableSortableNode';
+import { DragAndDropSortingContext } from '@/sortable-hoc/SortableContainer/drag-and-drop-sorting-context';
+import { Coordinates } from '@/sortable-hoc/types';
 
 type PropsTypes = {
   className?: string;
   index: number;
+  label: string;
   children: React.ReactNode | React.ReactNode[] | null;
 };
 
-export default function DragAndDropSortingSource({ children, className, index }: PropsTypes) {
-  const [sortableNodeRef, helperPosition, position, isActive, onStartPressElement] =
-    useDragAndDropSortingSource<HTMLDivElement>(index);
+export default function DragAndDropSortingSource({
+  children,
+  className,
+  index,
+  label
+}: PropsTypes) {
+  const sortingContext = useContext(DragAndDropSortingContext);
+  const sortableNodeRef = useRef<HTMLDivElement | null>(null);
+  const [isActive, setActiveNodeState] = useState<boolean>(false);
+  const [position, setNodePosition] = useState<Coordinates>({ x: 0, y: 0 });
+  const [helperPosition, setHelperNodePosition] = useState<Coordinates>({
+    x: 0,
+    y: 0
+  });
+
+  useEffect(() => {
+    if (sortableNodeRef.current) {
+      if (!!position.x || !!position.y) {
+        setNodePosition({ x: 0, y: 0 });
+      }
+      const node = getDraggableSortableNode(
+        sortableNodeRef.current,
+        label,
+        index,
+        setNodePosition,
+        setActiveNodeState,
+        setHelperNodePosition
+      );
+
+      sortingContext.registerSortableNode(node);
+      console.log('registerSortableNode: ', node);
+    }
+
+    return () => {
+      console.log('unRegisterSortableNode: ', index);
+      sortingContext.unRegisterSortableNode(index);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index]);
 
   let currentClassName = 'dnd-source';
 
@@ -46,7 +85,19 @@ export default function DragAndDropSortingSource({ children, className, index }:
           } as React.CSSProperties
         }
         className={isActive ? currentClassName + ' inactive' : currentClassName}
-        onMouseDown={onStartPressElement}
+        onMouseDown={event => {
+          if (sortableNodeRef.current && !shouldCancelStart(event as unknown as MouseEvent)) {
+            const node = getDraggableSortableNode(
+              sortableNodeRef.current,
+              label,
+              index,
+              setNodePosition,
+              setActiveNodeState,
+              setHelperNodePosition
+            );
+            sortingContext.onStartDrag(node, event as unknown as MouseEvent, sortableNodeRef);
+          }
+        }}
       >
         {children}
       </DragAndDropBaseSource>
@@ -76,3 +127,24 @@ const DragAndDropBaseSourceContainer = (
 );
 
 const DragAndDropBaseSource = forwardRef(DragAndDropBaseSourceContainer);
+
+const interactiveElements = ['A', 'BUTTON', 'CANVAS', 'INPUT', 'OPTION', 'TEXTAREA', 'SELECT'];
+
+function shouldCancelStart(event: MouseEvent | TouchEvent) {
+  return (
+    (event as MouseEvent).button === 2 ||
+    interactiveElements.indexOf(((event as MouseEvent).target as HTMLElement)?.tagName) !== -1
+  );
+}
+
+/*
+   if (!isTouchEvent(event) && event.target.tagName === NodeType.Anchor) {
+        event.preventDefault();
+      }
+
+      if (this.props.pressDelay === 0) {
+        this.onStartDrag(event);
+      } else {
+        this.pressTimer = setTimeout(() => this.onStartDrag(event), this.props.pressDelay);
+      }
+*/

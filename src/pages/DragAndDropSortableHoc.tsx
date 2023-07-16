@@ -75,7 +75,7 @@ export default function DragAndDropSortableHoc() {
       <DragAndDropSortingContainer axis="y" onDropChange={onSortEndY}>
         <div className={'dnd-area y-area'}>
           {sortingItemsY.map((item, i) => (
-            <DragAndDropSortingSource key={item.value} index={i}>
+            <DragAndDropSortingSource key={item.value} index={i} label={item.label}>
               <input type="checkbox" name={item.label} id={item.value} />
               <label>{item.label}</label>
             </DragAndDropSortingSource>
@@ -86,7 +86,7 @@ export default function DragAndDropSortableHoc() {
       <DragAndDropSortingContainer axis="x" onDropChange={onSortEndX}>
         <div className={'dnd-area x-area'}>
           {sortingItemsX.map((item, i) => (
-            <DragAndDropSortingSource key={item.value} index={i}>
+            <DragAndDropSortingSource key={item.value} index={i} label={item.label}>
               <input type="checkbox" name={item.label} id={item.value} />
               <label>{item.label}</label>
             </DragAndDropSortingSource>
