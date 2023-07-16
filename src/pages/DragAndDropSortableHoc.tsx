@@ -13,20 +13,20 @@ const SORTING_ITEMS = [
   { label: '3', value: '3' },
   {
     label:
-      'Lorem ipsum dolor sit amet, consectetur adipiscaliquip ex voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      '4 - Lorem ipsum dolor sit amet, consectetur adipiscaliquip ex voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
     value: '4'
   },
   { label: '5', value: '5' },
   { label: '6', value: '6' },
   {
     label:
-      'Lorem ipsum dolor sit amet, consectetur adna alsi ehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      '7 - Lorem ipsum dolor sit amet, consectetur adna alsi ehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
     value: '7'
   },
   { label: '8', value: '8' },
   {
     label:
-      'Lorem ipsum dolor sit amet, consectet dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      '8 - Lorem ipsum dolor sit amet, consectet dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
     value: '9'
   },
   { label: '10', value: '10' },
@@ -34,7 +34,7 @@ const SORTING_ITEMS = [
   { label: '12', value: '12' },
   {
     label:
-      'Lorem ipsum dolor sit amet, consectetur aduis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      '12 - Lorem ipsum dolor sit amet, consectetur aduis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
     value: '13'
   },
   { label: '14', value: '14' },

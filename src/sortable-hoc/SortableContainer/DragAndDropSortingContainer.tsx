@@ -1,6 +1,7 @@
 import { useCallback, useRef } from 'react';
 
 import { DraggableSortableNode } from '@/sortable-hoc/getDraggableSortableNode';
+import horizontalSorting from '@/sortable-hoc/horizontalSorting';
 import { DragAndDropSortingContext } from '@/sortable-hoc/SortableContainer/drag-and-drop-sorting-context';
 import { getDelta } from '@/sortable-hoc/SortableContainer/scroll/getDelta';
 import { getNestedScrollOffsets } from '@/sortable-hoc/SortableContainer/scroll/getNestedScrollOffsets';
@@ -9,6 +10,7 @@ import { useAutoScroller } from '@/sortable-hoc/SortableContainer/scroll/useAuto
 import useScrollableContainer from '@/sortable-hoc/SortableContainer/scroll/useScrollableContainer';
 import { Coordinates } from '@/sortable-hoc/types';
 import { getElementMargin, getEventCoordinates, getNestedNodeOffset } from '@/sortable-hoc/utils';
+import verticalSorting from '@/sortable-hoc/verticalSorting';
 
 type PropsTypes = {
   axis: keyof Coordinates;
@@ -18,6 +20,8 @@ type PropsTypes = {
 };
 
 type DragAndDropSortableState = {
+  to: number;
+  from: number;
   activeNode: DraggableSortableNode | null;
   containerRect: DOMRect | null;
   direction: Coordinates;
@@ -44,6 +48,8 @@ export default function DragAndDropSortingContainer({
     useScrollableContainer(isScrollableWindow);
 
   const sort = useRef<DragAndDropSortableState>({
+    to: 0,
+    from: 0,
     activeNode: null,
     containerRect: null,
     initRelatedContainerPosition: { x: 0, y: 0 },
@@ -61,7 +67,7 @@ export default function DragAndDropSortingContainer({
   });
 
   const registerSortableNode = useCallback((node: DraggableSortableNode) => {
-    sort.current.entries.push(node);
+    sort.current.entries[node.index] = node;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -86,13 +92,43 @@ export default function DragAndDropSortingContainer({
           ? curr
           : prev
       );
-
-      const currentDirection = meta.direction[axis];
-      console.log(closestNode, currentDirection);
+      console.clear();
+      console.log(sort.current.entries);
+      console.log('from: ', meta.activeNode.index, 'to: ', closestNode.index);
 
       if (meta.activeNode.index !== closestNode.index) {
-        for (let i = 0; i < sort.current.entries.length; i++) {
-          // const element = array[i];
+        const currDir = meta.direction[axis];
+        const isReversed = currDir === -1;
+        const from = meta.activeNode.index + currDir;
+        const to = closestNode.index;
+        meta.from = meta.activeNode.index;
+        meta.to = closestNode.index;
+        const len = Math.abs(meta.activeNode.index - closestNode.index);
+
+        const nodeTranslatePosition = { x: 0, y: 0 };
+
+        if (axis === 'x') {
+          nodeTranslatePosition.x = horizontalSorting(meta.entries, meta.to, meta.from);
+        }
+        if (axis === 'y') {
+          nodeTranslatePosition.y = verticalSorting(meta.entries, meta.to, meta.from);
+        }
+        console.log(nodeTranslatePosition);
+
+        if (len === 1) {
+          sort.current.entries[meta.activeNode.index].setPosition({
+            x: 0,
+            y: -1 * nodeTranslatePosition.y
+          });
+
+          sort.current.entries[closestNode.index].setPosition(nodeTranslatePosition);
+        } else if (len > 1) {
+          let i = from;
+
+          while (isReversed ? i > to - 1 : i < len + 1) {
+            console.log(sort.current.entries[i]);
+            i += currDir;
+          }
         }
       }
 
@@ -109,7 +145,7 @@ export default function DragAndDropSortingContainer({
     {
       axis,
       interval: 5,
-      threshold: 0.4,
+      threshold: 0.8,
       minSpeed: 4,
       maxSpeed: 12
     }
@@ -163,7 +199,7 @@ export default function DragAndDropSortingContainer({
       meta.activeNode.setActiveState(false);
       meta.activeNode = null;
 
-      onDropChange(0, 0);
+      onDropChange(meta.from, meta.to);
     }
   };
 

@@ -33,7 +33,10 @@
   background-color: #033639;
   border: 2px solid #8e8e8e;
   margin-top: 2rem;
-  // transition: transform 200ms linear;
+
+  &:not(.active) {
+    // transition: transform 200ms linear;
+  }
 
   .drag-handler {
     color: #000;

@@ -4,7 +4,6 @@ export type DraggableSortableNode = {
   width: number;
   height: number;
   index: number;
-  activeIndex: number;
   initPosition: Coordinates;
   translatePosition: Coordinates;
   offsets: Coordinates;
@@ -24,7 +23,6 @@ export function getDraggableSortableNode(
 
   return {
     index,
-    activeIndex: index,
     initPosition: { x: rect.left, y: rect.top },
     translatePosition: { x: 0, y: 0 },
     offsets: { x: el.offsetLeft, y: el.offsetTop },

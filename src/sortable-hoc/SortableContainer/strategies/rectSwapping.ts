@@ -1,4 +1,10 @@
-export default function rectSwappingStrategy({ activeIndex, index, rects, overIndex }) {
+import { DraggableSortableNode } from '@/sortable-hoc/getDraggableSortableNode';
+
+export default function rectSwappingStrategy(
+  rects: Array<DraggableSortableNode>,
+  index: number,
+  activeIndex: number
+) {
   let oldRect;
   let newRect;
 

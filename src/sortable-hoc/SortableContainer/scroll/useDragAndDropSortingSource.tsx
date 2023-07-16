@@ -25,6 +25,9 @@ export default function useDragAndDropSortingSource<TElement extends HTMLElement
 
   useEffect(() => {
     if (sortableNodeRef.current) {
+      if (!!position.x || !!position.y) {
+        setNodePosition({ x: 0, y: 0 });
+      }
       const node = getDraggableSortableNode(
         sortableNodeRef.current,
         index,

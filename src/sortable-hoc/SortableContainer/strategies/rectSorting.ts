@@ -1,4 +1,10 @@
-export default function rectSortingStrategy({ rects, activeIndex, overIndex, index }) {
+import { DraggableSortableNode } from '@/sortable-hoc/getDraggableSortableNode';
+
+export default function rectSortingStrategy(
+  rects: Array<DraggableSortableNode>,
+  index: number,
+  activeIndex: number
+) {
   const newRects = arrayMove(rects, overIndex, activeIndex);
 
   const oldRect = rects[index];
