@@ -9,12 +9,7 @@ import { getScrollableAncestors } from '@/sortable-hoc/SortableContainer/scroll/
 import { useAutoScroller } from '@/sortable-hoc/SortableContainer/scroll/useAutoScroller';
 import useScrollableContainer from '@/sortable-hoc/SortableContainer/scroll/useScrollableContainer';
 import { Coordinates } from '@/sortable-hoc/types';
-import {
-  distanceBetween,
-  getElementMargin,
-  getEventCoordinates,
-  getNestedNodeOffset
-} from '@/sortable-hoc/utils';
+import { getElementMargin, getEventCoordinates, getNestedNodeOffset } from '@/sortable-hoc/utils';
 import verticalSorting from '@/sortable-hoc/verticalSorting';
 
 type PropsTypes = {
@@ -110,9 +105,9 @@ export default function DragAndDropSortingContainer({
       // console.log(sort.current.entries);
       // console.log('from: ', meta.activeNode.index, 'to: ', closestNode.index);
       // on drop do not change indexes
-      const distance = distanceBetween(closestNode.offsets, relatedListPosition);
+      // const distance = distanceBetween(closestNode.offsets, relatedListPosition);
 
-      if (meta.activeNode.index !== closestNode.index && distance <= 15) {
+      if (meta.activeNode.index !== closestNode.index) {
         const currDir = meta.direction[axis];
         const isReversed = currDir === -1;
         const from = meta.activeNode.index + currDir;
@@ -161,21 +156,30 @@ export default function DragAndDropSortingContainer({
           sort.current.entries[meta.activeNode.index] = copyClosestNode;
           sort.current.entries[copyClosestNode.index] = copyActiveNode;
 
+          meta.activeNode.index = copyClosestNode.index;
+          meta.activeNode.offsets = { ...copyClosestNode.offsets };
+
           // console.log(sort.current.entries[0], sort.current.entries[1]);
         } else if (len > 1) {
+          const activeNodePos = { x: 0, y: -1 * nodeTranslatePosition.y };
+          sort.current.entries[meta.activeNode.index].setPosition(activeNodePos);
+          sort.current.entries[meta.activeNode.index].position = activeNodePos;
+
           let i = from;
 
           while (isReversed ? i > to - 1 : i < len + 1) {
-            // console.log(sort.current.entries[i]);
+            sort.current.entries[i].setPosition(nodeTranslatePosition);
+            sort.current.entries[i].position = nodeTranslatePosition;
+
             i += currDir;
           }
         }
       }
 
-      console.table({
-        relatedListPosition,
-        deltaScroll: containerDescriptor.current.deltaScroll
-      });
+      // console.table({
+      //   relatedListPosition,
+      //   deltaScroll: containerDescriptor.current.deltaScroll
+      // });
     }
   };
 

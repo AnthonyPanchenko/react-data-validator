@@ -22,7 +22,7 @@ export default function DragAndDropSortingSource({
   const sortingContext = useContext(DragAndDropSortingContext);
   const sortableNodeRef = useRef<HTMLDivElement | null>(null);
   const [isActive, setActiveNodeState] = useState<boolean>(false);
-  const [position, setNodePosition] = useState<Coordinates>({ x: 0, y: 0 });
+  const [position, setNodePosition] = useState<Coordinates | null>(null);
   const [helperPosition, setHelperNodePosition] = useState<Coordinates>({
     x: 0,
     y: 0
@@ -30,9 +30,9 @@ export default function DragAndDropSortingSource({
 
   useEffect(() => {
     if (sortableNodeRef.current) {
-      if (!!position.x || !!position.y) {
-        setNodePosition({ x: 0, y: 0 });
-      }
+      // if (!!position.x || !!position.y) {
+      //   setNodePosition({ x: 0, y: 0 });
+      // }
       const node = getDraggableSortableNode(
         sortableNodeRef.current,
         label,
@@ -43,12 +43,13 @@ export default function DragAndDropSortingSource({
       );
 
       sortingContext.registerSortableNode(node);
-      console.log('registerSortableNode: ', node);
+      // console.log('registerSortableNode: ', node);
     }
 
     return () => {
-      console.log('unRegisterSortableNode: ', index);
-      sortingContext.unRegisterSortableNode(index);
+      setNodePosition(null);
+      // console.log('unRegisterSortableNode: ', index);
+      // sortingContext.unRegisterSortableNode(index);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
@@ -80,8 +81,8 @@ export default function DragAndDropSortingSource({
         ref={sortableNodeRef}
         styles={
           {
-            transform: `translate(${position.x}px, ${position.y}px)`,
-            transition: 'transform 200ms linear'
+            transform: position ? `translate(${position.x}px, ${position.y}px)` : 'unset',
+            transition: position ? 'transform 100ms linear' : 'unset'
           } as React.CSSProperties
         }
         className={isActive ? currentClassName + ' inactive' : currentClassName}

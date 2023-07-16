@@ -32,7 +32,7 @@ export function useAutoScroller(
   const scrollStep = useRef<Coordinates>({ x: 0, y: 0 });
 
   const [setScrollInterval, clearScrollInterval] = useInterval(interval);
-  const [setInteractionTimeOut, clearInteractionTimeOut] = useTimeOut(300);
+  const [setInteractionTimeOut, clearInteractionTimeOut] = useTimeOut(100);
 
   const scrollView = useCallback(() => {
     const boundary = onScrollContainer(scrollStep.current, axis);
