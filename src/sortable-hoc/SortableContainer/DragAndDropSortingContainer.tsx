@@ -1,7 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 
 import { DraggableSortableNode } from '@/sortable-hoc/getDraggableSortableNode';
-import horizontalSorting from '@/sortable-hoc/horizontalSorting';
 import { DragAndDropSortingContext } from '@/sortable-hoc/SortableContainer/drag-and-drop-sorting-context';
 import { getDelta } from '@/sortable-hoc/SortableContainer/scroll/getDelta';
 import { getNestedScrollOffsets } from '@/sortable-hoc/SortableContainer/scroll/getNestedScrollOffsets';
@@ -9,8 +8,12 @@ import { getScrollableAncestors } from '@/sortable-hoc/SortableContainer/scroll/
 import { useAutoScroller } from '@/sortable-hoc/SortableContainer/scroll/useAutoScroller';
 import useScrollableContainer from '@/sortable-hoc/SortableContainer/scroll/useScrollableContainer';
 import { Coordinates } from '@/sortable-hoc/types';
-import { getElementMargin, getEventCoordinates, getNestedNodeOffset } from '@/sortable-hoc/utils';
-import verticalSorting from '@/sortable-hoc/verticalSorting';
+import {
+  distanceBetween,
+  getElementMargin,
+  getEventCoordinates,
+  getNestedNodeOffset
+} from '@/sortable-hoc/utils';
 
 type PropsTypes = {
   axis: keyof Coordinates;
@@ -101,83 +104,89 @@ export default function DragAndDropSortingContainer({
           ? curr
           : prev
       );
+
       // console.clear();
       // console.log(meta.activeNode);
       // console.log(sort.current.entries);
       // console.log('from: ', meta.activeNode.index, 'to: ', closestNode.index);
       // on drop do not change indexes
-      // const distance = distanceBetween(closestNode.offsets, relatedListPosition);
+      const distance = distanceBetween(closestNode.offsets, relatedListPosition);
 
-      if (meta.activeNode.index !== closestNode.index) {
-        const currDir = meta.direction[axis];
-        const isReversed = currDir === -1;
-        const from = meta.activeNode.index + currDir;
-        const to = closestNode.index;
+      if (meta.activeNode.index !== closestNode.index && distance <= 20) {
+        // const currDir = meta.direction[axis];
+        // const isReversed = currDir === -1;
+        // const from = meta.activeNode.index + currDir;
+        // const to = closestNode.index;
         meta.from = meta.activeNode.index;
         meta.to = closestNode.index;
-        const len = Math.abs(meta.activeNode.index - closestNode.index);
-
-        const nodeTranslatePosition = { x: 0, y: 0 };
-
-        if (axis === 'x') {
-          nodeTranslatePosition.x = horizontalSorting(meta.entries, meta.to, meta.from);
-        }
-        if (axis === 'y') {
-          nodeTranslatePosition.y = verticalSorting(meta.entries, meta.to, meta.from);
-        }
+        onDropChange(meta.from, meta.to);
         console.clear();
-        console.log(nodeTranslatePosition, meta.activeNode.height + meta.nodeMargin.y);
+        console.log(closestNode);
+        console.log(meta.from, meta.to);
+        meta.activeNode.index = closestNode.index;
+        // const len = Math.abs(meta.activeNode.index - closestNode.index);
 
-        if (len === 1) {
-          if (sort.current.entries[closestNode.index].position.y === 0) {
-            // console.log(sort.current.entries[0], sort.current.entries[1]);
-            const activeNodePos = { x: 0, y: -1 * nodeTranslatePosition.y };
-            sort.current.entries[meta.activeNode.index].setPosition(activeNodePos);
-            sort.current.entries[closestNode.index].setPosition(nodeTranslatePosition);
+        // const nodeTranslatePosition = { x: 0, y: 0 };
 
-            sort.current.entries[meta.activeNode.index].position = activeNodePos;
-            sort.current.entries[closestNode.index].position = nodeTranslatePosition;
-          } else {
-            sort.current.entries[meta.activeNode.index].setPosition({ x: 0, y: 0 });
-            sort.current.entries[closestNode.index].setPosition({ x: 0, y: 0 });
+        // if (axis === 'x') {
+        //   nodeTranslatePosition.x = horizontalSorting(meta.entries, meta.to, meta.from);
+        // }
+        // if (axis === 'y') {
+        //   nodeTranslatePosition.y = verticalSorting(meta.entries, meta.to, meta.from);
+        // }
+        // console.clear();
+        // console.log(nodeTranslatePosition, meta.activeNode.height + meta.nodeMargin.y);
 
-            sort.current.entries[meta.activeNode.index].position = { x: 0, y: 0 };
-            sort.current.entries[closestNode.index].position = { x: 0, y: 0 };
-          }
+        // if (len === 1) {
+        //   if (sort.current.entries[closestNode.index].position.y === 0) {
+        //     // console.log(sort.current.entries[0], sort.current.entries[1]);
+        //     const activeNodePos = { x: 0, y: -1 * nodeTranslatePosition.y };
+        //     sort.current.entries[meta.activeNode.index].setPosition(activeNodePos);
+        //     sort.current.entries[closestNode.index].setPosition(nodeTranslatePosition);
 
-          const copyActiveNode = {
-            ...sort.current.entries[meta.activeNode.index],
-            index: closestNode.index
-          };
-          const copyClosestNode = {
-            ...sort.current.entries[closestNode.index],
-            index: meta.activeNode.index
-          };
+        //     sort.current.entries[meta.activeNode.index].position = activeNodePos;
+        //     sort.current.entries[closestNode.index].position = nodeTranslatePosition;
+        //   } else {
+        //     sort.current.entries[meta.activeNode.index].setPosition({ x: 0, y: 0 });
+        //     sort.current.entries[closestNode.index].setPosition({ x: 0, y: 0 });
 
-          sort.current.entries[meta.activeNode.index] = copyClosestNode;
-          sort.current.entries[copyClosestNode.index] = copyActiveNode;
+        //     sort.current.entries[meta.activeNode.index].position = { x: 0, y: 0 };
+        //     sort.current.entries[closestNode.index].position = { x: 0, y: 0 };
+        //   }
 
-          meta.activeNode.index = copyClosestNode.index;
-          meta.activeNode.offsets = { ...copyClosestNode.offsets };
+        //   const copyActiveNode = {
+        //     ...sort.current.entries[meta.activeNode.index],
+        //     index: closestNode.index
+        //   };
+        //   const copyClosestNode = {
+        //     ...sort.current.entries[closestNode.index],
+        //     index: meta.activeNode.index
+        //   };
 
-          console.log('from: ', meta.from, 'to: ', meta.to);
-          // console.log(sort.current.entries[0], sort.current.entries[1]);
-        } else if (len > 1) {
-          const activeNodePos = { x: 0, y: -1 * nodeTranslatePosition.y };
-          sort.current.entries[meta.activeNode.index].setPosition(activeNodePos);
-          sort.current.entries[meta.activeNode.index].position = activeNodePos;
+        //   sort.current.entries[meta.activeNode.index] = copyClosestNode;
+        //   sort.current.entries[copyClosestNode.index] = copyActiveNode;
 
-          let i = from;
+        //   meta.activeNode.index = copyClosestNode.index;
+        //   meta.activeNode.offsets = { ...copyClosestNode.offsets };
 
-          console.log(+currDir * -1, nodeTranslatePosition);
+        //   console.log('from: ', meta.from, 'to: ', meta.to);
+        //   // console.log(sort.current.entries[0], sort.current.entries[1]);
+        // } else if (len > 1) {
+        //   const activeNodePos = { x: 0, y: -1 * nodeTranslatePosition.y };
+        //   sort.current.entries[meta.activeNode.index].setPosition(activeNodePos);
+        //   sort.current.entries[meta.activeNode.index].position = activeNodePos;
 
-          while (isReversed ? i > to - 1 : i < len + 1) {
-            sort.current.entries[i].setPosition(nodeTranslatePosition);
-            sort.current.entries[i].position = nodeTranslatePosition;
+        //   let i = from;
 
-            i += currDir;
-          }
-        }
+        //   console.log(+currDir * -1, nodeTranslatePosition);
+
+        //   while (isReversed ? i > to - 1 : i < len + 1) {
+        //     sort.current.entries[i].setPosition(nodeTranslatePosition);
+        //     sort.current.entries[i].position = nodeTranslatePosition;
+
+        //     i += currDir;
+        //   }
+        // }
       }
 
       // console.table({
