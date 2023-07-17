@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import { DraggableSortableNode } from '@/sortable-hoc/getDraggableSortableNode';
 import horizontalSorting from '@/sortable-hoc/horizontalSorting';
@@ -45,6 +45,7 @@ export default function DragAndDropSortingContainer({
   isScrollableWindow = false,
   onDropChange
 }: PropsTypes) {
+  const [activeId, setActiveNodeId] = useState<string | number>('');
   const [containerDescriptor, onScrollContainer, onSetScrollableContainer] =
     useScrollableContainer(isScrollableWindow);
 
@@ -124,8 +125,8 @@ export default function DragAndDropSortingContainer({
         if (axis === 'y') {
           nodeTranslatePosition.y = verticalSorting(meta.entries, meta.to, meta.from);
         }
-        // console.clear();
-        // console.log(nodeTranslatePosition);
+        console.clear();
+        console.log(nodeTranslatePosition, meta.activeNode.height + meta.nodeMargin.y);
 
         if (len === 1) {
           if (sort.current.entries[closestNode.index].position.y === 0) {
@@ -159,6 +160,7 @@ export default function DragAndDropSortingContainer({
           meta.activeNode.index = copyClosestNode.index;
           meta.activeNode.offsets = { ...copyClosestNode.offsets };
 
+          console.log('from: ', meta.from, 'to: ', meta.to);
           // console.log(sort.current.entries[0], sort.current.entries[1]);
         } else if (len > 1) {
           const activeNodePos = { x: 0, y: -1 * nodeTranslatePosition.y };
@@ -166,6 +168,8 @@ export default function DragAndDropSortingContainer({
           sort.current.entries[meta.activeNode.index].position = activeNodePos;
 
           let i = from;
+
+          console.log(+currDir * -1, nodeTranslatePosition);
 
           while (isReversed ? i > to - 1 : i < len + 1) {
             sort.current.entries[i].setPosition(nodeTranslatePosition);
@@ -203,7 +207,7 @@ export default function DragAndDropSortingContainer({
     const meta = sort.current;
 
     if (meta.activeNode) {
-      meta.activeNode.setActiveState(true);
+      setActiveNodeId(meta.activeNode.id);
       const pos = getEventCoordinates(event);
       meta.deltaPosition = getDelta(pos, meta.initPosition);
 
@@ -240,10 +244,8 @@ export default function DragAndDropSortingContainer({
     const meta = sort.current;
 
     if (meta.activeNode) {
-      meta.activeNode.setActiveState(false);
+      setActiveNodeId('');
       meta.activeNode = null;
-
-      onDropChange(meta.from, meta.to);
     }
 
     // console.log(sort.current.entries);
@@ -314,6 +316,7 @@ export default function DragAndDropSortingContainer({
   return (
     <DragAndDropSortingContext.Provider
       value={{
+        activeId,
         registerSortableNode,
         unRegisterSortableNode,
         onStartDrag

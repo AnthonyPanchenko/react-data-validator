@@ -3,6 +3,7 @@ import React from 'react';
 import { DraggableSortableNode } from '@/sortable-hoc/getDraggableSortableNode';
 
 export type DragAndDropSortingContextType = {
+  activeId: string | number;
   registerSortableNode: (node: DraggableSortableNode) => void;
   unRegisterSortableNode: (index: number) => void;
   onStartDrag: (
@@ -13,6 +14,7 @@ export type DragAndDropSortingContextType = {
 };
 
 export const DragAndDropSortingContext = React.createContext<DragAndDropSortingContextType>({
+  activeId: '',
   registerSortableNode: () => undefined,
   unRegisterSortableNode: () => undefined,
   onStartDrag: () => undefined

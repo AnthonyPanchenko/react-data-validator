@@ -1,6 +1,7 @@
 import { Coordinates } from '@/sortable-hoc/types';
 
 export type DraggableSortableNode = {
+  id: string | number;
   width: number;
   height: number;
   index: number;
@@ -8,19 +9,19 @@ export type DraggableSortableNode = {
   position: Coordinates;
   offsets: Coordinates;
   setPosition: (cords: Coordinates) => void;
-  setActiveState: (isActive: boolean) => void;
   setHelperPosition: (cords: Coordinates) => void;
 };
 
 export function getDraggableSortableNode(
+  id: string | number,
   el: HTMLElement,
   label: string,
   index: number,
   setPosition: (cords: Coordinates) => void,
-  setActiveState: (isActive: boolean) => void,
   setHelperPosition: (cords: Coordinates) => void
 ): DraggableSortableNode {
   return {
+    id,
     index,
     label,
     position: { x: 0, y: 0 },
@@ -28,7 +29,6 @@ export function getDraggableSortableNode(
     width: el.offsetWidth,
     height: el.offsetHeight,
     setPosition,
-    setActiveState,
     setHelperPosition
   };
 }

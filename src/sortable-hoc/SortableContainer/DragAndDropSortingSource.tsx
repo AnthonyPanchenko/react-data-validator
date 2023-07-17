@@ -9,6 +9,7 @@ import { Coordinates } from '@/sortable-hoc/types';
 type PropsTypes = {
   className?: string;
   index: number;
+  id: string | number;
   label: string;
   children: React.ReactNode | React.ReactNode[] | null;
 };
@@ -16,12 +17,12 @@ type PropsTypes = {
 export default function DragAndDropSortingSource({
   children,
   className,
+  id,
   index,
   label
 }: PropsTypes) {
   const sortingContext = useContext(DragAndDropSortingContext);
   const sortableNodeRef = useRef<HTMLDivElement | null>(null);
-  const [isActive, setActiveNodeState] = useState<boolean>(false);
   const [position, setNodePosition] = useState<Coordinates | null>(null);
   const [helperPosition, setHelperNodePosition] = useState<Coordinates>({
     x: 0,
@@ -34,11 +35,11 @@ export default function DragAndDropSortingSource({
       //   setNodePosition({ x: 0, y: 0 });
       // }
       const node = getDraggableSortableNode(
+        id,
         sortableNodeRef.current,
         label,
         index,
         setNodePosition,
-        setActiveNodeState,
         setHelperNodePosition
       );
 
@@ -62,7 +63,7 @@ export default function DragAndDropSortingSource({
 
   return (
     <Fragment>
-      {isActive && (
+      {sortingContext.activeId === id && (
         <DragAndDropBaseSource
           styles={
             {
@@ -85,15 +86,17 @@ export default function DragAndDropSortingSource({
             transition: position ? 'transform 100ms linear' : 'unset'
           } as React.CSSProperties
         }
-        className={isActive ? currentClassName + ' inactive' : currentClassName}
+        className={
+          sortingContext.activeId === id ? currentClassName + ' inactive' : currentClassName
+        }
         onMouseDown={event => {
           if (sortableNodeRef.current && !shouldCancelStart(event as unknown as MouseEvent)) {
             const node = getDraggableSortableNode(
+              id,
               sortableNodeRef.current,
               label,
               index,
               setNodePosition,
-              setActiveNodeState,
               setHelperNodePosition
             );
             sortingContext.onStartDrag(node, event as unknown as MouseEvent, sortableNodeRef);
