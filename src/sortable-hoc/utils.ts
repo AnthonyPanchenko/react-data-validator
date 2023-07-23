@@ -41,12 +41,12 @@ function decimalAdjust(num: number, fixed = 0, round: (num: number) => number) {
   return round(num * fixed) / fixed;
 }
 
-function toNum(value?: string | number, precision = 0): number {
+export function toNum(value: string | number | undefined | null, precision = 0): number {
   if (typeof value !== 'string') {
-    return 0;
+    return typeof value === 'number' && !isNaN(value) ? value : 0;
   }
 
-  if (precision) {
+  if (value.includes('.')) {
     const n = parseFloat(value) || 0;
     return !n || isNaN(n) ? 0 : decimalAdjust(n, precision, Math.round);
   }

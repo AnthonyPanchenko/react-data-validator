@@ -6,6 +6,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 // import logoSrc from '@/assets/logo.png';
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
+import DnDKitPage from '@/pages/DnDKitPage';
 import DragAndDropSortableHoc from '@/pages/DragAndDropSortableHoc';
 // import Logo from '@/components/Logo';
 import FastContext from '@/pages/FastContext';
@@ -32,6 +33,7 @@ export default function App() {
               <Route element={<GroupValidator />} path="/form-validator" />
               <Route element={<MediaQuery />} path="/media-query" />
               <Route element={<DragAndDropSortableHoc />} path="/sortable-hoc" />
+              <Route element={<DnDKitPage />} path="/dnd-kit" />
             </Routes>
           </Suspense>
         </section>

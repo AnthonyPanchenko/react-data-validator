@@ -1,5 +1,3 @@
-import './drag-and-drop-page.scss';
-
 import { Fragment, useState } from 'react';
 
 import DragAndDropSortingContainer from '@/sortable-hoc/SortableContainer/DragAndDropSortingContainer';

@@ -1,0 +1,42 @@
+.sortable-items-container {
+  margin-bottom: 5rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background-color: #1e1e1e;
+  border: 1px solid #8e8e8e;
+  overscroll-behavior: contain;
+  overflow-y: auto;
+  width: 400px;
+  height: 400px;
+}
+
+.sort-container-label {
+  padding: 5px;
+  border-bottom: 1px dashed #8e8e8e;
+}
+
+.sortable-list {
+  margin: 0;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: #3c5ffd;
+}
+
+.draggable-item {
+  list-style: none;
+  display: grid;
+  align-items: center;
+  background-color: #edf5f2;
+  color: #1e1e1e;
+
+  .handler {
+    width: 10px;
+    display: inline-block;
+  }
+}

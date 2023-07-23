@@ -14,6 +14,7 @@ export default function Header() {
         <NavLink to="/form-validator">Form Validator</NavLink>
         <NavLink to="/media-query">Media query</NavLink>
         <NavLink to="/sortable-hoc">DnD Sortable HOC</NavLink>
+        <NavLink to="/dnd-kit">DnD Kit</NavLink>
       </nav>
       <ThemeSwitcher />
     </header>
