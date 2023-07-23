@@ -5,15 +5,17 @@ import SortableItem from './SortableItem';
 
 type PropsTypes = {
   id: string | number;
-  index: number;
   containerId: string;
   className?: string;
   children: React.ReactNode | React.ReactNode[] | string | null;
 };
 
-export default function SortableItemWrapper({ id, children }: PropsTypes) {
+export default function SortableItemWrapper({ id, containerId, children }: PropsTypes) {
   const sortItem = useSortable({
-    id
+    id,
+    data: {
+      containerId
+    }
   });
 
   // active: import("@dnd-kit/core").Active | null;
@@ -44,6 +46,7 @@ export default function SortableItemWrapper({ id, children }: PropsTypes) {
       x: sortItem.transform?.x || 0,
       y: sortItem.transform?.y || 0
     }),
+    opacity: sortItem.isDragging ? 0.3 : undefined,
     transition: sortItem.transition
   };
 
@@ -52,6 +55,7 @@ export default function SortableItemWrapper({ id, children }: PropsTypes) {
       ref={sortItem.setNodeRef}
       attributes={sortItem.attributes}
       listeners={sortItem.listeners}
+      containerId={containerId}
       style={style}
     >
       {children}

@@ -9,7 +9,6 @@ type PropsTypes<TColumnName extends string> = {
   containerId: string;
   items: ReadonlyArray<TColumnName>;
   itemLabelGetter: (name: TColumnName) => string;
-  // style?: React.CSSProperties;
 };
 
 export default function SortableContainer<TColumnName extends string>({
@@ -26,8 +25,8 @@ export default function SortableContainer<TColumnName extends string>({
           items={items as unknown as UniqueIdentifier[]}
           strategy={verticalListSortingStrategy}
         >
-          {items.map((value, index) => (
-            <SortableItemWrapper key={value} id={value} index={index} containerId={containerId}>
+          {items.map(value => (
+            <SortableItemWrapper key={value} id={value} containerId={containerId}>
               {itemLabelGetter(value)}
             </SortableItemWrapper>
           ))}

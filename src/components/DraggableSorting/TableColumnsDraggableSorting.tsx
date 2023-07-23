@@ -40,7 +40,7 @@ export default function TableColumnsDraggableSorting({ sortingItems }: PropsType
   console.log('items: ', items);
 
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeItem, setActiveId] = useState<{ container: string; id: string } | null>(null);
   const [clonedItems, setClonedItems] = useState<SequenceOfIdentifiers<string> | null>(null);
 
   const itemLabelGetter = (name: string) => mapOfLabels.current[name];
@@ -53,15 +53,8 @@ export default function TableColumnsDraggableSorting({ sortingItems }: PropsType
         );
   };
 
-  // const getIndex = (id: string): number => {
-  //   const container = findContainer(id);
-  //   return !container
-  //     ? -1
-  //     : items[container as keyof SequenceOfIdentifiers<string>].indexOf(id as string);
-  // };
-
   const handleDragStart = ({ active }: DragStartEvent) => {
-    setActiveId(active.id as string);
+    setActiveId({ container: active.data.current?.containerId, id: active.id as string });
     setClonedItems(items);
   };
 
@@ -202,9 +195,9 @@ export default function TableColumnsDraggableSorting({ sortingItems }: PropsType
       </div>
       {createPortal(
         <DragOverlay adjustScale={false}>
-          {!!activeId && (
-            <SortableItem dragOverlay isSorting isDragging isDragOverlay>
-              {itemLabelGetter(activeId)}
+          {!!activeItem?.id && (
+            <SortableItem containerId={activeItem.container}>
+              {itemLabelGetter(activeItem.id)}
             </SortableItem>
           )}
         </DragOverlay>,

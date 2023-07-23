@@ -50,13 +50,13 @@ export default function useSequentiallyActiveColumns<TColumnName extends string>
     if (typeof state === 'function') {
       const columns = state(currentData);
       updateColumns(columns);
-      if (serverSequenceOfColumns === null) {
+      if (!serverSequenceOfColumns) {
         setLocalStorage(localStoreActiveSequenceKey, columns.active);
       }
       setLocalStorage(localStoreInactiveSequenceKey, columns.inactive);
     } else if (state) {
       updateColumns(state);
-      if (serverSequenceOfColumns === null) {
+      if (!serverSequenceOfColumns) {
         setLocalStorage(localStoreActiveSequenceKey, state.active);
       }
       setLocalStorage(localStoreInactiveSequenceKey, state.inactive);
