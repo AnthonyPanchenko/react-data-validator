@@ -3,7 +3,6 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  // padding: 1rem;
   border-radius: 1rem;
   background-color: #fff;
   border: 1px solid #8e8e8e;
@@ -19,6 +18,8 @@
   display: flex;
   gap: 1rem;
   flex-direction: column;
+  min-height: 70px;
+  flex-shrink: 0;
 }
 
 .sort-container-label {
@@ -72,7 +73,3 @@
     box-shadow: 0 0.4rem 0.7rem 0 rgba(26, 88, 74, 0.1), 0 0.2rem 0.4rem 0 rgba(26, 88, 74, 0.05);
   }
 }
-
-// popup: 'rgb(207 209 210) 0 0.3rem 0.7rem 0',
-// default: '0 0.4rem 0.7rem 0 rgba(26, 88, 74, 0.1), 0 0.2rem 0.4rem 0 rgba(26, 88, 74, 0.05)',
-// card: '0 0.1rem 0.3rem 0 rgba(26, 88, 74, 0.1), 0 0 0.1rem 0 rgba(26, 88, 74, 0.05)'

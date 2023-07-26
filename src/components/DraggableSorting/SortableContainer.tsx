@@ -1,4 +1,4 @@
-import { UniqueIdentifier } from '@dnd-kit/core';
+import { UniqueIdentifier, useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Fragment } from 'react';
 
@@ -17,10 +17,14 @@ export default function SortableContainer<TColumnName extends string>({
   label,
   itemLabelGetter
 }: PropsTypes<TColumnName>) {
+  const { isOver, setNodeRef } = useDroppable({
+    id: containerId
+  });
+
   return (
     <Fragment>
       <div className="sort-container-label">{label}</div>
-      <ul className="sortable-list">
+      <ul ref={setNodeRef} className="sortable-list">
         <SortableContext
           items={items as unknown as UniqueIdentifier[]}
           strategy={verticalListSortingStrategy}
